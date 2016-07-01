@@ -1,0 +1,207 @@
+
+/* 
+ * HUA Compiler's Course  
+ */
+import java_cup.runtime.Symbol;
+
+parser code
+{:
+    /** Report a non fatal error (or warning).
+     *
+     * @param message an error message.
+     * @param info    an extra object reserved for use by specialized subclasses.
+     */
+    public void report_error(String message, Object info)
+    {
+        String error = "";
+        if (! (info instanceof Symbol))
+            info = cur_token;
+        if( info instanceof Symbol ) {
+            int line = ((Symbol)info).left;
+            int column = ((Symbol)info).right;
+            error = line  + ":" + column;
+        }
+        error = error + ": error: " + message;
+        System.err.println(error);
+        System.err.flush();
+    }
+
+    /** Report a fatal error.
+     *
+     * @param message an error message.
+     * @param info    an extra object reserved for use by specialized subclasses.
+     */
+    public void report_fatal_error(String   message, Object   info) throws java.lang.Exception
+    {
+        /* stop parsing (not really necessary since we throw an exception, but) */
+        done_parsing();
+
+        /* use the normal error message reporting to put out the message */
+        report_error(message, info);
+
+        /* throw an exception */
+        throw new Exception("Can't recover from previous error(s)");
+    }
+
+    public int getLine() {
+        Symbol symbol = (Symbol) cur_token;
+        return symbol.left;
+    }
+
+    public int getColumn() {
+        Symbol symbol = (Symbol) cur_token;
+        return symbol.right;
+    }
+:};
+
+terminal java.lang.String ID;
+terminal WHILE, FOR, IF, ELSE, RETURN, BREAK, CONTINUE, FUNCTION, TRUE, FALSE, NIL;
+terminal LEFT_PARENTHESIS, RIGHT_PARENTHESIS, SEMICOLON, COLON, LEFT_BRACKET, RIGHT_BRACKET, LEFT_SQ_BRACKET, RIGHT_SQ_BRACKET, DOT, COMMA;
+terminal ASSIGN;
+terminal STAR, SLASH, MOD;
+terminal PLUS, MINUS, UMINUS;
+terminal GREATER, LESS, NOT_EQUAL, LESS_OR_EQUAL, GREATER_OR_EQUAL, CMP_EQUAL;
+terminal LOGIC_AND, LOGIC_OR, NOT;
+terminal QUASI_OPEN, QUASI_CLOSE, QUASI_ESC, QUASI_EXEC;
+
+terminal java.lang.Integer INTEGER_LITERAL;
+terminal java.lang.Double  DOUBLE_LITERAL;
+terminal java.lang.String  STRING_LITERAL;
+
+non terminal Program;
+non terminal Stmt;
+non terminal StmtList;
+non terminal ReturnStmt;
+non terminal Literals;
+non terminal Expr;
+non terminal ExprList;
+non terminal Op;
+non terminal Term;
+non terminal AssignExpr;
+non terminal Primary;
+non terminal Lvalue;
+non terminal Member;
+non terminal Call;
+non terminal CallSuffix;
+non terminal NormCall;
+non terminal MethodCall;
+non terminal ObjectDef;
+non terminal Indexed;
+non terminal IndexedElem;
+non terminal IndexedElemList;
+non terminal ArrayDef;
+non terminal Block;
+non terminal FuncDef;
+non terminal Const;
+non terminal ID_;
+non terminal IDList;
+non terminal IfStmt;
+non terminal ElseStmt;
+non terminal WhileStmt;
+non terminal ForStmt;
+
+precedence left  PLUS, MINUS;
+precedence left  STAR, SLASH, MOD;
+precedence left  LOGIC_AND, LOGIC_OR;
+precedence left  GREATER, LESS, NOT_EQUAL, LESS_OR_EQUAL, GREATER_OR_EQUAL, CMP_EQUAL;
+precedence right UMINUS, NOT;
+precedence left ELSE;
+
+start with Program;
+
+Program   ::= 
+          | StmtList;
+
+StmtList ::= Stmt
+          | StmtList Stmt;
+
+Stmt    ::= Expr SEMICOLON
+          | IfStmt
+          | WhileStmt
+          | ForStmt
+          | ReturnStmt
+          | BREAK SEMICOLON
+          | CONTINUE SEMICOLON
+          | Block
+          | FuncDef;
+
+ReturnStmt  ::= RETURN SEMICOLON
+              | RETURN Expr SEMICOLON;
+
+/*Block   ::= LEFT_BRACKET RIGHT_BRACKET
+          | LEFT_BRACKET Stmt RIGHT_BRACKET;*/
+
+
+Literals ::= INTEGER_LITERAL | DOUBLE_LITERAL | STRING_LITERAL;
+Op      ::= PLUS|MINUS|STAR|SLASH|MOD|GREATER|GREATER_OR_EQUAL|LESS|LESS_OR_EQUAL|CMP_EQUAL|NOT_EQUAL|LOGIC_OR|LOGIC_AND;
+
+Expr    ::= Literals
+          | AssignExpr
+          | Expr Op Expr
+          | Term;
+
+ExprList  ::= 
+          | Expr
+          | ExprList COMMA Expr;
+
+AssignExpr  ::= Lvalue ASSIGN Expr;
+
+Term    ::= LEFT_PARENTHESIS Expr RIGHT_PARENTHESIS
+          | UMINUS Expr
+          | NOT Expr
+          | QUASI_OPEN Expr QUASI_CLOSE
+          | QUASI_ESC Expr
+          | QUASI_EXEC Expr
+          | PLUS PLUS Expr
+          | Lvalue PLUS PLUS
+          | MINUS MINUS Lvalue
+          | Lvalue MINUS MINUS
+          | Primary;
+
+Primary ::= Lvalue
+          | Call
+          | ObjectDef
+          | ArrayDef
+          | LEFT_PARENTHESIS FuncDef RIGHT_PARENTHESIS;
+          //| Const;
+
+Lvalue  ::= ID
+            | COLON COLON ID
+            | Member;
+
+Member  ::= Lvalue DOT ID
+            | Lvalue LEFT_SQ_BRACKET Expr RIGHT_SQ_BRACKET
+            | Call DOT ID
+            | Call LEFT_SQ_BRACKET Expr RIGHT_SQ_BRACKET;
+
+
+Call    ::= Call LEFT_PARENTHESIS ExprList RIGHT_PARENTHESIS
+            | Lvalue CallSuffix
+            | LEFT_PARENTHESIS FuncDef RIGHT_PARENTHESIS LEFT_PARENTHESIS ExprList RIGHT_PARENTHESIS;
+
+CallSuffix  ::= NormCall
+            | MethodCall;
+
+ObjectDef   ::= LEFT_BRACKET Indexed RIGHT_BRACKET;
+Indexed     ::= IndexedElemList;
+IndexedElem ::= Expr COLON Expr;
+IndexedElemList ::= IndexedElem
+                  | IndexedElemList COMMA IndexedElem;
+ArrayDef  ::= LEFT_SQ_BRACKET ExprList RIGHT_SQ_BRACKET;
+Block     ::= LEFT_BRACKET StmtList RIGHT_BRACKET;
+
+FuncDef   ::= FUNCTION ID_ LEFT_PARENTHESIS IDList RIGHT_PARENTHESIS Block;
+ID_ ::= ID
+      | ;
+IDList  ::= ID
+          | IDList COMMA ID;
+
+Const     ::= INTEGER_LITERAL | DOUBLE_LITERAL | STRING_LITERAL | NIL
+              | TRUE  | FALSE;
+
+IfStmt  ::= IF LEFT_PARENTHESIS Expr RIGHT_PARENTHESIS Stmt ElseStmt;
+ElseStmt  ::= 
+            | ELSE Stmt;
+
+WhileStmt ::= WHILE LEFT_BRACKET Expr RIGHT_BRACKET Stmt;
+ForStmt   ::= FOR LEFT_PARENTHESIS ElseStmt SEMICOLON Expr SEMICOLON ExprList RIGHT_PARENTHESIS Stmt;
