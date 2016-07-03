@@ -54,154 +54,243 @@ parser code
     }
 :};
 
-terminal java.lang.String ID;
+
 terminal WHILE, FOR, IF, ELSE, RETURN, BREAK, CONTINUE, FUNCTION, TRUE, FALSE, NIL;
-terminal LEFT_PARENTHESIS, RIGHT_PARENTHESIS, SEMICOLON, COLON, LEFT_BRACKET, RIGHT_BRACKET, LEFT_SQ_BRACKET, RIGHT_SQ_BRACKET, DOT, COMMA;
+terminal LEFT_PARENTHESIS, RIGHT_PARENTHESIS, SEMICOLON, COLON, LEFT_BRACKET, RIGHT_BRACKET, OPEN_BLOCK, CLOSE_BLOCK, DOT, DOUBLE_DOT, COMMA;
+terminal DOUBLE_COLON;
 terminal ASSIGN;
-terminal STAR, SLASH, MOD;
-terminal PLUS, MINUS, UMINUS;
+terminal MUL, DIV, MOD;
+terminal PLUS, MINUS, UMINUS, PLUS_PLUS, MINUS_MINUS;
 terminal GREATER, LESS, NOT_EQUAL, LESS_OR_EQUAL, GREATER_OR_EQUAL, CMP_EQUAL;
 terminal LOGIC_AND, LOGIC_OR, NOT;
-terminal QUASI_OPEN, QUASI_CLOSE, QUASI_ESC, QUASI_EXEC;
+terminal QUASI_ESC, QUASI_EXEC;
 
+terminal java.lang.String ID;
 terminal java.lang.Integer INTEGER_LITERAL;
-terminal java.lang.Double  DOUBLE_LITERAL;
+terminal java.lang.Double  REAL_LITERAL;
 terminal java.lang.String  STRING_LITERAL;
 
-non terminal Program;
-non terminal Stmt;
-non terminal StmtList;
-non terminal ReturnStmt;
-non terminal Literals;
-non terminal Expr;
-non terminal ExprList;
-non terminal Op;
-non terminal Term;
-non terminal AssignExpr;
-non terminal Primary;
-non terminal Lvalue;
-non terminal Member;
-non terminal Call;
-non terminal CallSuffix;
-non terminal NormCall;
-non terminal MethodCall;
-non terminal ObjectDef;
-non terminal Indexed;
-non terminal IndexedElem;
-non terminal IndexedElemList;
-non terminal ArrayDef;
-non terminal Block;
-non terminal FuncDef;
-non terminal Const;
-non terminal ID_;
-non terminal IDList;
-non terminal IfStmt;
-non terminal ElseStmt;
-non terminal WhileStmt;
-non terminal ForStmt;
+non terminal program;
+non terminal stmt;
+non terminal expr;
+non terminal exprlist;
+non terminal ifstmt;
+non terminal whilestmt;
+non terminal forstmt;
+non terminal returnstmt;
+non terminal returnStmt;
+non terminal block;
+non terminal funcdef;
+non terminal functionName;
+non terminal assignexpr;
+non terminal term;
+non terminal op;
+non terminal lvalue;
+non terminal primary;
+non terminal call;
+non terminal objectdef;
+non terminal arraydef;
+non terminal const;
+non terminal member;
+non terminal callsuffix;
+non terminal elist;
+non terminal normcall;
+non terminal methodcall;
+non terminal indexed;
+non terminal indexedelem;
+non terminal idlist;
+non terminal idList;
+non terminal elsestmt;
 
-precedence left  PLUS, MINUS;
-precedence left  STAR, SLASH, MOD;
-precedence left  LOGIC_AND, LOGIC_OR;
-precedence left  GREATER, LESS, NOT_EQUAL, LESS_OR_EQUAL, GREATER_OR_EQUAL, CMP_EQUAL;
-precedence right UMINUS, NOT;
-precedence left ELSE;
+precedence right ASSIGN;
+precedence left LOGIC_OR;
+precedence left LOGIC_AND;
+precedence nonassoc  CMP_EQUAL, NOT_EQUAL;
+precedence nonassoc  GREATER, GREATER_OR_EQUAL, LESS, LESS_OR_EQUAL;
+precedence left PLUS, MINUS;
+precedence left MUL, DIV, MOD;
+precedence right NOT,PLUS_PLUS, MINUS_MINUS, UMINUS;
+precedence left  DOT, DOUBLE_DOT;
+precedence left LEFT_BRACKET, RIGHT_BRACKET;
+precedence left  LEFT_PARENTHESIS, RIGHT_PARENTHESIS;
+precedence nonassoc IF;
+precedence nonassoc ELSE;
 
-start with Program;
-
-Program   ::= 
-          | StmtList;
-
-StmtList ::= Stmt
-          | StmtList Stmt;
-
-Stmt    ::= Expr SEMICOLON
-          | IfStmt
-          | WhileStmt
-          | ForStmt
-          | ReturnStmt
-          | BREAK SEMICOLON
-          | CONTINUE SEMICOLON
-          | Block
-          | FuncDef;
-
-ReturnStmt  ::= RETURN SEMICOLON
-              | RETURN Expr SEMICOLON;
-
-/*Block   ::= LEFT_BRACKET RIGHT_BRACKET
-          | LEFT_BRACKET Stmt RIGHT_BRACKET;*/
+start with program;
 
 
-Literals ::= INTEGER_LITERAL | DOUBLE_LITERAL | STRING_LITERAL;
-Op      ::= PLUS|MINUS|STAR|SLASH|MOD|GREATER|GREATER_OR_EQUAL|LESS|LESS_OR_EQUAL|CMP_EQUAL|NOT_EQUAL|LOGIC_OR|LOGIC_AND;
-
-Expr    ::= Literals
-          | AssignExpr
-          | Expr Op Expr
-          | Term;
-
-ExprList  ::= 
-          | Expr
-          | ExprList COMMA Expr;
-
-AssignExpr  ::= Lvalue ASSIGN Expr;
-
-Term    ::= LEFT_PARENTHESIS Expr RIGHT_PARENTHESIS
-          | UMINUS Expr
-          | NOT Expr
-          | QUASI_OPEN Expr QUASI_CLOSE
-          | QUASI_ESC Expr
-          | QUASI_EXEC Expr
-          | PLUS PLUS Expr
-          | Lvalue PLUS PLUS
-          | MINUS MINUS Lvalue
-          | Lvalue MINUS MINUS
-          | Primary;
-
-Primary ::= Lvalue
-          | Call
-          | ObjectDef
-          | ArrayDef
-          | LEFT_PARENTHESIS FuncDef RIGHT_PARENTHESIS;
-          //| Const;
-
-Lvalue  ::= ID
-            | COLON COLON ID
-            | Member;
-
-Member  ::= Lvalue DOT ID
-            | Lvalue LEFT_SQ_BRACKET Expr RIGHT_SQ_BRACKET
-            | Call DOT ID
-            | Call LEFT_SQ_BRACKET Expr RIGHT_SQ_BRACKET;
+program ::=	 
+			|stmt program
+			;
 
 
-Call    ::= Call LEFT_PARENTHESIS ExprList RIGHT_PARENTHESIS
-            | Lvalue CallSuffix
-            | LEFT_PARENTHESIS FuncDef RIGHT_PARENTHESIS LEFT_PARENTHESIS ExprList RIGHT_PARENTHESIS;
+stmt ::=	 expr SEMICOLON
+			|ifstmt
+			|whilestmt
+			|forstmt
+			|returnstmt
+			|BREAK SEMICOLON
+			|CONTINUE SEMICOLON
+			|block
+			|funcdef
+			|SEMICOLON
+			;
 
-CallSuffix  ::= NormCall
-            | MethodCall;
+expr ::=	assignexpr
+			|expr op expr
+			|term
+			;
 
-ObjectDef   ::= LEFT_BRACKET Indexed RIGHT_BRACKET;
-Indexed     ::= IndexedElemList;
-IndexedElem ::= Expr COLON Expr;
-IndexedElemList ::= IndexedElem
-                  | IndexedElemList COMMA IndexedElem;
-ArrayDef  ::= LEFT_SQ_BRACKET ExprList RIGHT_SQ_BRACKET;
-Block     ::= LEFT_BRACKET StmtList RIGHT_BRACKET;
 
-FuncDef   ::= FUNCTION ID_ LEFT_PARENTHESIS IDList RIGHT_PARENTHESIS Block;
-ID_ ::= ID
-      | ;
-IDList  ::= ID
-          | IDList COMMA ID;
+op ::=       PLUS
+            |MINUS
+            |MUL
+            |DIV
+            |MOD
+            |GREATER
+            |GREATER_OR_EQUAL
+            |LESS
+            |LESS_OR_EQUAL
+            |CMP_EQUAL
+            |NOT_EQUAL
+            |LOGIC_AND
+            |LOGIC_OR
+            ;
 
-Const     ::= INTEGER_LITERAL | DOUBLE_LITERAL | STRING_LITERAL | NIL
-              | TRUE  | FALSE;
+term ::=	 LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
+			|MINUS expr  %prec UMINUS
+			|NOT expr
+			|DOT LESS expr GREATER DOT
+			|DOT QUASI_ESC expr
+			|DOT QUASI_EXEC expr
+			|PLUS_PLUS lvalue
+			|lvalue PLUS_PLUS
+			|MINUS_MINUS lvalue
+			|lvalue MINUS_MINUS
+			|primary
+			;
 
-IfStmt  ::= IF LEFT_PARENTHESIS Expr RIGHT_PARENTHESIS Stmt ElseStmt;
-ElseStmt  ::= 
-            | ELSE Stmt;
+assignexpr ::= 	lvalue ASSIGN expr
+			;
 
-WhileStmt ::= WHILE LEFT_BRACKET Expr RIGHT_BRACKET Stmt;
-ForStmt   ::= FOR LEFT_PARENTHESIS ElseStmt SEMICOLON Expr SEMICOLON ExprList RIGHT_PARENTHESIS Stmt;
+
+primary ::= lvalue
+			|call
+			|objectdef
+			|arraydef
+			|LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS
+			|const
+			;			
+
+lvalue ::=   ID
+			|DOUBLE_COLON ID
+			|member
+			;			
+
+
+member ::= lvalue DOT ID
+			|lvalue LEFT_BRACKET expr RIGHT_BRACKET
+			|call DOT ID
+			|call LEFT_BRACKET expr RIGHT_BRACKET
+			;
+
+
+
+call   ::= call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS
+			|lvalue callsuffix
+			|LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS LEFT_PARENTHESIS elist RIGHT_PARENTHESIS			
+			;
+
+
+
+callsuffix ::= normcall
+			|methodcall	
+			;
+
+
+
+normcall ::= LEFT_PARENTHESIS elist RIGHT_PARENTHESIS
+			;
+
+
+methodcall ::=  DOUBLE_DOT ID LEFT_PARENTHESIS elist RIGHT_PARENTHESIS
+			;
+
+
+elist ::= 
+		  |expr exprlist
+		  ;
+
+
+exprlist ::= 
+		  |COMMA expr exprlist
+		  ;	  
+
+
+objectdef ::= OPEN_BLOCK indexed CLOSE_BLOCK
+		  ;
+
+indexed ::= 
+		  | expr COLON expr	indexedelem
+		  ;
+
+indexedelem ::=
+			|COMMA expr COLON expr indexedelem
+			;	  
+
+
+arraydef::= LEFT_BRACKET elist RIGHT_BRACKET
+			;
+
+
+block ::=   OPEN_BLOCK program CLOSE_BLOCK	
+			;	
+
+funcdef ::= FUNCTION  functionName LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS block
+			;
+
+
+functionName::= 
+			|ID
+			;
+
+const ::= INTEGER_LITERAL
+			|REAL_LITERAL
+			|STRING_LITERAL
+			|NIL
+			|TRUE
+			|FALSE
+			;
+
+idlist ::= 
+			|ID idList
+			;
+
+
+idList ::= 
+            |COMMA ID idList
+            ;
+
+ifstmt ::= IF LEFT_PARENTHESIS expr LEFT_PARENTHESIS stmt elsestmt
+			;
+
+
+elsestmt ::= ELSE stmt
+			|  %prec IF 
+			;
+
+whilestmt ::= WHILE LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt
+			;
+
+
+forstmt ::=  FOR LEFT_PARENTHESIS elist SEMICOLON expr SEMICOLON elist RIGHT_PARENTHESIS stmt
+			;
+
+
+returnstmt ::= RETURN returnStmt SEMICOLON
+			;
+
+
+returnStmt  ::= 
+			| expr
+			;

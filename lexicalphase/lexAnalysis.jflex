@@ -10,11 +10,11 @@ import java.util.*;
 %column
 
 %eof{
-  if(yystate()==STRING) System.out.println("unterminated string: "+ string.toString() + " in line "+ stringLine);
+  if(yystate()==STRING) throw new Error("unterminated string: "+ string.toString() + " in line "+ stringLine);
   if(openComments>0){
   for (int i = commentsState.size() - 1 ; i >= 0 ; i--) {
            if (commentsState.get(i).equals("Unclosed")) {
-              System.out.println("unclosed comment in line: "+ commentsPositions.get(i));
+              throw new Error("unclosed comment in line: "+ commentsPositions.get(i));
             }
         }
   }
@@ -107,4 +107,4 @@ LineTerminator = \r|\n|\r\n
 
 }
 //error case
- . {System.out.println("In line : "+  (yyline + 1) + " unrecognised characters " + yytext()); }
+ . {throw new Error((yyline+1) + ":" + (yycolumn+1) + ": illegal character <"+ yytext()+">"); }
