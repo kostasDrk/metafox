@@ -160,8 +160,8 @@ term ::=	 LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
 			|MINUS expr  %prec UMINUS
 			|NOT expr
 			|QUASI_OPEN expr QUASI_CLOSE
-			|DOT QUASI_ESC expr
-			|DOT QUASI_EXEC expr
+			|QUASI_ESC expr
+			|QUASI_EXEC expr
 			|PLUS_PLUS lvalue
 			|lvalue PLUS_PLUS
 			|MINUS_MINUS lvalue
