@@ -1,0 +1,196 @@
+-----------------------------------------------------------------------------------------
+----------------------------------- Settings for Git ------------------------------------
+-----------------------------------------------------------------------------------------
+1)Setting your username in Git
+	
+	A)To set your username for every repository on your computer:
+	  1)Navigate to your repository from a command-line prompt.
+	  
+	  2)Set a new name
+	    git config user.name "Name Surname"
+
+	  3)Verify the setting
+	    git config user.name
+
+	B)To set your username for every repository on your computer:
+  	  1)Navigate to your repository from a command-line prompt.
+
+	  2)Set a new name
+	    git config --global user.name "Name Surname"
+
+	  3)Verify the setting
+	    git config --global user.name
+-----------------------------------------------------------------------------------------
+---------------------------------- Git Useful Commands ----------------------------------
+-----------------------------------------------------------------------------------------
+1)Clone
+	A)A remote git repository
+	git clone <URL from git repository>
+
+	B)A specific branch from a remote git repository
+	git clone -b <branch> <URL from git repository>
+
+-----------------------------------------------------------------------------------------
+
+2) Create a new branch called <branch>.
+	
+	A)This does not check out the new branch.
+	  git branch <branch>
+	
+	B)This check out the new branch.
+	  git checkout -b <branch>
+
+-----------------------------------------------------------------------------------------
+
+3) List all of the branches in your repository.
+
+	git branch
+
+-----------------------------------------------------------------------------------------
+
+4) Update a local branch with the changes from a tracked remote branch
+
+	//if you weren't already on my_local_branch branch:
+	git checkout my_local_branch 
+
+	//then:
+	git pull
+
+-----------------------------------------------------------------------------------------
+
+5) Delete a local branch <branch>
+	
+	A)Delete the specified branch. This is a “safe” operation in that Git prevents 
+	  you from deleting the branch if it has unmerged changes.
+	  
+	  git branch -d <branch>
+
+	B)Force delete the specified branch, even if it has unmerged changes. This is 
+	  the command to use if you want to permanently throw away all of the commits 
+          associated with a particular line of development. 
+	  
+          git branch -D <branch>
+
+-----------------------------------------------------------------------------------------
+
+6) Show commit history
+	
+	A)See last commit info 
+	  git log --name-status HEAD^..HEAD
+	
+	B)See commits for the checkout branch  
+	  git log
+
+	C)See commits for a specific branch <branch>
+	  git log <branch>
+	
+-----------------------------------------------------------------------------------------
+
+7) Reset locally only branch to a previous commit
+
+	A)Only if you want to lose the commits between the Header and
+	  the commit you choose.
+	  This will destroy any local modifications.
+   	  Don't do it if you have uncommitted work you want to keep.
+          git reset --hard <commit>
+
+	B)If you want to keep local modifications 
+          To return to previous commit and keep last commit changes
+	  git reset --soft HEAD^
+
+	C)Same with (B) but to reset branch to a specific commit.
+	  git reset --soft HEAD^ <commit> 
+
+   Reset locally and online branch to a previous commit
+        git reset --hard <commit>
+        git push origin HEAD --force
+        
+-----------------------------------------------------------------------------------------
+
+8) Reset only a file to a previous commit   
+        git checkout HEAD -- <file>
+
+-----------------------------------------------------------------------------------------
+
+9) Use stash 
+        A)Store modifications of a brach in stash For example before a merge/switch 
+          branch.. (if you don't want to commit them first).
+          git stash 
+
+        B)Pop last stored modification in stash
+          git stash pop
+
+        C)Show stash contents
+          git stash list
+
+        D)Remove all the stashed states.
+          git stash clear
+
+-----------------------------------------------------------------------------------------
+
+10)Merge two branches <branch2> into <branch1>
+	A)If you are not at <branch1>
+	  git checkout <branch1>
+	  git merge <branch2>
+
+	B)If you are at <branch1>
+	  git merge <branch2>
+
+-----------------------------------------------------------------------------------------
+
+11) Reset / checkout /merge  branch (when you have modifications that you want to keep them)
+	This saves the modifications, then reapplies that patch after resetting.
+  	You could get merge conflicts, if you've modified things which were
+  	changed since the commit you reset to.
+
+	A)Reset
+	git stash			--> to push changes to a git stack
+	git reset --hard <commit>
+	git stash pop			--> to restore changes, pop changes from stack.
+
+	B)Checkout
+	git stash
+	git checkout <branch>
+	git stash pop
+
+	C)Merge
+    	git stash
+	git merge  <branch>
+	git stash pop
+
+-----------------------------------------------------------------------------------------
+
+12)Ignoring the changes to a file
+	
+	This will tell git you want to start ignoring the changes to the file
+	git update-index --assume-unchanged path/to/file
+
+    	When you want to start keeping track again
+	git update-index --no-assume-unchanged path/to/file
+
+-----------------------------------------------------------------------------------------
+
+13)Resolve issues automatically when users push code
+    
+        You can configure Bitbucket to resolve tickets automatically when people 
+        push updates through to your Bitbucket repository.  Users specify 
+        commands and issues in a commit message, for example:
+
+        hg commit -m "fixes #6, resolve ticket #5 and see ticket #9 and ticket #5 in the tracker"
+
+-----------------------------------------------------------------------------------------
+
+14)Push a new local branch to a remote git repository
+	git push -u origin <branch>
+
+
+-----------------------------------------------------------------------------------------
+------------- Sites where you can search for more info about git commands ---------------
+-----------------------------------------------------------------------------------------
+
+1)http://stackoverflow.com/
+2)https://www.atlassian.com/
+3)https://github.com/
+
+-----------------------------------------------------------------------------------------
+
