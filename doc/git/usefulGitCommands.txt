@@ -183,6 +183,21 @@
 14)Push a new local branch to a remote git repository
 	git push -u origin <branch>
 
+-----------------------------------------------------------------------------------------
+
+15)Moving files within the repository
+	
+	A)One way
+	  mkdir src
+	  git mv hello.c src
+	  git status 
+	
+	B)One more way
+	  mkdir src
+	  mv hello.c src (for linux) or move hello.c src (for windows)
+  	  git add src/hello.c
+  	  git rm hello.c
+	  git status
 
 -----------------------------------------------------------------------------------------
 ------------- Sites where you can search for more info about git commands ---------------
