@@ -180,12 +180,7 @@
 
 -----------------------------------------------------------------------------------------
 
-14)Push a new local branch to a remote git repository
-	git push -u origin <branch>
-
------------------------------------------------------------------------------------------
-
-15)Moving files within the repository
+14)Moving files within the repository
 	
 	A)One way
 	  mkdir src
@@ -198,6 +193,22 @@
   	  git add src/hello.c
   	  git rm hello.c
 	  git status
+
+-----------------------------------------------------------------------------------------
+
+15)Push changes from a branch to a remote repository
+
+	A)A local branch to a remote git repository (NOT new)
+	  git push origin <branch>
+
+	B)A NEW local branch to a remote git repository
+	  git push -u origin <branch>
+
+-----------------------------------------------------------------------------------------
+
+16)Commit changes
+
+	git commit -m "<message>"
 
 -----------------------------------------------------------------------------------------
 ------------- Sites where you can search for more info about git commands ---------------
