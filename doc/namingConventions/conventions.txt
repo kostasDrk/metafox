@@ -1,0 +1,10 @@
+class: ClassClass
+abstract class: AClassClass
+interface: IInterfaceInterface
+
+constant: CONSTANT_CONSTANT
+field: _fieldField
+
+method: methodMethod
+argument: argumentArgument
+local variable: variableVariable
