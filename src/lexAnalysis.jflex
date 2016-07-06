@@ -1,7 +1,7 @@
 import static java.lang.System.out;
 import java.util.*;
 import java_cup.runtime.*;
-/*TEST for git push -b*/
+
 %%
 
 %class MyLexer

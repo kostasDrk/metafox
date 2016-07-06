@@ -1,6 +1,17 @@
 import java_cup.runtime.Symbol;
 import java.util.ArrayList;
 import java.util.List;
+import ast.Program;
+import ast.Statement;
+import ast.Expression;
+import ast.ExpressionStatement;
+import ast.AssignmentExpression;
+import ast.Lvalue;
+import ast.BinaryExpression;
+import ast.UnaryExpression;
+import ast.TermExpression;
+import ast.Identifier;
+import ast.Operator;
 
 
 parser code
@@ -69,11 +80,13 @@ terminal java.lang.Integer INTEGER_LITERAL;
 terminal java.lang.Double  REAL_LITERAL;
 terminal java.lang.String  STRING_LITERAL;
 
-non terminal program;
-non terminal stmt;
-non terminal expr;
-non terminal exprlist;
+non terminal Program program;
+non terminal ArrayList<Statement> stmtlist;
+non terminal Statement stmt;
+non terminal Expression expr;
+non terminal ArrayList<Expression> exprlist;
 non terminal ifstmt;
+non terminal elsestmt;
 non terminal whilestmt;
 non terminal forstmt;
 non terminal returnstmt;
@@ -81,10 +94,10 @@ non terminal returnStmt;
 non terminal block;
 non terminal funcdef;
 non terminal functionName;
-non terminal assignexpr;
-non terminal term;
-non terminal op;
-non terminal lvalue;
+non terminal AssignmentExpression assignexpr;
+non terminal TermExpression term;
+non terminal Operator op;
+non terminal Lvalue lvalue;
 non terminal primary;
 non terminal call;
 non terminal objectdef;
@@ -99,7 +112,6 @@ non terminal indexed;
 non terminal indexedelem;
 non terminal idlist;
 non terminal idList;
-non terminal elsestmt;
 
 precedence right ASSIGN;
 precedence left LOGIC_OR;
@@ -118,12 +130,39 @@ precedence nonassoc ELSE;
 start with program;
 
 
-program ::=	 
-			|stmt program
+program ::=	 /*Empty program*/
+			 {:
+			 	RESULT = new Program();
+			 	RESULT.setLine(0);
+			 	RESULT.setColumn(0);
+			 :}
+			| stmtlist:stlist
+			 {:
+			 	RESULT = new Program(stlist);
+			 	RESULT.setLine(stlistleft);
+			 	RESULT.setColumn(stlistright);
+			 :}
+			;
+
+stmtlist  ::= stmt:st
+			  {:
+			  	RESULT = new ArrayList<Statement>();
+			  	RESULT.add(st);
+			  :}
+			| stmtlist:stlist stmt:st
+			  {:
+			  	stlist.add(st);
+			  	RESULT = stlist;
+			  :}
 			;
 
 
-stmt ::=	 expr SEMICOLON
+stmt ::=	 expr:ex SEMICOLON
+			{:
+				RESULT = new ExpressionStatement(ex);
+				RESULT.setLine(exleft);
+				RESULT.setColumn(exright);
+			:}
 			|ifstmt
 			|whilestmt
 			|forstmt
@@ -136,7 +175,12 @@ stmt ::=	 expr SEMICOLON
 			;
 
 expr ::=	assignexpr
-			|expr op expr
+			|expr:ex1 op:oper expr:ex2
+			{:
+				RESULT = new BinaryExpression(oper, ex1, ex2);
+				RESULT.setLine(ex1left);
+				RESULT.setColumn(ex1right);
+			:}
 			|term
 			;
 
@@ -154,22 +198,57 @@ op ::=       PLUS
             |NOT_EQUAL
             |LOGIC_AND
             |LOGIC_OR
+            | NOT
             ;
 
 term ::=	 LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
-			|MINUS expr  %prec UMINUS
-			|NOT expr
+			|MINUS expr:ex
+			{:
+				RESULT = new UnaryExpression(Operator.MINUS, ex, null);
+				RESULT.setLine(exleft);
+				RESULT.setColumn(exright);
+			:}
+			 %prec UMINUS
+			|NOT expr:ex
+			{:
+				RESULT = new UnaryExpression(Operator.LOGIC_NOT, ex, null);
+				RESULT.setLine(exleft);
+				RESULT.setColumn(exright);
+			:}
 			|QUASI_OPEN expr QUASI_CLOSE
 			|QUASI_ESC expr
 			|QUASI_EXEC expr
-			|PLUS_PLUS lvalue
-			|lvalue PLUS_PLUS
-			|MINUS_MINUS lvalue
-			|lvalue MINUS_MINUS
+			|PLUS_PLUS lvalue:lval
+			/*{:
+				RESULT = UnaryExpression(Operator.PLUS_PLUS, null, lval);
+				RESULT.setLine(lvalleft);
+				RESULT.setColumn(lvalright);
+			:}*/
+			|lvalue:lval PLUS_PLUS
+			/*{:
+				RESULT = UnaryExpression(Operator.PLUS_PLUS, lval);
+				RESULT.setLine(lvalleft);
+				RESULT.setColumn(lvalright);
+			:}*/
+			|MINUS_MINUS lvalue:lval
+			/*{:
+				RESULT = UnaryExpression(Operator.MINUS_MINUS, lval);
+				RESULT.setLine(lvalleft);
+				RESULT.setColumn(lvalright);
+			:}*/
+			|lvalue:lval MINUS_MINUS
+			/*{:
+				RESULT = UnaryExpression(Operator.MINUS_MINUS, lval);
+				RESULT.setLine(lvalleft);
+				RESULT.setColumn(lvalright);
+			:}*/
 			|primary
 			;
 
-assignexpr ::= 	lvalue ASSIGN expr
+assignexpr ::= 	lvalue:lval ASSIGN expr:ex
+			{:
+				//RESULT = new AssignmentExpression();
+			:}
 			;
 
 
@@ -181,10 +260,20 @@ primary ::= lvalue
 			|const
 			;			
 
-lvalue ::=   ID
-			|DOUBLE_COLON ID
+lvalue ::=   ID:id
+			{:
+				RESULT = new Identifier(id, false);	// boolean value used to indicate local/global scope
+				RESULT.setLine(idleft);
+				RESULT.setColumn(idright);
+			:}
+			|DOUBLE_COLON ID:id
+			{:
+				RESULT = new Identifier(id, true); // boolean value used to indicate local/global scope
+				RESULT.setLine(idleft);
+				RESULT.setColumn(idright);
+			:}
 			|member
-			;			
+			;
 
 
 member ::= lvalue DOT ID

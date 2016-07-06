@@ -1,6 +1,6 @@
 import java.io.FileReader;
-//import ast.ASTNode;
-//import ast.ASTVisitor;
+import ast.ASTNode;
+import ast.ASTVisitor;
 
 public class MetafoxCompiler {
 
@@ -12,7 +12,9 @@ public class MetafoxCompiler {
             try {
                 MyLexer mlx = new MyLexer(new FileReader(args[0]));
                 parser p = new parser( mlx );
-                Object result = (Object) p.parse().value;
+
+                ASTNode compUnit = (ASTNode) p.parse().value;
+                // Object result = (Object) p.parse().value;
                 System.out.println("Parse ok");
             }
             catch(Exception e) {
