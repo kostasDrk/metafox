@@ -55,7 +55,7 @@ parser code
 
 
 terminal WHILE, FOR, IF, ELSE, RETURN, BREAK, CONTINUE, FUNCTION, TRUE, FALSE, NIL;
-terminal LEFT_PARENTHESIS, RIGHT_PARENTHESIS, SEMICOLON, COLON, DOLLAR, LEFT_BRACKET, RIGHT_BRACKET, OPEN_BLOCK, CLOSE_BLOCK, DOT, DOUBLE_DOT, COMMA;
+terminal LEFT_PARENTHESIS, RIGHT_PARENTHESIS, SEMICOLON, COLON, LEFT_BRACKET, RIGHT_BRACKET, OPEN_BLOCK, CLOSE_BLOCK, DOT, DOUBLE_DOT, COMMA;
 terminal DOUBLE_COLON;
 terminal ASSIGN;
 terminal MUL, DIV, MOD;
@@ -71,6 +71,7 @@ terminal java.lang.String  STRING_LITERAL;
 
 non terminal program;
 non terminal stmt;
+non terminal stmtlist;
 non terminal expr;
 non terminal exprlist;
 non terminal ifstmt;
@@ -226,7 +227,7 @@ exprlist ::=
 		  ;	  
 
 
-objectdef ::= DOLLAR OPEN_BLOCK indexed CLOSE_BLOCK
+objectdef ::= OPEN_BLOCK indexed CLOSE_BLOCK
 		  ;
 
 indexed ::= 
@@ -242,10 +243,16 @@ arraydef::= LEFT_BRACKET elist RIGHT_BRACKET
 			;
 
 
-block ::=   OPEN_BLOCK program CLOSE_BLOCK	
-			;	
+block ::=   OPEN_BLOCK stmtlist CLOSE_BLOCK	
+			;
+
+stmtlist ::= stmt stmtlist
+			|stmt
+			;
+
 
 funcdef ::= FUNCTION  functionName LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS block
+			|FUNCTION  functionName LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS  OPEN_BLOCK  CLOSE_BLOCK	
 			;
 
 
