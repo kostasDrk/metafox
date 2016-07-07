@@ -51,11 +51,9 @@ letter = [A-Za-z]
 intConst = [0-9]+
 identifier = {letter}+({letter}|{intConst}|"_")*
 realConst = [0-9]+\.[0-9]+
-// keyword = "and"|"not"|"or"|"true"|"false"|"nil"|"if"|"else"|"while"|"for"|"function"|"return"|"break"|"continue"
-// punctuation = "{"|"}"|"["|"]"|"("|")"|";"|","|":"|"::"|"."|".."
-// operator = ">"|"<"|">="|"<="|"="|"+"|"-"|"*"|"/"|"%"|"=="|"!="|"++"|"--"|".!"|".~"
 whiteSpace = [ \t\n]+
 LineTerminator = \r|\n|\r\n
+
 %state STRING
 %state COMMENT
 %state LINECOMMENT
@@ -90,6 +88,7 @@ LineTerminator = \r|\n|\r\n
   ".!"  { return symbol(sym.QUASI_EXEC);}
   ".~"  { return symbol(sym.QUASI_ESC);}
 
+
   /*Punctuation*/
   "{"    { return symbol(sym.OPEN_BLOCK);}
   "}"    { return symbol(sym.CLOSE_BLOCK);}
@@ -103,7 +102,7 @@ LineTerminator = \r|\n|\r\n
   ":"    { return symbol(sym.COLON);}
   ".."   { return symbol(sym.DOUBLE_DOT);}
   "."    { return symbol(sym.DOT);}
-  "$"    { return symbol(sym.DOLLAR);}
+
 
   /*Operators*/
   ">"   { return symbol(sym.GREATER);}
@@ -122,17 +121,11 @@ LineTerminator = \r|\n|\r\n
   "--"  { return symbol(sym.MINUS_MINUS);}
   "!"   { return symbol(sym.NOT);}
 
-
- //{keyword}			   {System.out.println("keyword: "+ yytext() + " in line "+ (yyline + 1)); }
- //{identifier}	       {System.out.println("identifier: "+ yytext() + " in line "+ (yyline + 1)); }
- //{intConst}			   {System.out.println("intConst: "+ yytext() + " in line "+ (yyline + 1)); }
- //{realConst}		   {System.out.println("realConst: "+ yytext() + " in line "+ (yyline + 1)); }
- //{punctuation}	       {System.out.println("punctuation: "+ yytext() + " in line "+ (yyline + 1)); }
- //{operator}			   {System.out.println("operator: "+ yytext() + " in line "+ (yyline + 1)); }
  {whiteSpace}		   { }
  
  /*String mode*/
  "\""			   { string.setLength(0); stringLine = (yyline + 1); yybegin(STRING); }
+
  /*Comment mode*/
  "/*"   {openComments++; commentsPositions.add(yyline+1); commentsState.add("Unclosed");  yybegin(COMMENT); }
 
@@ -180,5 +173,5 @@ LineTerminator = \r|\n|\r\n
 	   . { }
 
 }
-//error case
+/*Error case*/
  . {throw new Error((yyline+1) + ":" + (yycolumn+1) + ": illegal character <"+ yytext()+">"); }
