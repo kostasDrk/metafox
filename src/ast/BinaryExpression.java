@@ -1,6 +1,6 @@
 package ast;
 
-public class BinaryExpression extends TermExpression {
+public class BinaryExpression extends Expression {
 
 	private Operator _operator;
 	private Expression _expression1;

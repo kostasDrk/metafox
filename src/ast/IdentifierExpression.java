@@ -1,11 +1,11 @@
 package ast;
 
-public class Identifier extends Lvalue {
+public class IdentifierExpression extends Lvalue {
 
 	private String _identifier;
 	private boolean _local;
 
-	public Identifier(String identifier, boolean local) {
+	public IdentifierExpression(String identifier, boolean local) {
 		this._identifier = identifier;
 		this._local = local;
 	}

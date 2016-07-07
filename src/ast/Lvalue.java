@@ -1,5 +1,5 @@
 package ast;
 
-public abstract class Lvalue extends ASTNode {
+public abstract class Lvalue extends Primary {
 
 }

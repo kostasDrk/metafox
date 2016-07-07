@@ -103,7 +103,6 @@ LineTerminator = \r|\n|\r\n
   ":"    { return symbol(sym.COLON);}
   ".."   { return symbol(sym.DOUBLE_DOT);}
   "."    { return symbol(sym.DOT);}
-  "$"    { return symbol(sym.DOLLAR);}
 
   /*Operators*/
   ">"   { return symbol(sym.GREATER);}

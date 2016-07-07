@@ -6,12 +6,15 @@ import ast.Statement;
 import ast.Expression;
 import ast.ExpressionStatement;
 import ast.AssignmentExpression;
-import ast.Lvalue;
 import ast.BinaryExpression;
 import ast.UnaryExpression;
 import ast.TermExpression;
-import ast.Identifier;
+import ast.IdentifierExpression;
 import ast.Operator;
+import ast.Primary;
+import ast.Lvalue;
+import ast.Member;
+import ast.Call;
 
 
 parser code
@@ -66,7 +69,7 @@ parser code
 
 
 terminal WHILE, FOR, IF, ELSE, RETURN, BREAK, CONTINUE, FUNCTION, TRUE, FALSE, NIL;
-terminal LEFT_PARENTHESIS, RIGHT_PARENTHESIS, SEMICOLON, COLON, DOLLAR, LEFT_BRACKET, RIGHT_BRACKET, OPEN_BLOCK, CLOSE_BLOCK, DOT, DOUBLE_DOT, COMMA;
+terminal LEFT_PARENTHESIS, RIGHT_PARENTHESIS, SEMICOLON, COLON, LEFT_BRACKET, RIGHT_BRACKET, OPEN_BLOCK, CLOSE_BLOCK, DOT, DOUBLE_DOT, COMMA;
 terminal DOUBLE_COLON;
 terminal ASSIGN;
 terminal MUL, DIV, MOD;
@@ -98,12 +101,12 @@ non terminal AssignmentExpression assignexpr;
 non terminal TermExpression term;
 non terminal Operator op;
 non terminal Lvalue lvalue;
-non terminal primary;
-non terminal call;
+non terminal Primary primary;
+non terminal Call call;
 non terminal objectdef;
 non terminal arraydef;
 non terminal const;
-non terminal member;
+non terminal Member member;
 non terminal callsuffix;
 non terminal elist;
 non terminal normcall;
@@ -258,17 +261,17 @@ primary ::= lvalue
 			|arraydef
 			|LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS
 			|const
-			;			
+			;
 
 lvalue ::=   ID:id
 			{:
-				RESULT = new Identifier(id, false);	// boolean value used to indicate local/global scope
+				RESULT = new IdentifierExpression(id, true);	// boolean value used to indicate local/global scope
 				RESULT.setLine(idleft);
 				RESULT.setColumn(idright);
 			:}
 			|DOUBLE_COLON ID:id
 			{:
-				RESULT = new Identifier(id, true); // boolean value used to indicate local/global scope
+				RESULT = new IdentifierExpression(id, false); // boolean value used to indicate local/global scope
 				RESULT.setLine(idleft);
 				RESULT.setColumn(idright);
 			:}
@@ -276,10 +279,30 @@ lvalue ::=   ID:id
 			;
 
 
-member ::= lvalue DOT ID
-			|lvalue LEFT_BRACKET expr RIGHT_BRACKET
-			|call DOT ID
-			|call LEFT_BRACKET expr RIGHT_BRACKET
+member ::= lvalue:lval DOT ID:id
+			{:
+				RESULT = new Member(lval, id, null, null);
+				RESULT.setLine(lvalleft);
+				RESULT.setColumn(lvalright);				
+			:}
+			|lvalue:lval LEFT_BRACKET expr:ex RIGHT_BRACKET
+			{:
+				RESULT = new Member(lval, null, null, ex);
+				RESULT.setLine(lvalleft);
+				RESULT.setColumn(lvalright);				
+			:}
+			|call:cl DOT ID:id
+			{:
+				RESULT = new Member(null, id, cl, null);
+				RESULT.setLine(clleft);
+				RESULT.setColumn(clright);				
+			:}
+			|call:cl LEFT_BRACKET expr:ex RIGHT_BRACKET
+			{:
+				RESULT = new Member(null, null, cl, ex);
+				RESULT.setLine(clleft);
+				RESULT.setColumn(clright);
+			:}
 			;
 
 
@@ -315,7 +338,7 @@ exprlist ::=
 		  ;	  
 
 
-objectdef ::= DOLLAR OPEN_BLOCK indexed CLOSE_BLOCK
+objectdef ::= OPEN_BLOCK indexed CLOSE_BLOCK
 		  ;
 
 indexed ::= 
@@ -331,10 +354,11 @@ arraydef::= LEFT_BRACKET elist RIGHT_BRACKET
 			;
 
 
-block ::=   OPEN_BLOCK program CLOSE_BLOCK	
+block ::=   OPEN_BLOCK stmtlist CLOSE_BLOCK
 			;	
 
 funcdef ::= FUNCTION  functionName LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS block
+			| FUNCTION  functionName LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS OPEN_BLOCK CLOSE_BLOCK
 			;
 
 
