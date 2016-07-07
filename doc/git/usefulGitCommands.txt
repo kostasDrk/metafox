@@ -196,7 +196,13 @@
 
 -----------------------------------------------------------------------------------------
 
-15)Push changes from a branch to a remote repository
+15)Download a branch
+	
+	git checkout -b newlocalbranchname origin/branch-name
+
+-----------------------------------------------------------------------------------------
+
+16)Push changes from a branch to a remote repository
 
 	A)A local branch to a remote git repository (NOT new)
 	  git push origin <branch>
@@ -206,7 +212,7 @@
 
 -----------------------------------------------------------------------------------------
 
-16)Commit changes
+17)Commit changes
 
 	git commit -m "<message>"
 
