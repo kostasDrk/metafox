@@ -15,6 +15,11 @@ import ast.Primary;
 import ast.Lvalue;
 import ast.Member;
 import ast.Call;
+import ast.ExtendedCall;
+import ast.LvalueCall;
+import ast.CallSuffix;
+import ast.NormCall;
+import ast.MethodCall;
 
 
 parser code
@@ -107,10 +112,10 @@ non terminal objectdef;
 non terminal arraydef;
 non terminal const;
 non terminal Member member;
-non terminal callsuffix;
-non terminal elist;
-non terminal normcall;
-non terminal methodcall;
+non terminal CallSuffix callsuffix;
+non terminal NormCall normcall;
+non terminal MethodCall methodcall;
+non terminal ArrayList<Expression> elist;
 non terminal indexed;
 non terminal indexedelem;
 non terminal idlist;
@@ -189,22 +194,67 @@ expr ::=	assignexpr
 
 
 op ::=       PLUS
+			{:
+				RESULT = Operator.PLUS;
+			:}
             |MINUS
+            {:
+				RESULT = Operator.MINUS;
+			:}
             |MUL
+            {:
+				RESULT = Operator.MUL;
+			:}
             |DIV
+            {:
+				RESULT = Operator.DIV;
+			:}
             |MOD
+            {:
+				RESULT = Operator.MOD;
+			:}
             |GREATER
+            {:
+				RESULT = Operator.GREATER;
+			:}
             |GREATER_OR_EQUAL
+            {:
+				RESULT = Operator.GREATER_OR_EQUAL;
+			:}
             |LESS
+            {:
+				RESULT = Operator.LESS;
+			:}
             |LESS_OR_EQUAL
+            {:
+				RESULT = Operator.LESS_OR_EQUAL;
+			:}
             |CMP_EQUAL
+            {:
+				RESULT = Operator.CMP_EQUAL;
+			:}
             |NOT_EQUAL
+            {:
+				RESULT = Operator.NOT_EQUAL;
+			:}
             |LOGIC_AND
+            {:
+				RESULT = Operator.LOGIC_AND;
+			:}
             |LOGIC_OR
+            {:
+				RESULT = Operator.LOGIC_OR;
+			:}
             | NOT
+            {:
+				RESULT = Operator.LOGIC_NOT;
+			:}
             ;
 
 term ::=	 LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
+			{:
+				/**/
+			:}
 			|MINUS expr:ex
 			{:
 				RESULT = new UnaryExpression(Operator.MINUS, ex, null);
@@ -307,34 +357,66 @@ member ::= lvalue:lval DOT ID:id
 
 
 
-call   ::= call LEFT_PARENTHESIS elist RIGHT_PARENTHESIS
-			|lvalue callsuffix
-			|LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS LEFT_PARENTHESIS elist RIGHT_PARENTHESIS			
+call   ::= call:cl LEFT_PARENTHESIS elist:el RIGHT_PARENTHESIS
+			{:
+				RESULT = new ExtendedCall(cl, el);
+				RESULT.setLine(elleft);
+				RESULT.setColumn(elright);
+			:}
+			|lvalue:lval callsuffix:clsuffix
+			{:
+				/*RESULT = LvalueCall(lval, clsuffix);
+				RESULT.setLine(lvalleft);
+				RESULT.setColumn(lvalright);*/
+			:}
+
+			|LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS LEFT_PARENTHESIS elist RIGHT_PARENTHESIS
 			;
 
 
 
 callsuffix ::= normcall
-			|methodcall	
+			|methodcall
 			;
 
 
 
-normcall ::= LEFT_PARENTHESIS elist RIGHT_PARENTHESIS
+normcall ::= LEFT_PARENTHESIS elist:el RIGHT_PARENTHESIS
+			{:
+				RESULT = new NormCall(el);
+				RESULT.setLine(elleft);
+				RESULT.setColumn(elright);
+			:}
 			;
 
 
-methodcall ::=  DOUBLE_DOT ID LEFT_PARENTHESIS elist RIGHT_PARENTHESIS
+methodcall ::=  DOUBLE_DOT ID:id LEFT_PARENTHESIS elist:el RIGHT_PARENTHESIS
+			{:
+				RESULT = new MethodCall(id, el);
+				RESULT.setLine(idleft);
+				RESULT.setColumn(idright);
+			:}
 			;
 
 
-elist ::= 
-		  |expr exprlist
+elist ::= {:
+			RESULT = new ArrayList<Expression>();
+
+		  :}
+		  |expr:ex exprlist:el
+		  {:
+		  	RESULT = new ArrayList<Expression>();
+		  	RESULT.add(ex);
+		  :}
 		  ;
 
 
 exprlist ::= 
-		  |COMMA expr exprlist
+		  |COMMA expr:ex exprlist:el
+		  {:
+		  	el.add(ex);
+		  	RESULT = el;
+		  :}
 		  ;	  
 
 
