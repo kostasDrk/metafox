@@ -10,3 +10,8 @@ print(student1.bag.brand);
 
 a = 8;
 b = a+1;
+
+function justAfunc(a, s){
+   print(a);
+   return a%s;
+}
