@@ -1,8 +1,8 @@
 
-student1 = ${x:5,
+student1 = {x:5,
 	    y:"aasdasd",
 	    z:99,
-	    bag:${brand:"Nike", year:2006}
+	    bag:{brand:"Nike", year:2006}
 	    };
 
 

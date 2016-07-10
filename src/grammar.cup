@@ -14,12 +14,23 @@ import ast.Operator;
 import ast.Primary;
 import ast.Lvalue;
 import ast.Member;
+import ast.Constant;
+import ast.IntegerLiteral;
+import ast.DoubleLiteral;
+import ast.StringLiteral;
+import ast.TrueLiteral;
+import ast.FalseLiteral;
+import ast.NullLiteral;
 import ast.Call;
 import ast.ExtendedCall;
 import ast.LvalueCall;
+import ast.AnonymousFunctionCall;
 import ast.CallSuffix;
 import ast.NormCall;
 import ast.MethodCall;
+import ast.Block;
+import ast.ArrayDef;
+import ast.FunctionDef;
 
 
 parser code
@@ -92,34 +103,33 @@ non terminal Program program;
 non terminal ArrayList<Statement> stmtlist;
 non terminal Statement stmt;
 non terminal Expression expr;
-non terminal ArrayList<Expression> exprlist;
+non terminal ArrayList<Expression> elist;
 non terminal ifstmt;
 non terminal elsestmt;
 non terminal whilestmt;
 non terminal forstmt;
 non terminal returnstmt;
 non terminal returnStmt;
-non terminal block;
-non terminal funcdef;
-non terminal functionName;
+non terminal Block block;
+non terminal FunctionDef funcdef;
+non terminal String functionName;
 non terminal AssignmentExpression assignexpr;
 non terminal TermExpression term;
 non terminal Operator op;
 non terminal Lvalue lvalue;
 non terminal Primary primary;
 non terminal Call call;
-non terminal objectdef;
-non terminal arraydef;
-non terminal const;
+non terminal ArrayDef arraydef;
+non terminal Constant const;
 non terminal Member member;
 non terminal CallSuffix callsuffix;
 non terminal NormCall normcall;
 non terminal MethodCall methodcall;
-non terminal ArrayList<Expression> elist;
+non terminal objectdef;
 non terminal indexed;
 non terminal indexedelem;
-non terminal idlist;
-non terminal idList;
+non terminal ArrayList<String> idlist;
+// non terminal idList;
 
 precedence right ASSIGN;
 precedence left LOGIC_OR;
@@ -272,35 +282,37 @@ term ::=	 LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
 			|QUASI_ESC expr
 			|QUASI_EXEC expr
 			|PLUS_PLUS lvalue:lval
-			/*{:
-				RESULT = UnaryExpression(Operator.PLUS_PLUS, null, lval);
+			{:
+				RESULT = new UnaryExpression(Operator.PLUS_PLUS, null, lval);
 				RESULT.setLine(lvalleft);
 				RESULT.setColumn(lvalright);
-			:}*/
+			:}
 			|lvalue:lval PLUS_PLUS
-			/*{:
-				RESULT = UnaryExpression(Operator.PLUS_PLUS, lval);
+			{:
+				RESULT = new UnaryExpression(Operator.PLUS_PLUS, null, lval);
 				RESULT.setLine(lvalleft);
 				RESULT.setColumn(lvalright);
-			:}*/
+			:}
 			|MINUS_MINUS lvalue:lval
-			/*{:
-				RESULT = UnaryExpression(Operator.MINUS_MINUS, lval);
+			{:
+				RESULT = new UnaryExpression(Operator.MINUS_MINUS, null, lval);
 				RESULT.setLine(lvalleft);
 				RESULT.setColumn(lvalright);
-			:}*/
+			:}
 			|lvalue:lval MINUS_MINUS
-			/*{:
-				RESULT = UnaryExpression(Operator.MINUS_MINUS, lval);
+			{:
+				RESULT = new UnaryExpression(Operator.MINUS_MINUS, null, lval);
 				RESULT.setLine(lvalleft);
 				RESULT.setColumn(lvalright);
-			:}*/
+			:}
 			|primary
 			;
 
 assignexpr ::= 	lvalue:lval ASSIGN expr:ex
 			{:
-				//RESULT = new AssignmentExpression();
+				RESULT = new AssignmentExpression(lval, ex);
+				RESULT.setLine(lvalleft);
+				RESULT.setColumn(lvalright);
 			:}
 			;
 
@@ -365,12 +377,16 @@ call   ::= call:cl LEFT_PARENTHESIS elist:el RIGHT_PARENTHESIS
 			:}
 			|lvalue:lval callsuffix:clsuffix
 			{:
-				/*RESULT = LvalueCall(lval, clsuffix);
+				RESULT = new LvalueCall(lval, clsuffix);
 				RESULT.setLine(lvalleft);
-				RESULT.setColumn(lvalright);*/
+				RESULT.setColumn(lvalright);
 			:}
-
-			|LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS LEFT_PARENTHESIS elist RIGHT_PARENTHESIS
+			|LEFT_PARENTHESIS funcdef:fdef RIGHT_PARENTHESIS LEFT_PARENTHESIS elist:el RIGHT_PARENTHESIS
+			{:
+				RESULT = new AnonymousFunctionCall(fdef, el);
+				RESULT.setLine(fdefleft);
+				RESULT.setColumn(fdefright);
+			:}
 			;
 
 
@@ -399,78 +415,138 @@ methodcall ::=  DOUBLE_DOT ID:id LEFT_PARENTHESIS elist:el RIGHT_PARENTHESIS
 			;
 
 
-elist ::= {:
-			RESULT = new ArrayList<Expression>();
-
-		  :}
-		  |expr:ex exprlist:el
-		  {:
-		  	RESULT = new ArrayList<Expression>();
-		  	RESULT.add(ex);
-		  :}
-		  ;
-
-
-exprlist ::= 
-		  |COMMA expr:ex exprlist:el
-		  {:
-		  	el.add(ex);
-		  	RESULT = el;
-		  :}
-		  ;	  
+elist 	   	::= 
+		  	| expr:ex
+		  	{:
+			  	RESULT = new ArrayList<Expression>();
+			  	RESULT.add(ex);
+		  	:}
+		  	| elist:el COMMA expr:ex
+		  	{:
+		  		el.add(ex);
+		  		RESULT = el;
+		  	:};
 
 
-objectdef ::= OPEN_BLOCK indexed CLOSE_BLOCK
+objectdef ::= OPEN_BLOCK indexed:ind CLOSE_BLOCK
 		  ;
 
 indexed ::= 
-		  | expr COLON expr	indexedelem
+		  | expr:ex1 COLON expr:ex2	indexedelem:indelem
 		  ;
 
 indexedelem ::=
-			|COMMA expr COLON expr indexedelem
+			|COMMA expr:ex1 COLON expr:ex2 indexedelem:indelem
 			;	  
 
 
-arraydef::= LEFT_BRACKET elist RIGHT_BRACKET
+arraydef::= LEFT_BRACKET elist:el RIGHT_BRACKET
+			{:
+				RESULT = new ArrayDef(el);
+				RESULT.setLine(elleft);
+				RESULT.setColumn(elright);
+			:}
 			;
 
 
-block ::=   OPEN_BLOCK stmtlist CLOSE_BLOCK
-			;	
+block ::=   OPEN_BLOCK stmtlist:stlist CLOSE_BLOCK
+			{:
+				RESULT = new Block(stlist);
+				RESULT.setLine(stlistleft);
+				RESULT.setColumn(stlistright);
+			:}
+			;
 
-funcdef ::= FUNCTION  functionName LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS block
-			| FUNCTION  functionName LEFT_PARENTHESIS idlist RIGHT_PARENTHESIS OPEN_BLOCK CLOSE_BLOCK
+funcdef ::= FUNCTION  functionName:funcName LEFT_PARENTHESIS idlist:idl RIGHT_PARENTHESIS block:bl
+			{:
+				RESULT = new FunctionDef(funcName, idl, bl);
+				RESULT.setLine(funcNameleft);
+				RESULT.setColumn(funcNameright);
+			:}
+			| FUNCTION  functionName:funcName LEFT_PARENTHESIS idlist:idl RIGHT_PARENTHESIS OPEN_BLOCK CLOSE_BLOCK
+			{:
+				RESULT = new FunctionDef(funcName, idl, null);
+				RESULT.setLine(funcNameleft);
+				RESULT.setColumn(funcNameright);
+			:}
 			;
 
 
 functionName::= 
-			|ID
+			|ID:id
+			{:
+				RESULT = id;
+			:}
 			;
 
-const ::= INTEGER_LITERAL
-			|REAL_LITERAL
-			|STRING_LITERAL
-			|NIL
-			|TRUE
-			|FALSE
+const ::= INTEGER_LITERAL:literal
+			{:
+				RESULT = new IntegerLiteral(literal);
+				RESULT.setLine(literalleft);
+				RESULT.setColumn(literalright);
+			:}
+			|REAL_LITERAL:literal
+			{:
+				RESULT = new DoubleLiteral(literal);
+				RESULT.setLine(literalleft);
+				RESULT.setColumn(literalright);
+			:}
+			|STRING_LITERAL:literal
+			{:
+				RESULT = new StringLiteral(literal);
+				RESULT.setLine(literalleft);
+				RESULT.setColumn(literalright);
+			:}
+			|NIL:literal
+			{:
+				RESULT = new NullLiteral();
+				RESULT.setLine(literalleft);
+				RESULT.setColumn(literalright);
+			:}
+			|TRUE:literal
+			{:
+				RESULT = new TrueLiteral();
+				RESULT.setLine(literalleft);
+				RESULT.setColumn(literalright);
+			:}
+			|FALSE:literal
+			{:
+				RESULT = new FalseLiteral();
+				RESULT.setLine(literalleft);
+				RESULT.setColumn(literalright);
+			:}
 			;
 
-idlist ::= 
+idlist	::= 
+			| ID:id
+			{:
+				RESULT = new ArrayList<String>();
+				RESULT.add(id);
+			:}
+			| idlist:idl COMMA ID:id
+			{:
+				idl.add(id);
+				RESULT = idl;
+			:};
+
+/*idlist ::= 
 			|ID idList
+			{:
+				RESULT = new ArrayList<String>();
+			:}
 			;
 
 
 idList ::= 
             |COMMA ID idList
-            ;
+            ;*/
 
 ifstmt ::= IF LEFT_PARENTHESIS expr LEFT_PARENTHESIS stmt elsestmt
 			;
 
 
 elsestmt ::= ELSE stmt
-			|  %prec IF 
+			|  %prec IF
 			;
 
 whilestmt ::= WHILE LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt
