@@ -31,6 +31,8 @@ public interface ASTVisitor {
 	void visit(IfStatement node) throws ASTVisitorException;
 	void visit(WhileStatement node) throws ASTVisitorException;
 	void visit(ForStatement node) throws ASTVisitorException;
+	void visit(BreakStatement node) throws ASTVisitorException;
+	void visit(ContinueStatement node) throws ASTVisitorException;
 	void visit(ReturnStatement node) throws ASTVisitorException;
 	void visit(ObjectDefinition node) throws ASTVisitorException;
 	void visit(IndexedElement node) throws ASTVisitorException;

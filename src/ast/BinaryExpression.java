@@ -7,9 +7,6 @@ public class BinaryExpression extends Expression {
 	private Expression _expression2;
 	
 	public BinaryExpression(Operator operator, Expression expression1, Expression expression2) {
-		/*System.out.println("Expr1:   "+expression1);
-		System.out.println("Expr2:   "+expression2);
-		System.out.println("Operator:   "+operator);*/
 		this._operator = operator;
 		this._expression1 = expression1;
 		this._expression2 = expression2;

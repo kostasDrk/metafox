@@ -6,6 +6,8 @@ import ast.Statement;
 import ast.IfStatement;
 import ast.WhileStatement;
 import ast.ForStatement;
+import ast.BreakStatement;
+import ast.ContinueStatement;
 import ast.ReturnStatement;
 import ast.Expression;
 import ast.ExpressionStatement;
@@ -205,8 +207,18 @@ stmt ::=	 expr:ex SEMICOLON
 			{:
 				RESULT = retst;
 			:}
-			|BREAK SEMICOLON
-			|CONTINUE SEMICOLON
+			|BREAK:br SEMICOLON
+			{:
+				RESULT = new BreakStatement();
+				RESULT.setLine(brleft);
+				RESULT.setColumn(brright);
+			:}
+			|CONTINUE:cont SEMICOLON
+			{:
+				RESULT = new ContinueStatement();
+				RESULT.setLine(contleft);
+				RESULT.setColumn(contright);
+			:}
 			|block:bl
 			{:
 				RESULT = bl;
@@ -227,9 +239,6 @@ expr ::=	assignexpr:assignex
 				RESULT = new BinaryExpression(oper, ex1, ex2);
 				RESULT.setLine(ex1left);
 				RESULT.setColumn(ex1right);
-				/*System.out.println("Expression1: "+ide1.getIdentifier());
-				System.out.println("Operator: "+oper);
-				System.out.println("Expression2: "+ide2.getIdentifier());*/
 			:}
 			|term:trm
 			{:
@@ -308,7 +317,6 @@ term ::=	 LEFT_PARENTHESIS expr:ex RIGHT_PARENTHESIS
 				RESULT = new UnaryExpression(Operator.MINUS, ex, null);
 				RESULT.setLine(exleft);
 				RESULT.setColumn(exright);
-				//System.out.println("Unary: "+ex);
 			:}
 			 %prec UMINUS
 			|NOT expr:ex
@@ -499,7 +507,10 @@ elist 	   	::=
 
 objectdef ::= OPEN_BLOCK indexedelemlist:indlist CLOSE_BLOCK
 			{:
-				RESULT = new ObjectDefinition(indlist);
+				if(indlist == null)
+					RESULT = new ObjectDefinition();
+				else
+					RESULT = new ObjectDefinition(indlist);
 				RESULT.setLine(indlistleft);
 				RESULT.setColumn(indlistright);
 			:};
@@ -615,7 +626,7 @@ idlist	::=
 			:};
 
 
-ifstmt ::= IF LEFT_PARENTHESIS expr:ex LEFT_PARENTHESIS stmt:st elsestmt:elsest
+ifstmt ::= IF LEFT_PARENTHESIS expr:ex RIGHT_PARENTHESIS stmt:st elsestmt:elsest
 			{:
 				RESULT = new IfStatement(ex, st, elsest);
 				RESULT.setLine(exleft);

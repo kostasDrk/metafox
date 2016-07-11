@@ -5,6 +5,8 @@ import ast.Statement;
 import ast.IfStatement;
 import ast.WhileStatement;
 import ast.ForStatement;
+import ast.BreakStatement;
+import ast.ContinueStatement;
 import ast.ReturnStatement;
 import ast.Expression;
 import ast.ExpressionStatement;
@@ -40,7 +42,7 @@ import ast.ObjectDefinition;
 import ast.IndexedElement;
 
 public class PrintASTVisitor implements ASTVisitor{
-	
+
     private void semicolon(){
     	System.out.println(";");
     }
@@ -165,9 +167,11 @@ public class PrintASTVisitor implements ASTVisitor{
     @Override
     public void visit(ObjectDefinition node) throws ASTVisitorException {
     	System.out.print("{");
-    	for(IndexedElement indexed : node.getIndexedElementList()){
-    		indexed.accept(this);
-    		System.out.print(",\n\t");
+    	if(!node.getIndexedElementList().isEmpty()){
+	    	for(IndexedElement indexed : node.getIndexedElementList()){
+	    		indexed.accept(this);
+	    		System.out.print(",\n\t");
+	    	}
     	}
     	System.out.print("}");
     }
@@ -251,7 +255,8 @@ public class PrintASTVisitor implements ASTVisitor{
     	node.getExpression().accept(this);
     	System.out.println(")");
     	node.getStatement().accept(this);
-    	node.getElseStatement().accept(this);
+    	if(node.getElseStatement() != null)
+    		node.getElseStatement().accept(this);
     }
 
     @Override
@@ -278,6 +283,16 @@ public class PrintASTVisitor implements ASTVisitor{
     	}
     	System.out.print(")");
     	node.getStatement().accept(this);
+    }
+
+    @Override
+    public void visit(BreakStatement node) throws ASTVisitorException {
+    	System.out.println("break;");
+    }
+
+    @Override
+    public void visit(ContinueStatement node) throws ASTVisitorException {
+    	System.out.println("continue;");
     }
 
     @Override
