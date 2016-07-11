@@ -10,12 +10,13 @@ public class MetafoxCompiler {
         }
         else {
             try {
-                MyLexer mlx = new MyLexer(new FileReader(args[0]));
-                parser p = new parser( mlx );
+                parser p = new parser( new MyLexer(new FileReader(args[0])) );
 
-                ASTNode compUnit = (ASTNode) p.parse().value;
-                //ASTVisitor printVisitor = new PrintASTVisitor();
-                System.out.println("Parse ok");
+                ASTNode program = (ASTNode) p.parse().value;
+                
+                ASTVisitor printVisitor = new PrintASTVisitor();
+                program.accept(printVisitor);
+                System.out.println("\n\n**Parse ok**\n\n");
             }
             catch(Exception e) {
                 System.out.println(e.getMessage());

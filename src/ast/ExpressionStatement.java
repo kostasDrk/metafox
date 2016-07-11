@@ -2,18 +2,18 @@ package ast;
 
 public class ExpressionStatement extends Statement {
     
-    private Expression _expr;
+    private Expression _expression;
 
-    public ExpressionStatement(Expression expr) {
-        this._expr = expr;
+    public ExpressionStatement(Expression expression) {
+        this._expression = expression;
     }
 
-    public Expression getExpr() {
-        return _expr;
+    public Expression getExpression() {
+        return _expression;
     }
 
-    public void setExpr(Expression expr) {
-        this._expr = expr;
+    public void setExpression(Expression expression) {
+        this._expression = expression;
     }
     
     @Override

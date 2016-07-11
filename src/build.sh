@@ -12,5 +12,7 @@ echo "[+] Compiling Lexer"
 javac MyLexer.java
 echo "[+] Compiling AST package"
 javac ast/*.java
+echo "[+] Compiling ASTVisitor"
+javac PrintASTVisitor.java
 echo "[+] Compilerception"
 javac MetafoxCompiler.java
