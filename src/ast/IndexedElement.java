@@ -1,28 +1,15 @@
 package ast;
 
-public class BinaryExpression extends Expression {
+public class IndexedElement extends ASTNode {
 
-	private Operator _operator;
 	private Expression _expression1;
 	private Expression _expression2;
 	
-	public BinaryExpression(Operator operator, Expression expression1, Expression expression2) {
-		/*System.out.println("Expr1:   "+expression1);
-		System.out.println("Expr2:   "+expression2);
-		System.out.println("Operator:   "+operator);*/
-		this._operator = operator;
+	public IndexedElement(Expression expression1, Expression expression2) {
 		this._expression1 = expression1;
 		this._expression2 = expression2;
 	}
 	
-	public Operator getOperator() {
-		return _operator;
-	}
-
-	public void setOperator(Operator operator) {
-		this._operator = operator;
-	}
-
 	public Expression getExpression1() {
 		return _expression1;
 	}

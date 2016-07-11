@@ -3,12 +3,17 @@ import java.util.ArrayList;
 import java.util.List;
 import ast.Program;
 import ast.Statement;
+import ast.IfStatement;
+import ast.WhileStatement;
+import ast.ForStatement;
+import ast.ReturnStatement;
 import ast.Expression;
 import ast.ExpressionStatement;
 import ast.AssignmentExpression;
 import ast.BinaryExpression;
 import ast.UnaryExpression;
 import ast.TermExpression;
+import ast.TermExpressionStmt;
 import ast.IdentifierExpression;
 import ast.Operator;
 import ast.Primary;
@@ -31,6 +36,9 @@ import ast.MethodCall;
 import ast.Block;
 import ast.ArrayDef;
 import ast.FunctionDef;
+import ast.FunctionDefExpression;
+import ast.ObjectDefinition;
+import ast.IndexedElement;
 
 
 parser code
@@ -104,12 +112,12 @@ non terminal ArrayList<Statement> stmtlist;
 non terminal Statement stmt;
 non terminal Expression expr;
 non terminal ArrayList<Expression> elist;
-non terminal ifstmt;
-non terminal elsestmt;
-non terminal whilestmt;
-non terminal forstmt;
-non terminal returnstmt;
-non terminal returnStmt;
+non terminal IfStatement ifstmt;
+non terminal Statement elsestmt;
+non terminal WhileStatement whilestmt;
+non terminal ForStatement forstmt;
+non terminal ReturnStatement returnstmt;
+non terminal ReturnStatement returnStmt;
 non terminal Block block;
 non terminal FunctionDef funcdef;
 non terminal String functionName;
@@ -125,9 +133,9 @@ non terminal Member member;
 non terminal CallSuffix callsuffix;
 non terminal NormCall normcall;
 non terminal MethodCall methodcall;
-non terminal objectdef;
-non terminal indexed;
-non terminal indexedelem;
+non terminal ObjectDefinition objectdef;
+non terminal IndexedElement indexedelem;
+non terminal ArrayList<IndexedElement> indexedelemlist;
 non terminal ArrayList<String> idlist;
 // non terminal idList;
 
@@ -181,25 +189,52 @@ stmt ::=	 expr:ex SEMICOLON
 				RESULT.setLine(exleft);
 				RESULT.setColumn(exright);
 			:}
-			|ifstmt
-			|whilestmt
-			|forstmt
-			|returnstmt
+			|ifstmt:ifst
+			{:
+				RESULT = ifst;
+			:}
+			|whilestmt:whilest
+			{:
+				RESULT = whilest;
+			:}
+			|forstmt:forst
+			{:
+				RESULT = forst;
+			:}
+			|returnstmt:retst
+			{:
+				RESULT = retst;
+			:}
 			|BREAK SEMICOLON
 			|CONTINUE SEMICOLON
-			|block
-			|funcdef
+			|block:bl
+			{:
+				RESULT = bl;
+			:}
+			|funcdef:fdef
+			{:
+				RESULT = fdef;
+			:}
 			|SEMICOLON
 			;
 
-expr ::=	assignexpr
+expr ::=	assignexpr:assignex
+			{:
+				RESULT = assignex;
+			:}
 			|expr:ex1 op:oper expr:ex2
 			{:
 				RESULT = new BinaryExpression(oper, ex1, ex2);
 				RESULT.setLine(ex1left);
 				RESULT.setColumn(ex1right);
+				/*System.out.println("Expression1: "+ide1.getIdentifier());
+				System.out.println("Operator: "+oper);
+				System.out.println("Expression2: "+ide2.getIdentifier());*/
 			:}
-			|term
+			|term:trm
+			{:
+				RESULT = trm;
+			:}
 			;
 
 
@@ -261,15 +296,19 @@ op ::=       PLUS
 			:}
             ;
 
-term ::=	 LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
+term ::=	 LEFT_PARENTHESIS expr:ex RIGHT_PARENTHESIS
 			{:
-				/**/
+				//RESULT = ex;
+				RESULT = new TermExpressionStmt(ex);
+				RESULT.setLine(exleft);
+				RESULT.setColumn(exright);
 			:}
 			|MINUS expr:ex
 			{:
 				RESULT = new UnaryExpression(Operator.MINUS, ex, null);
 				RESULT.setLine(exleft);
 				RESULT.setColumn(exright);
+				//System.out.println("Unary: "+ex);
 			:}
 			 %prec UMINUS
 			|NOT expr:ex
@@ -278,9 +317,6 @@ term ::=	 LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
 				RESULT.setLine(exleft);
 				RESULT.setColumn(exright);
 			:}
-			|QUASI_OPEN expr QUASI_CLOSE
-			|QUASI_ESC expr
-			|QUASI_EXEC expr
 			|PLUS_PLUS lvalue:lval
 			{:
 				RESULT = new UnaryExpression(Operator.PLUS_PLUS, null, lval);
@@ -305,8 +341,13 @@ term ::=	 LEFT_PARENTHESIS expr RIGHT_PARENTHESIS
 				RESULT.setLine(lvalleft);
 				RESULT.setColumn(lvalright);
 			:}
-			|primary
-			;
+			|QUASI_OPEN expr QUASI_CLOSE
+			|QUASI_ESC expr
+			|QUASI_EXEC expr
+			|primary:prim
+			{:
+				RESULT = prim;
+			:};
 
 assignexpr ::= 	lvalue:lval ASSIGN expr:ex
 			{:
@@ -317,12 +358,31 @@ assignexpr ::= 	lvalue:lval ASSIGN expr:ex
 			;
 
 
-primary ::= lvalue
-			|call
-			|objectdef
-			|arraydef
-			|LEFT_PARENTHESIS funcdef RIGHT_PARENTHESIS
-			|const
+primary ::= lvalue:lval{:
+				RESULT = lval;
+			:}
+			|call:cl
+			{:
+				RESULT = cl;
+			:}
+			|objectdef:objdef
+			{:
+				RESULT = objdef;
+			:}
+			|arraydef:arrdef
+			{:
+				RESULT = arrdef;
+			:}
+			|LEFT_PARENTHESIS funcdef:fdef RIGHT_PARENTHESIS
+			{:
+				RESULT = new FunctionDefExpression(fdef);
+				RESULT.setLine(fdefleft);
+				RESULT.setColumn(fdefright);
+			:}
+			|const:con
+			{:
+				RESULT = con;
+			:}
 			;
 
 lvalue ::=   ID:id
@@ -337,7 +397,10 @@ lvalue ::=   ID:id
 				RESULT.setLine(idleft);
 				RESULT.setColumn(idright);
 			:}
-			|member
+			|member:memb
+			{:
+				RESULT = memb;
+			:}
 			;
 
 
@@ -345,7 +408,7 @@ member ::= lvalue:lval DOT ID:id
 			{:
 				RESULT = new Member(lval, id, null, null);
 				RESULT.setLine(lvalleft);
-				RESULT.setColumn(lvalright);				
+				RESULT.setColumn(lvalright);
 			:}
 			|lvalue:lval LEFT_BRACKET expr:ex RIGHT_BRACKET
 			{:
@@ -357,7 +420,7 @@ member ::= lvalue:lval DOT ID:id
 			{:
 				RESULT = new Member(null, id, cl, null);
 				RESULT.setLine(clleft);
-				RESULT.setColumn(clright);				
+				RESULT.setColumn(clright);
 			:}
 			|call:cl LEFT_BRACKET expr:ex RIGHT_BRACKET
 			{:
@@ -391,8 +454,14 @@ call   ::= call:cl LEFT_PARENTHESIS elist:el RIGHT_PARENTHESIS
 
 
 
-callsuffix ::= normcall
-			|methodcall
+callsuffix ::= normcall:normcl
+			{:
+				RESULT = normcl;
+			:}
+			|methodcall:methcl
+			{:
+				RESULT = methcl;
+			:}
 			;
 
 
@@ -428,16 +497,32 @@ elist 	   	::=
 		  	:};
 
 
-objectdef ::= OPEN_BLOCK indexed:ind CLOSE_BLOCK
-		  ;
+objectdef ::= OPEN_BLOCK indexedelemlist:indlist CLOSE_BLOCK
+			{:
+				RESULT = new ObjectDefinition(indlist);
+				RESULT.setLine(indlistleft);
+				RESULT.setColumn(indlistright);
+			:};
 
-indexed ::= 
-		  | expr:ex1 COLON expr:ex2	indexedelem:indelem
-		  ;
 
-indexedelem ::=
-			|COMMA expr:ex1 COLON expr:ex2 indexedelem:indelem
-			;	  
+indexedelem ::= expr:ex1 COLON expr:ex2
+			{:
+				RESULT = new IndexedElement(ex1, ex2);
+				RESULT.setLine(ex1left);
+				RESULT.setColumn(ex1right);
+			:};
+
+indexedelemlist ::=
+			| indexedelem:ind
+			{:
+				RESULT = new ArrayList<IndexedElement>();
+				RESULT.add(ind);
+			:}
+			| indexedelemlist:indel COMMA indexedelem:ind
+			{:
+				indel.add(ind);
+				RESULT = indel;
+			:};	  
 
 
 arraydef::= LEFT_BRACKET elist:el RIGHT_BRACKET
@@ -529,38 +614,60 @@ idlist	::=
 				RESULT = idl;
 			:};
 
-/*idlist ::= 
-			|ID idList
+
+ifstmt ::= IF LEFT_PARENTHESIS expr:ex LEFT_PARENTHESIS stmt:st elsestmt:elsest
 			{:
-				RESULT = new ArrayList<String>();
+				RESULT = new IfStatement(ex, st, elsest);
+				RESULT.setLine(exleft);
+				RESULT.setColumn(exright);
 			:}
 			;
 
 
-idList ::= 
-            |COMMA ID idList
-            ;*/
+elsestmt ::= ELSE stmt:st
+			{:
+				RESULT = st;
+			:}
+			|  
+			{:
+				RESULT = null;
+			:}
+			%prec IF
+			;
 
-ifstmt ::= IF LEFT_PARENTHESIS expr LEFT_PARENTHESIS stmt elsestmt
+whilestmt ::= WHILE LEFT_PARENTHESIS expr:ex RIGHT_PARENTHESIS stmt:st
+			{:
+				RESULT = new WhileStatement(ex, st);
+				RESULT.setLine(exleft);
+				RESULT.setColumn(exright);
+			:}
 			;
 
 
-elsestmt ::= ELSE stmt
-			|  %prec IF
-			;
-
-whilestmt ::= WHILE LEFT_PARENTHESIS expr RIGHT_PARENTHESIS stmt
-			;
-
-
-forstmt ::=  FOR LEFT_PARENTHESIS elist SEMICOLON expr SEMICOLON elist RIGHT_PARENTHESIS stmt
+forstmt ::=  FOR LEFT_PARENTHESIS elist:el1 SEMICOLON expr:ex SEMICOLON elist:el2 RIGHT_PARENTHESIS stmt:st
+			{:
+				RESULT = new ForStatement(el1, ex, el2, st);
+				RESULT.setLine(el1left);
+				RESULT.setColumn(el1right);
+			:}
 			;
 
 
-returnstmt ::= RETURN returnStmt SEMICOLON
+returnstmt ::= RETURN returnStmt:retst SEMICOLON
+			{:
+				RESULT = retst;
+			:}
 			;
 
 
 returnStmt  ::= 
-			| expr
+			{:
+				RESULT = new ReturnStatement();
+			:}
+			| expr:ex
+			{:
+				RESULT = new ReturnStatement(ex);
+				RESULT.setLine(exleft);
+				RESULT.setColumn(exright);
+			:}
 			;

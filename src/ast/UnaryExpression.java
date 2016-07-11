@@ -7,6 +7,7 @@ public class UnaryExpression extends TermExpression {
 	private Lvalue _lvalue;
 	
 	public UnaryExpression(Operator operator, Expression expression, Lvalue lvalue) { 
+		// super(expression);
 		this._operator = operator;
 		this._expression = expression;
 		this._lvalue = lvalue;

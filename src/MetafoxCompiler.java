@@ -14,7 +14,7 @@ public class MetafoxCompiler {
                 parser p = new parser( mlx );
 
                 ASTNode compUnit = (ASTNode) p.parse().value;
-                // Object result = (Object) p.parse().value;
+                //ASTVisitor printVisitor = new PrintASTVisitor();
                 System.out.println("Parse ok");
             }
             catch(Exception e) {

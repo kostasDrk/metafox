@@ -6,12 +6,12 @@ student1 = {x:5,
 	    };
 
 
-print(student1.bag.brand);
+print(5, 9);
 
 a = 8;
-b = a+1;
-
 function justAfunc(a, s){
    print(a);
    return a%s;
 }
+
+b = a + (z + y);
