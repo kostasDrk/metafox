@@ -40,21 +40,7 @@ import ast.ObjectDefinition;
 import ast.IndexedElement;
 
 public class PrintASTVisitor implements ASTVisitor{
-	private int margin = 0; //how much white space ('\t') preceding in each line
-    
-    private void format() { //add white space to have a nice format
-        for(int i = 0; i < margin; i++)
-            System.out.print("\t");
-    }
-    
-    private void addmargin() { //adds more white space to the end of a printed line
-        margin++;
-    }
-    
-    private void submargin() { //subtracts white space
-        margin--;
-    }
-
+	
     private void semicolon(){
     	System.out.println(";");
     }
