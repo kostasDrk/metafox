@@ -54,8 +54,8 @@ realConst = [0-9]+\.[0-9]+
 // keyword = "and"|"not"|"or"|"true"|"false"|"nil"|"if"|"else"|"while"|"for"|"function"|"return"|"break"|"continue"
 // punctuation = "{"|"}"|"["|"]"|"("|")"|";"|","|":"|"::"|"."|".."
 // operator = ">"|"<"|">="|"<="|"="|"+"|"-"|"*"|"/"|"%"|"=="|"!="|"++"|"--"|".!"|".~"
-whiteSpace = [ \t\n]+
 LineTerminator = \r|\n|\r\n
+whiteSpace     = {LineTerminator} | [ \t\f] | " "
 %state STRING
 %state COMMENT
 %state LINECOMMENT
@@ -121,13 +121,6 @@ LineTerminator = \r|\n|\r\n
   "--"  { return symbol(sym.MINUS_MINUS);}
   "!"   { return symbol(sym.NOT);}
 
-
- //{keyword}			   {System.out.println("keyword: "+ yytext() + " in line "+ (yyline + 1)); }
- //{identifier}	       {System.out.println("identifier: "+ yytext() + " in line "+ (yyline + 1)); }
- //{intConst}			   {System.out.println("intConst: "+ yytext() + " in line "+ (yyline + 1)); }
- //{realConst}		   {System.out.println("realConst: "+ yytext() + " in line "+ (yyline + 1)); }
- //{punctuation}	       {System.out.println("punctuation: "+ yytext() + " in line "+ (yyline + 1)); }
- //{operator}			   {System.out.println("operator: "+ yytext() + " in line "+ (yyline + 1)); }
  {whiteSpace}		   { }
  
  /*String mode*/
