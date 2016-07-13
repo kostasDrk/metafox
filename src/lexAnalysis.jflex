@@ -53,8 +53,8 @@ letter         = [A-Za-z]
 intConst       = [0-9]+
 identifier     = {letter}+({letter}|{intConst}|"_")*
 realConst      = [0-9]+\.[0-9]+
-whiteSpace     = [ \t\n]+
 LineTerminator = \r|\n|\r\n
+whiteSpace     = {LineTerminator} | [ \t\f] | " "
 %state STRING
 %state COMMENT
 %state LINECOMMENT
