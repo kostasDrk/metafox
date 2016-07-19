@@ -1,8 +1,9 @@
-package symbolTable;
+package symbolTable.entries;
 
 public enum SymTableEntryType {
 
     GLOBAL("GLOBAL"),
+    LOCAL("LOCAL"),
     FORMAL("FORMAL"),
     USER_FUNCTION("USER_FUNCTION"),
     LIBRARY_FUNCTION("LIBRARY_FUNCTION"),
