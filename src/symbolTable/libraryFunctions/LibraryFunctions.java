@@ -1,4 +1,4 @@
-package symbolTable;
+package symbolTable.libraryFunctions;
 
 public enum LibraryFunctions {
 
