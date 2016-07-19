@@ -1,25 +1,22 @@
-package symbolTable;
+package symbolTable.entries;
 
 public abstract class ASymTableEntry {
 
     private boolean _isActive;
     private final String _name;
     private final int _scope;
-    private final SymTableEntryType _type;
     private ASymTableEntry _nextScopeListNode;
 
     /**
-     * Constructor
+     * ASymTableEntry Constructor
      *
      * @param name
      * @param scope
-     * @param type
      */
-    public ASymTableEntry(SymTableEntryType type, String name, int scope) {
+    protected ASymTableEntry(String name, int scope) {
         this._isActive = true;
         this._name = name;
         this._scope = scope;
-        this._type = type;
         this._nextScopeListNode = null;
     }
 
@@ -33,10 +30,6 @@ public abstract class ASymTableEntry {
 
     public int getScope() {
         return _scope;
-    }
-
-    public SymTableEntryType getType() {
-        return _type;
     }
 
     public ASymTableEntry getNextScopeListNode() {
