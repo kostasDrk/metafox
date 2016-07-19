@@ -17,7 +17,9 @@ echo "[+] Compiling AST package"
 javac ast/*.java
 
 echo "[+] Compiling SymTable"
-javac symbol/*.java
+javac symbolTable/libraryFunctions/*.java
+javac symbolTable/entries/*.java
+javac symbolTable/*.java
 
 echo "[+] Compiling ASTVisitor"
 javac PrintASTVisitor.java

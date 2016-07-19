@@ -10,4 +10,6 @@ rm parser.java
 
 rm sym.java
 
-rm symbol/*.class
+rm symbolTable/*class
+rm symbolTable/libraryFunctions/*class
+rm symbolTable/entries/*class

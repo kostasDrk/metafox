@@ -5,7 +5,7 @@
  */
 package symTable;
 
-import symbolTable.entries.LibraryFunctions;
+import symbolTable.libraryFunctions.LibraryFunctions;
 
 import symbolTable.entries.SymTableEntryType;
 import symbolTable.entries.ASymTableEntry;
