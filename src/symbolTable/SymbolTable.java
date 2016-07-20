@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package symTable;
+package symbolTable;
 
 import symbolTable.libraryFunctions.LibraryFunctions;
 
@@ -24,10 +24,13 @@ public class SymbolTable {
 
     private static final int GLOBAL_SCOPE = 0;
 
-    private Hashtable<Integer, ASymTableEntry> _scopeLists = new Hashtable<Integer, ASymTableEntry>();
-    private Hashtable<String, ArrayList<ASymTableEntry>> _table = new Hashtable<String, ArrayList<ASymTableEntry>>();
+    private final HashMap<Integer, ASymTableEntry> _scopeLists;
+    private final HashMap<String, ArrayList<ASymTableEntry>> _table;
 
     public SymbolTable() {
+        _scopeLists = new HashMap<>();
+        _table = new HashMap<>();
+
         //Insert all the library function in symbol table.
         for (LibraryFunctions libraryFunction : LibraryFunctions.values()) {
             insertSymbolTable(new LibraryFunctionEntry(libraryFunction.name()));
@@ -137,15 +140,15 @@ public class SymbolTable {
             ArrayList<ASymTableEntry> ASymTableEntryList = new ArrayList<ASymTableEntry>();
             ASymTableEntryList.add(_newEntry);
             _table.put(_newEntry.getName(), ASymTableEntryList);
-        
+
         } else {
             _table.get(_newEntry.getName()).add(_newEntry);
 
         }
-        
+
         if (_scopeLists.get(_newEntry.getScope()) == null) {
             _scopeLists.put(_newEntry.getScope(), _newEntry);
-            
+
         } else {
             ASymTableEntry tempElement = _scopeLists.get(_newEntry.getScope());
             while (tempElement.getNextScopeListNode() != null) {
