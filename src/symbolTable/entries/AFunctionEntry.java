@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public abstract class AFunctionEntry extends ASymTableEntry {
 
-    private final ArrayList<FormalVariableEntry> _arguments;
+    protected ArrayList<FormalVariableEntry> _arguments;
 
     /**
      * ASymTableEntry Constructor
