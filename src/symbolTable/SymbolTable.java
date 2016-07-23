@@ -5,6 +5,7 @@
  */
 package symbolTable;
 
+import ast.ASTVisitorException;
 import symbolTable.libraryFunctions.LibraryFunctions;
 
 import symbolTable.entries.SymTableEntryType;
@@ -38,7 +39,7 @@ public class SymbolTable {
 
     }
 
-    public ASymTableEntry lookupGlobalScope(String name, Integer line) throws Exception {
+    public ASymTableEntry lookupGlobalScope(String name, Integer line) throws ASTVisitorException {
 
         ASymTableEntry firstElement = _scopeLists.get(0);
 
@@ -49,13 +50,13 @@ public class SymbolTable {
                 firstElement = firstElement.getNextScopeListNode();
             }
         }
-        throw new Exception("Global variable: " + name + " doesn't exist" + " in line " + line);
+        throw new ASTVisitorException("Global variable: " + name + " doesn't exist" + " in line " + line);
 
     }
 
     /*In this function we look up in Symbol Table for formal and function definition
      */
-    public void lookUpLocalScope(String name, Integer scope, SymTableEntryType type, Integer line) throws Exception {
+    public void lookUpLocalScope(String name, Integer scope, SymTableEntryType type, Integer line) throws ASTVisitorException {
 
         ASymTableEntry tempElement = _scopeLists.get(scope);
         while (tempElement != null) {
@@ -66,10 +67,10 @@ public class SymbolTable {
             }
         }
         if (LibraryFunctions.isLibraryFunction(name)) {
-            throw new Exception("Error: Collision with library function " + name + " in line " + line);
+            throw new ASTVisitorException("Error: Collision with library function " + name + " in line " + line);
         }
         if (tempElement != null) {
-            throw new Exception("Error: " + name + " in line " + line + " is " + tempElement.getClass());
+            throw new ASTVisitorException("Error: " + name + " in line " + line + " is " + tempElement.getClass());
 
         }
 
@@ -87,7 +88,7 @@ public class SymbolTable {
 
     }
 
-    public ASymTableEntry lookUpVariable(String name, Integer scope, Integer line) throws Exception {
+    public ASymTableEntry lookUpVariable(String name, Integer scope, Integer line) throws ASTVisitorException {
 
         ASymTableEntry element = null;
         Boolean foundUserFunction = false;
@@ -128,7 +129,7 @@ public class SymbolTable {
                 && foundUserFunction
                 && scope != element.getScope()
                 && element instanceof UserFunctionEntry) {
-            throw new Exception("Cannot access symbol: " + name + " in line " + line + " in scope " + scope);
+            throw new ASTVisitorException("Cannot access symbol: " + name + " in line " + line + " in scope " + scope);
         }
 
         return element;
