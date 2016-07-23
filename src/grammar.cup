@@ -454,7 +454,10 @@ call   ::= call:cl LEFT_PARENTHESIS elist:el RIGHT_PARENTHESIS
 			:}
 			|LEFT_PARENTHESIS funcdef:fdef RIGHT_PARENTHESIS LEFT_PARENTHESIS elist:el RIGHT_PARENTHESIS
 			{:
-				RESULT = new AnonymousFunctionCall(fdef, el);
+				if(el == null)
+					RESULT = new AnonymousFunctionCall(fdef);
+				else
+					RESULT = new AnonymousFunctionCall(fdef, el);
 				RESULT.setLine(fdefleft);
 				RESULT.setColumn(fdefright);
 			:}
@@ -476,7 +479,10 @@ callsuffix ::= normcall:normcl
 
 normcall ::= LEFT_PARENTHESIS elist:el RIGHT_PARENTHESIS
 			{:
-				RESULT = new NormCall(el);
+				if(el == null)
+					RESULT = new NormCall();
+				else
+					RESULT = new NormCall(el);
 				RESULT.setLine(elleft);
 				RESULT.setColumn(elright);
 			:}
@@ -485,7 +491,10 @@ normcall ::= LEFT_PARENTHESIS elist:el RIGHT_PARENTHESIS
 
 methodcall ::=  DOUBLE_DOT ID:id LEFT_PARENTHESIS elist:el RIGHT_PARENTHESIS
 			{:
-				RESULT = new MethodCall(id, el);
+				if(el == null)
+					RESULT = new MethodCall(id);
+				else
+					RESULT = new MethodCall(id, el);
 				RESULT.setLine(idleft);
 				RESULT.setColumn(idright);
 			:}
@@ -555,7 +564,10 @@ block ::=   OPEN_BLOCK stmtlist:stlist CLOSE_BLOCK
 
 funcdef ::= FUNCTION  functionName:funcName LEFT_PARENTHESIS idlist:idl RIGHT_PARENTHESIS block:bl
 			{:
-				RESULT = new FunctionDef(funcName, idl, bl);
+				if(idl == null)
+					RESULT = new FunctionDef(funcName, bl);
+				else
+					RESULT = new FunctionDef(funcName, idl, bl);
 				RESULT.setLine(funcNameleft);
 				RESULT.setColumn(funcNameright);
 			:}
