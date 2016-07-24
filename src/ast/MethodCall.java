@@ -11,6 +11,10 @@ public class MethodCall extends CallSuffix {
 		this._expressionList = expressionList;
 	}
 	
+	public MethodCall(String identifier){
+		this._identifier = identifier;
+		this._expressionList = new ArrayList<Expression>();
+	}
 
 	public String getIdentifier(){
 		return this._identifier;

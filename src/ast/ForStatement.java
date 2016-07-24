@@ -10,9 +10,17 @@ public class ForStatement extends Statement{
 	private Statement _statement;
 
 	public ForStatement(ArrayList<Expression> expressionList1, Expression expression, ArrayList<Expression> expressionList2, Statement statement){
-		this._expressionList1 = expressionList1;
+		if(expressionList1 == null)
+			this._expressionList1 = new ArrayList<Expression>();
+		else
+			this._expressionList1 = expressionList1;
+		
 		this._expression = expression;
-		this._expressionList2 = expressionList2;
+
+		if(expressionList2 == null)
+			this._expressionList2 = new ArrayList<Expression>();
+		else
+			this._expressionList2 = expressionList2;
 		this._statement = statement;
 	}
 

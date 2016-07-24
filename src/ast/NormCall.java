@@ -9,6 +9,10 @@ public class NormCall extends CallSuffix {
 		this._expressionList = expressionList;
 	}
 
+	public NormCall(){
+		this._expressionList = new ArrayList<Expression>();
+	}
+
 	public ArrayList<Expression> getExpressionList(){
 		return this._expressionList;
 	}

@@ -12,6 +12,11 @@ public class AnonymousFunctionCall extends Call{
 		this._expressionList = expressionList;
 	}
 
+	public AnonymousFunctionCall(FunctionDef funcDef){
+		this._funcDef = funcDef;
+		this._expressionList = new ArrayList<Expression>();
+	}
+
 	public FunctionDef getFunctionDef(){
 		return this._funcDef;
 	}

@@ -14,6 +14,12 @@ public class FunctionDef extends Statement {
 		this._body = body;
 	}
 
+	public FunctionDef(String funcName, Block body){
+		this._funcName = funcName;
+		this._arguments = new ArrayList<String>();
+		this._body = body;
+	}
+
 	public String getFuncName(){
 		return this._funcName;
 	}

@@ -15,3 +15,12 @@ function justAfunc(a, s){
 }
 
 b = a + (z + y);
+
+print();
+myFunction();
+
+student1..grade();
+
+for(; i < 40 ;){
+    print(i);
+}
