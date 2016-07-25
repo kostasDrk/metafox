@@ -564,10 +564,7 @@ block ::=   OPEN_BLOCK stmtlist:stlist CLOSE_BLOCK
 
 funcdef ::= FUNCTION  functionName:funcName LEFT_PARENTHESIS idlist:idl RIGHT_PARENTHESIS block:bl
 			{:
-				if(idl == null)
-					RESULT = new FunctionDef(funcName, bl);
-				else
-					RESULT = new FunctionDef(funcName, idl, bl);
+				RESULT = new FunctionDef(funcName, idl, bl);
 				RESULT.setLine(funcNameleft);
 				RESULT.setColumn(funcNameright);
 			:}
@@ -580,7 +577,9 @@ funcdef ::= FUNCTION  functionName:funcName LEFT_PARENTHESIS idlist:idl RIGHT_PA
 			;
 
 
-functionName::= 
+functionName::=         {:
+				RESULT = "#ANONYMOUS#_";
+                        :}
 			|ID:id
 			{:
 				RESULT = id;
@@ -625,7 +624,9 @@ const ::= INTEGER_LITERAL:literal
 			:}
 			;
 
-idlist	::= 
+idlist	::=             {:
+				RESULT = new ArrayList<String>();
+                        :}
 			| ID:id
 			{:
 				RESULT = new ArrayList<String>();

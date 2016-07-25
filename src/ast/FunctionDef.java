@@ -7,16 +7,16 @@ public class FunctionDef extends Statement {
 	private String _funcName;
 	private ArrayList<String> _arguments;
 	private Block _body;
-
+        private static int _anonumousFunctionCounter = 0 ;
+        
 	public FunctionDef(String funcName, ArrayList<String> arguments, Block body){
-		this._funcName = funcName;
+                if(funcName.equals("#ANONYMOUS#_")){
+                    funcName+= _anonumousFunctionCounter;
+                    _anonumousFunctionCounter++;
+                }
+                
+                this._funcName = funcName;
 		this._arguments = arguments;
-		this._body = body;
-	}
-
-	public FunctionDef(String funcName, Block body){
-		this._funcName = funcName;
-		this._arguments = new ArrayList<String>();
 		this._body = body;
 	}
 
