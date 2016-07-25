@@ -8,7 +8,6 @@ package symbolTable;
 import ast.ASTVisitorException;
 import symbolTable.libraryFunctions.LibraryFunctions;
 
-import symbolTable.entries.SymTableEntryType;
 import symbolTable.entries.ASymTableEntry;
 import symbolTable.entries.LibraryFunctionEntry;
 import symbolTable.entries.UserFunctionEntry;
@@ -54,24 +53,18 @@ public final class SymbolTable {
 
     /*In this function we look up in Symbol Table for formal and function definition
      */
-    public void lookUpLocalScope(String name, Integer scope, SymTableEntryType type, Integer line) throws ASTVisitorException {
+    public ASymTableEntry lookUpLocalScope(String name, Integer scope) throws ASTVisitorException {
 
         ASymTableEntry tempElement = _scopeLists.get(scope);
         while (tempElement != null) {
             if (tempElement.getName().equals(name) && tempElement.isActive()) {
                 break;
-            } else {
-                tempElement = tempElement.getNextScopeListNode();
             }
-        }
-        if (LibraryFunctions.isLibraryFunction(name)) {
-            throw new ASTVisitorException("Error: Collision with library function " + name + " in line " + line);
-        }
-        if (tempElement != null) {
-            throw new ASTVisitorException("Error: " + name + " in line " + line + " is " + tempElement.getClass());
 
+            tempElement = tempElement.getNextScopeListNode();
         }
 
+        return tempElement;
     }
 
     public void hide(Integer scope) {

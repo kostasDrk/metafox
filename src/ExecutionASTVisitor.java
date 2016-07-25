@@ -35,13 +35,17 @@ import ast.TrueLiteral;
 import ast.UnaryExpression;
 import ast.WhileStatement;
 import ast.utils.ASTUtils;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import symbolTable.SymbolTable;
 import symbolTable.entries.AFunctionEntry;
 import symbolTable.entries.ASymTableEntry;
+import symbolTable.entries.FormalVariableEntry;
 import symbolTable.entries.GlobalVariableEntry;
 import symbolTable.entries.LocalVariableEntry;
+import symbolTable.entries.UserFunctionEntry;
+import symbolTable.libraryFunctions.LibraryFunctions;
 
 public class ExecutionASTVisitor implements ASTVisitor {
 
@@ -55,6 +59,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     private void exitScopeSpace() {
         System.out.println("ExitScopeSpace");
+        _scope--;
+    }
+
+    private void hiddeScopeSpaceAndExit() {
+        System.out.println("HiddeScopeSpaceAndExit");
+        _symTable.hide(_scope);
         _scope--;
     }
 
@@ -272,7 +282,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         for (Statement stmt : node.getStatementList()) {
             stmt.accept(this);
         }
-        exitScopeSpace();
+        hiddeScopeSpaceAndExit();
     }
 
     @Override
@@ -286,13 +296,57 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public void visit(FunctionDef node) throws ASTVisitorException {
         System.out.println("-FunctionDef");
 
-        //System.out.print(node.getFuncName());
+        String name = node.getFuncName();
+        /*Function Name*/
+        ASymTableEntry symbolTableEntry = _symTable.lookUpLocalScope(name, _scope);
+        boolean isLibraryFunction = LibraryFunctions.isLibraryFunction(name);
+
+        if (symbolTableEntry != null) {
+            boolean isUserFunction = symbolTableEntry instanceof UserFunctionEntry;
+            String msg;
+            if (isUserFunction) {
+                msg = "Redeclaration of User-Function: " + name + ".";
+
+            } else if (isLibraryFunction) {
+                msg = "User-Fuction shadows Library-Function: " + name + ".";
+
+            } else {
+                msg = "User-Fuction already declared as Variable: " + name + ".";
+            }
+            ASTUtils.error(node, msg);
+        } else {
+            if (isLibraryFunction) {
+                String msg = "User-Fuction Shadows Library-Function: " + name + ".";
+                ASTUtils.error(node, msg);
+
+            }
+        }
+
+        /*Function arguments*/
         enterScopeSpace();
-        for (String id : node.getArguments()) {
-            /*code to be add*/
+        ArrayList<FormalVariableEntry> args = new ArrayList(); 
+        for (IdentifierExpression argument : node.getArguments()) {
+            name = argument.getIdentifier();
+            ASymTableEntry entry = _symTable.lookUpLocalScope(name, _scope);
+
+            if (entry != null) {
+                String msg = "Redeclaration of Formal-Argument: " + name + ".";
+                ASTUtils.error(node, msg);
+            }
+
+            if (LibraryFunctions.isLibraryFunction(name)) {
+                String msg = "Formal-Argument shadows Library-Function: " + name + ".";
+                ASTUtils.error(node, msg);
+            }
+            
+            FormalVariableEntry formalArg = new FormalVariableEntry(name, _scope);
+            args.add(formalArg);
         }
         exitScopeSpace();
 
+        ASymTableEntry symEntry = new UserFunctionEntry(node.getFuncName(), args, _scope);
+        _symTable.insertSymbolTable(symbolTableEntry);
+        
         node.getBody().accept(this);
 
     }
