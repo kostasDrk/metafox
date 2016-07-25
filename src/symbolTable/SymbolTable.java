@@ -98,10 +98,10 @@ public class SymbolTable {
         while (tempElement != null && tempScope != -1) {
             while (tempElement != null) {
 
-                if (tempElement.getName().equals(name) && element.isActive()) {
+                if (tempElement.getName().equals(name) && tempElement.isActive()) {
                     element = tempElement;
                     break;
-                } else {
+                } else if (!tempElement.getName().equals(name) && tempElement.isActive()) {
                     if (((tempElement instanceof UserFunctionEntry))
                             && (tempElement.isActive() == true)) {
                         foundUserFunction = true;
@@ -155,7 +155,7 @@ public class SymbolTable {
             while (tempElement.getNextScopeListNode() != null) {
 
                 tempElement = tempElement.getNextScopeListNode();
-            }
+        }
             tempElement.setNextScopeListNode(_newEntry);
         }
 
