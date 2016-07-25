@@ -41,7 +41,6 @@ public abstract class ASymTableEntry {
     }
 
     public void setNextScopeListNode(ASymTableEntry nextScopeListNode) {
-        nextScopeListNode._nextScopeListNode = this._nextScopeListNode;
         this._nextScopeListNode = nextScopeListNode;
     }
 

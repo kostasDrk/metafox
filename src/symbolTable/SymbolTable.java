@@ -138,7 +138,7 @@ public class SymbolTable {
     private void insertSymbolTable(ASymTableEntry _newEntry) {
 
         if (_table.get(_newEntry.getName()) == null) {
-            ArrayList<ASymTableEntry> ASymTableEntryList = new ArrayList<ASymTableEntry>();
+            ArrayList<ASymTableEntry> ASymTableEntryList = new ArrayList<>();
             ASymTableEntryList.add(_newEntry);
             _table.put(_newEntry.getName(), ASymTableEntryList);
 
@@ -147,17 +147,11 @@ public class SymbolTable {
 
         }
 
-        if (_scopeLists.get(_newEntry.getScope()) == null) {
-            _scopeLists.put(_newEntry.getScope(), _newEntry);
-
-        } else {
+        if (_scopeLists.get(_newEntry.getScope()) != null) {
             ASymTableEntry tempElement = _scopeLists.get(_newEntry.getScope());
-            while (tempElement.getNextScopeListNode() != null) {
-
-                tempElement = tempElement.getNextScopeListNode();
+            _newEntry.setNextScopeListNode(tempElement);
+            
         }
-            tempElement.setNextScopeListNode(_newEntry);
-        }
-
+        _scopeLists.put(_newEntry.getScope(), _newEntry);
     }
 }
