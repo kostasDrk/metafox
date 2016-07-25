@@ -345,7 +345,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         exitScopeSpace();
 
         ASymTableEntry symEntry = new UserFunctionEntry(node.getFuncName(), args, _scope);
-        _symTable.insertSymbolTable(symbolTableEntry);
+        _symTable.insertSymbolTable(symEntry);
         
         node.getBody().accept(this);
 
