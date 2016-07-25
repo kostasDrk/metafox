@@ -2,6 +2,8 @@ package symbolTable.entries;
 
 public abstract class ASymTableEntry {
 
+    private static final int GLOBAL_SCOPE = 0;
+
     private boolean _isActive;
     private final String _name;
     private final int _scope;
@@ -30,6 +32,10 @@ public abstract class ASymTableEntry {
 
     public int getScope() {
         return _scope;
+    }
+
+    public boolean hasGlobalScope() {
+        return this._scope == GLOBAL_SCOPE;
     }
 
     public ASymTableEntry getNextScopeListNode() {

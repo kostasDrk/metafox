@@ -10,8 +10,6 @@ import symbolTable.libraryFunctions.LibraryFunctions;
 
 import symbolTable.entries.SymTableEntryType;
 import symbolTable.entries.ASymTableEntry;
-import symbolTable.entries.GlobalVariableEntry;
-import symbolTable.entries.LocalVariableEntry;
 import symbolTable.entries.LibraryFunctionEntry;
 import symbolTable.entries.UserFunctionEntry;
 
@@ -21,7 +19,7 @@ import java.util.*;
  *
  * @author Default
  */
-public class SymbolTable {
+public final class SymbolTable {
 
     private static final int GLOBAL_SCOPE = 0;
 
@@ -39,7 +37,7 @@ public class SymbolTable {
 
     }
 
-    public ASymTableEntry lookupGlobalScope(String name, Integer line) throws ASTVisitorException {
+    public ASymTableEntry lookupGlobalScope(String name) {
 
         ASymTableEntry firstElement = _scopeLists.get(0);
 
@@ -50,8 +48,8 @@ public class SymbolTable {
                 firstElement = firstElement.getNextScopeListNode();
             }
         }
-        throw new ASTVisitorException("Global variable: " + name + " doesn't exist" + " in line " + line);
 
+        return null;
     }
 
     /*In this function we look up in Symbol Table for formal and function definition
@@ -88,8 +86,7 @@ public class SymbolTable {
 
     }
 
-    public ASymTableEntry lookUpVariable(String name, Integer scope, Integer line) throws ASTVisitorException {
-
+    public HashMap<String, Object> lookUpVariable(String name, Integer scope) {
         ASymTableEntry element = null;
         Boolean foundUserFunction = false;
         ASymTableEntry tempElement = _scopeLists.get(scope);
@@ -116,26 +113,13 @@ public class SymbolTable {
             tempScope--;
         }
 
-        if (element == null) {
-            if (scope == GLOBAL_SCOPE) {
-                element = new GlobalVariableEntry(name);
-            } else {
-                element = new LocalVariableEntry(name, scope);
-            }
-
-            insertSymbolTable(element);
-
-        } else if (element.getScope() != GLOBAL_SCOPE
-                && foundUserFunction
-                && scope != element.getScope()
-                && element instanceof UserFunctionEntry) {
-            throw new ASTVisitorException("Cannot access symbol: " + name + " in line " + line + " in scope " + scope);
-        }
-
-        return element;
+        HashMap<String, Object> returnVal = new HashMap<>();
+        returnVal.put("symbolTableEntry", element);
+        returnVal.put("foundUserFunction", foundUserFunction);
+        return returnVal;
     }
 
-    private void insertSymbolTable(ASymTableEntry _newEntry) {
+    public void insertSymbolTable(ASymTableEntry _newEntry) {
 
         if (_table.get(_newEntry.getName()) == null) {
             ArrayList<ASymTableEntry> ASymTableEntryList = new ArrayList<>();
@@ -150,7 +134,7 @@ public class SymbolTable {
         if (_scopeLists.get(_newEntry.getScope()) != null) {
             ASymTableEntry tempElement = _scopeLists.get(_newEntry.getScope());
             _newEntry.setNextScopeListNode(tempElement);
-            
+
         }
         _scopeLists.put(_newEntry.getScope(), _newEntry);
     }

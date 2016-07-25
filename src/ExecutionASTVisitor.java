@@ -34,8 +34,14 @@ import ast.TermExpressionStmt;
 import ast.TrueLiteral;
 import ast.UnaryExpression;
 import ast.WhileStatement;
+import ast.utils.ASTUtils;
+import java.util.HashMap;
 
 import symbolTable.SymbolTable;
+import symbolTable.entries.AFunctionEntry;
+import symbolTable.entries.ASymTableEntry;
+import symbolTable.entries.GlobalVariableEntry;
+import symbolTable.entries.LocalVariableEntry;
 
 public class ExecutionASTVisitor implements ASTVisitor {
 
@@ -102,7 +108,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public void visit(UnaryExpression node) throws ASTVisitorException {
         System.out.println("-UnaryExpression");
-        
+
         //System.out.print(node.getOperator());
         if (node.getExpression() != null) {
             node.getExpression().accept(this);
@@ -114,28 +120,55 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public void visit(IdentifierExpression node) throws ASTVisitorException {
         System.out.println("-IdentifierExpression");
-        
-        if (!node.isLocal()) {
-            //_symTable.lookupGlobalScope(node.getIdentifier(), node.getLine());
-        } else {
+        String name = node.getIdentifier();
 
+        if (!node.isLocal()) {
+            ASymTableEntry symTableEntry = _symTable.lookupGlobalScope(name);
+            if (symTableEntry == null) {
+                String msg = "Global variable: " + name + " doesn't exist";
+                ASTUtils.error(node, msg);
+            }
+
+        } else {
+            HashMap<String, Object> returnVal = _symTable.lookUpVariable(name, _scope);
+            ASymTableEntry symTableEntry = (ASymTableEntry) returnVal.get("symbolTableEntry");
+            boolean foundUserFunction = (boolean) returnVal.get("foundUserFunction");
+
+            if (symTableEntry == null) {
+                if (node.isLocal()) {
+                    symTableEntry = new GlobalVariableEntry(name);
+                } else {
+                    symTableEntry = new LocalVariableEntry(name, _scope);
+                }
+
+                _symTable.insertSymbolTable(symTableEntry);
+            } else {
+                if (foundUserFunction
+                        && !symTableEntry.hasGlobalScope()
+                        && !(symTableEntry instanceof AFunctionEntry)
+                        && (_scope != symTableEntry.getScope())) {
+
+                    String msg = "Cannot access symbol: " + name
+                            + " (in scope " + symTableEntry.getScope() + " ).";
+                    ASTUtils.error(node, msg);
+                }
+            }
         }
-        //System.out.print(node.getIdentifier());
     }
 
     @Override
     public void visit(Member node) throws ASTVisitorException {
         System.out.println("-Member");
-        
+
         if (node.getLvalue() != null) {
             node.getLvalue().accept(this);
-            
+
         } else if (node.getCall() != null) {
             node.getCall().accept(this);
         }
         if (node.getIdentifier() != null) {
             //System.out.print("." + node.getIdentifier());
-            
+
         } else if (node.getExpression() != null) {
             node.getExpression().accept(this);
 
@@ -145,7 +178,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public void visit(ExtendedCall node) throws ASTVisitorException {
         System.out.println("-ExtendedCall");
-        
+
         node.getCall().accept(this);
 
         node.getExpressionList();
@@ -159,7 +192,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public void visit(LvalueCall node) throws ASTVisitorException {
         System.out.println("-LvalueCall");
-        
+
         node.getLvalue().accept(this);
         node.getCallSuffix().accept(this);
     }
@@ -167,7 +200,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public void visit(AnonymousFunctionCall node) throws ASTVisitorException {
         System.out.println("-AnonymousFunctionCall");
-        
+
         node.getFunctionDef().accept(this);
 
         for (Expression expression : node.getExpressionList()) {
@@ -179,7 +212,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public void visit(NormCall node) throws ASTVisitorException {
         System.out.println("-NormCall");
-        
+
         for (Expression expression : node.getExpressionList()) {
             expression.accept(this);
 
@@ -190,7 +223,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public void visit(MethodCall node) throws ASTVisitorException {
         System.out.println("-MethodCall");
-        
+
         //System.out.print(".." + node.getIdentifier() + "(");
         for (Expression expression : node.getExpressionList()) {
             expression.accept(this);
@@ -202,7 +235,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public void visit(ObjectDefinition node) throws ASTVisitorException {
         System.out.println("-ObjectDefinition");
-        
+
         if (!node.getIndexedElementList().isEmpty()) {
             for (IndexedElement indexed : node.getIndexedElementList()) {
                 indexed.accept(this);
@@ -215,7 +248,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public void visit(IndexedElement node) throws ASTVisitorException {
         System.out.println("-IndexedElement");
-        
+
         node.getExpression1().accept(this);
         node.getExpression2().accept(this);
     }
@@ -223,7 +256,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public void visit(ArrayDef node) throws ASTVisitorException {
         System.out.println("-ArrayDef");
-        
+
         for (Expression expression : node.getExpressionList()) {
             expression.accept(this);
 
@@ -234,7 +267,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public void visit(Block node) throws ASTVisitorException {
         System.out.println("-Block");
-        
+
         enterScopeSpace();
         for (Statement stmt : node.getStatementList()) {
             stmt.accept(this);
@@ -245,22 +278,21 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public void visit(FunctionDefExpression node) throws ASTVisitorException {
         System.out.println("-FunctionDefExpression");
-        
+
         node.getFunctionDef().accept(this);
     }
 
     @Override
     public void visit(FunctionDef node) throws ASTVisitorException {
         System.out.println("-FunctionDef");
-        
-        //System.out.print(node.getFuncName());
 
+        //System.out.print(node.getFuncName());
         enterScopeSpace();
         for (String id : node.getArguments()) {
             /*code to be add*/
         }
         exitScopeSpace();
-        
+
         node.getBody().accept(this);
 
     }
@@ -268,7 +300,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public void visit(IntegerLiteral node) throws ASTVisitorException {
         System.out.println("-IntegerLiteral");
-        
+
     }
 
     @Override
@@ -304,7 +336,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public void visit(IfStatement node) throws ASTVisitorException {
         System.out.println("-IfStatement");
-        
+
         node.getExpression().accept(this);
 
         node.getStatement().accept(this);
@@ -316,7 +348,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public void visit(WhileStatement node) throws ASTVisitorException {
         System.out.println("-WhileStatement");
-        
+
         node.getExpression().accept(this);
         node.getStatement().accept(this);
     }
@@ -324,24 +356,24 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public void visit(ForStatement node) throws ASTVisitorException {
         System.out.println("-ForStatement");
-        
+
         for (Expression expression : node.getExpressionList1()) {
             expression.accept(this);
         }
-        
+
         node.getExpression().accept(this);
 
         for (Expression expression : node.getExpressionList2()) {
             expression.accept(this);
         }
-        
+
         node.getStatement().accept(this);
     }
 
     @Override
     public void visit(BreakStatement node) throws ASTVisitorException {
         System.out.println("-BreakStatement");
- 
+
     }
 
     @Override
@@ -352,7 +384,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public void visit(ReturnStatement node) throws ASTVisitorException {
         System.out.println("-ReturnStatement");
-        
+
         node.getExpression().accept(this);
     }
 }
