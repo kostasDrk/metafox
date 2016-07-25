@@ -138,8 +138,7 @@ non terminal MethodCall methodcall;
 non terminal ObjectDefinition objectdef;
 non terminal IndexedElement indexedelem;
 non terminal ArrayList<IndexedElement> indexedelemlist;
-non terminal ArrayList<String> idlist;
-// non terminal idList;
+non terminal ArrayList<IdentifierExpression> idlist;
 
 precedence right ASSIGN;
 precedence left LOGIC_OR;
@@ -625,16 +624,25 @@ const ::= INTEGER_LITERAL:literal
 			;
 
 idlist	::=             {:
-				RESULT = new ArrayList<String>();
+				RESULT = new ArrayList<IdentifierExpression>();
                         :}
 			| ID:id
 			{:
-				RESULT = new ArrayList<String>();
-				RESULT.add(id);
+				RESULT = new ArrayList<IdentifierExpression>();
+
+				IdentifierExpression tmpID = new IdentifierExpression(id, true);	// boolean value used to indicate local/global scope
+				tmpID.setLine(idleft);
+				tmpID.setColumn(idright);
+
+				RESULT.add(tmpID);
 			:}
 			| idlist:idl COMMA ID:id
 			{:
-				idl.add(id);
+				IdentifierExpression tmpID = new IdentifierExpression(id, true);	// boolean value used to indicate local/global scope
+				tmpID.setLine(idleft);
+				tmpID.setColumn(idright);
+
+				idl.add(tmpID);
 				RESULT = idl;
 			:};
 

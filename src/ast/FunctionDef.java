@@ -5,11 +5,11 @@ import java.util.ArrayList;
 public class FunctionDef extends Statement {
 
 	private String _funcName;
-	private ArrayList<String> _arguments;
+	private ArrayList<IdentifierExpression> _arguments;
 	private Block _body;
         private static int _anonumousFunctionCounter = 0 ;
         
-	public FunctionDef(String funcName, ArrayList<String> arguments, Block body){
+	public FunctionDef(String funcName, ArrayList<IdentifierExpression> arguments, Block body){
                 if(funcName.equals("#ANONYMOUS#_")){
                     funcName+= _anonumousFunctionCounter;
                     _anonumousFunctionCounter++;
@@ -28,11 +28,11 @@ public class FunctionDef extends Statement {
 		this._funcName = funcName;
 	}
 
-	public ArrayList<String> getArguments(){
+	public ArrayList<IdentifierExpression> getArguments(){
 		return this._arguments;
 	}
 
-	public void setArguments(ArrayList<String> arguments){
+	public void setArguments(ArrayList<IdentifierExpression> arguments){
 		this._arguments = arguments;
 	}
 

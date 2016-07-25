@@ -212,8 +212,8 @@ public class PrintASTVisitor implements ASTVisitor{
     	System.out.print("function ");
     	System.out.print(node.getFuncName());
     	System.out.print("(");
-    	for(String id : node.getArguments()){
-    		System.out.print(id+", ");
+    	for(IdentifierExpression id : node.getArguments()){
+            System.out.print(id.getIdentifier()+", ");
     	}
     	System.out.print(")");
     	node.getBody().accept(this);
