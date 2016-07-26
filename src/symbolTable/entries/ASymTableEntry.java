@@ -50,4 +50,13 @@ public abstract class ASymTableEntry {
         this._nextScopeListNode = nextScopeListNode;
     }
 
+    @Override
+    public String toString() {
+        return "Entry    name:  " + this._name
+                + "\n\t scope: " + this._scope
+                + "\n\t class: " + this.getClass()
+                + "\n\t active:" + this._isActive
+                + "\n";
+
+    }
 }

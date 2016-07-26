@@ -80,6 +80,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
         for (Statement stmt : node.getStatements()) {
             stmt.accept(this);
         }
+
+        this._symTable.printAll();
     }
 
     @Override

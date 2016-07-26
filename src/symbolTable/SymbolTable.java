@@ -24,10 +24,12 @@ public final class SymbolTable {
 
     private final HashMap<Integer, ASymTableEntry> _scopeLists;
     private final HashMap<String, ArrayList<ASymTableEntry>> _table;
+    private int _maxEnteredScope;
 
     public SymbolTable() {
         _scopeLists = new HashMap<>();
         _table = new HashMap<>();
+        _maxEnteredScope = GLOBAL_SCOPE;
 
         //Insert all the library function in symbol table.
         for (LibraryFunctions libraryFunction : LibraryFunctions.values()) {
@@ -44,7 +46,7 @@ public final class SymbolTable {
             if (firstElement.getName().equals(name)) {
                 return firstElement;
             }
-
+            
             firstElement = firstElement.getNextScopeListNode();
         }
 
@@ -128,5 +130,40 @@ public final class SymbolTable {
 
         }
         _scopeLists.put(_newEntry.getScope(), _newEntry);
+
+        keepMaxScope(_newEntry.getScope());
+
+    }
+
+    private void keepMaxScope(int scope) {
+        if (scope > _maxEnteredScope) {
+            _maxEnteredScope = scope;
+        }
+    }
+
+    public void printAll() {
+        System.out.println("--------------------------------------------------------------");
+        System.out.println("---------------------Symbol Table Entries---------------------");
+        System.out.println("--------------------------------------------------------------");
+
+        for (int scope = 0; scope <= _maxEnteredScope; scope++) {
+            System.out.println("");
+            System.out.println("-------------------------- Scope: " + scope + " --------------------------");
+
+            ArrayList<ASymTableEntry> scopeList = new ArrayList<>();
+            ASymTableEntry tmpElement = _scopeLists.get(scope);
+
+            while (tmpElement != null) {
+                scopeList.add(tmpElement);
+                tmpElement = tmpElement.getNextScopeListNode();
+            }
+
+            Collections.reverse(scopeList);
+            for (ASymTableEntry tmpList : scopeList) {
+                System.out.println(tmpList);
+            }
+
+            System.out.println("--------------------------------------------------------------");
+        }
     }
 }
