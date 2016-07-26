@@ -132,6 +132,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         System.out.println("-IdentifierExpression");
         String name = node.getIdentifier();
 
+        //if variable have :: at the front it is "global"
         if (!node.isLocal()) {
             ASymTableEntry symTableEntry = _symTable.lookupGlobalScope(name);
             if (symTableEntry == null) {
@@ -310,15 +311,15 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 msg = "Redeclaration of User-Function: " + name + ".";
 
             } else if (isLibraryFunction) {
-                msg = "User-Fuction shadows Library-Function: " + name + ".";
+                msg = "User-Function shadows Library-Function: " + name + ".";
 
             } else {
-                msg = "User-Fuction already declared as Variable: " + name + ".";
+                msg = "User-Function already declared as Variable: " + name + ".";
             }
             ASTUtils.error(node, msg);
         } else {
             if (isLibraryFunction) {
-                String msg = "User-Fuction Shadows Library-Function: " + name + ".";
+                String msg = "User-Function Shadows Library-Function: " + name + ".";
                 ASTUtils.error(node, msg);
 
             }
