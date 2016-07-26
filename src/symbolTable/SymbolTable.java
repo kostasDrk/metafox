@@ -31,7 +31,7 @@ public final class SymbolTable {
 
         //Insert all the library function in symbol table.
         for (LibraryFunctions libraryFunction : LibraryFunctions.values()) {
-            insertSymbolTable(new LibraryFunctionEntry(libraryFunction.name()));
+            insertSymbolTable(new LibraryFunctionEntry(libraryFunction.toString()));
         }
 
     }
@@ -43,9 +43,9 @@ public final class SymbolTable {
         while (firstElement != null) {
             if (firstElement.getName().equals(name)) {
                 return firstElement;
-            } else {
-                firstElement = firstElement.getNextScopeListNode();
             }
+
+            firstElement = firstElement.getNextScopeListNode();
         }
 
         return null;
@@ -87,18 +87,15 @@ public final class SymbolTable {
 
         while (tempScope >= GLOBAL_SCOPE) {
             while (tempElement != null) {
-
                 if (tempElement.getName().equals(name) && tempElement.isActive()) {
                     element = tempElement;
                     break;
                 } else if (!tempElement.getName().equals(name) && tempElement.isActive()) {
-                    if (((tempElement instanceof UserFunctionEntry))
-                            && (tempElement.isActive() == true)) {
+                    if (tempElement instanceof UserFunctionEntry) {
                         foundUserFunction = true;
                     }
-                    tempElement = tempElement.getNextScopeListNode();
                 }
-
+                tempElement = tempElement.getNextScopeListNode();
             }
             if (element != null) {
                 break;
