@@ -145,7 +145,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
             boolean foundUserFunction = (boolean) returnVal.get("foundUserFunction");
 
             if (symTableEntry == null) {
-                if (node.isLocal()) {
+                if (!node.isLocal() || this._scope == 0) {
                     symTableEntry = new GlobalVariableEntry(name);
                 } else {
                     symTableEntry = new LocalVariableEntry(name, _scope);
@@ -324,7 +324,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         /*Function arguments*/
         enterScopeSpace();
-        ArrayList<FormalVariableEntry> args = new ArrayList(); 
+        ArrayList<FormalVariableEntry> args = new ArrayList();
         for (IdentifierExpression argument : node.getArguments()) {
             name = argument.getIdentifier();
             ASymTableEntry entry = _symTable.lookUpLocalScope(name, _scope);
@@ -338,7 +338,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 String msg = "Formal-Argument shadows Library-Function: " + name + ".";
                 ASTUtils.error(node, msg);
             }
-            
+
             FormalVariableEntry formalArg = new FormalVariableEntry(name, _scope);
             args.add(formalArg);
         }
@@ -346,7 +346,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         ASymTableEntry symEntry = new UserFunctionEntry(node.getFuncName(), args, _scope);
         _symTable.insertSymbolTable(symEntry);
-        
+
         node.getBody().accept(this);
 
     }
