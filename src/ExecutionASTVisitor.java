@@ -341,6 +341,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
             FormalVariableEntry formalArg = new FormalVariableEntry(name, _scope);
             args.add(formalArg);
+
+            _symTable.insertSymbolTable(formalArg);
         }
         exitScopeSpace();
 
