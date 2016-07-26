@@ -38,7 +38,7 @@ public final class SymbolTable {
 
     public ASymTableEntry lookupGlobalScope(String name) {
 
-        ASymTableEntry firstElement = _scopeLists.get(0);
+        ASymTableEntry firstElement = _scopeLists.get(GLOBAL_SCOPE);
 
         while (firstElement != null) {
             if (firstElement.getName().equals(name)) {
@@ -72,9 +72,9 @@ public final class SymbolTable {
         ASymTableEntry tempElement = _scopeLists.get(scope);
 
         while (tempElement != null) {
-
             tempElement.setIsActive(false);
             tempElement = tempElement.getNextScopeListNode();
+
         }
 
     }
@@ -85,7 +85,7 @@ public final class SymbolTable {
         ASymTableEntry tempElement = _scopeLists.get(scope);
         Integer tempScope = scope;
 
-        while (tempElement != null && tempScope != -1) {
+        while (tempScope >= GLOBAL_SCOPE) {
             while (tempElement != null) {
 
                 if (tempElement.getName().equals(name) && tempElement.isActive()) {
@@ -104,6 +104,7 @@ public final class SymbolTable {
                 break;
             }
             tempScope--;
+            tempElement = _scopeLists.get(tempScope);
         }
 
         HashMap<String, Object> returnVal = new HashMap<>();
