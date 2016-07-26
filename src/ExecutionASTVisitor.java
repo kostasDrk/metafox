@@ -246,12 +246,14 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public void visit(ObjectDefinition node) throws ASTVisitorException {
         System.out.println("-ObjectDefinition");
 
+        enterScopeSpace();
         if (!node.getIndexedElementList().isEmpty()) {
             for (IndexedElement indexed : node.getIndexedElementList()) {
                 indexed.accept(this);
 
             }
         }
+        hiddeScopeSpaceAndExit();
 
     }
 
