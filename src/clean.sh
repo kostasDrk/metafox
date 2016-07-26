@@ -3,6 +3,7 @@ echo "Clean-up directory."
 rm *.class
 
 rm ast/*class
+rm ast/utils/*class
 
 rm MyLexer.java*
 
