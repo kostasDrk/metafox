@@ -6,6 +6,11 @@ public class ExtendedCall extends Call {
 	private Call _call;
 	private ArrayList<Expression> _expressionList;
 
+	public ExtendedCall(Call call){
+		this._call = call;
+		this._expressionList = new ArrayList<Expression>();
+	}
+
 	public ExtendedCall(Call call, ArrayList<Expression> expressionList){
 		this._call = call;
 		this._expressionList = expressionList;

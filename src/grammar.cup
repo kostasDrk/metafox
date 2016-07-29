@@ -441,7 +441,10 @@ member ::= lvalue:lval DOT ID:id
 
 call   ::= call:cl LEFT_PARENTHESIS elist:el RIGHT_PARENTHESIS
 			{:
-				RESULT = new ExtendedCall(cl, el);
+				if(el == null)
+					RESULT = new ExtendedCall(cl);
+				else
+					RESULT = new ExtendedCall(cl, el);
 				RESULT.setLine(elleft);
 				RESULT.setColumn(elright);
 			:}
