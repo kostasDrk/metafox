@@ -51,6 +51,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     private final SymbolTable _symTable;
     private int _scope;
+    private int _inFunction;  
+    private int _inLoop;  
 
     private void enterScopeSpace() {
         System.out.println("EnterScopeSpace");
@@ -60,6 +62,25 @@ public class ExecutionASTVisitor implements ASTVisitor {
     private void exitScopeSpace() {
         System.out.println("ExitScopeSpace");
         _scope--;
+    }
+    private void enterFunctionSpace() {
+        System.out.println("EnterFunctionSpace");
+        _inFunction++;
+    }
+
+    private void exitFunctionSpace() {
+        System.out.println("ExitFunctionSpace");
+        _inFunction--;
+    }
+
+     private void enterLoopSpace() {
+        System.out.println("EnterLoopSpace");
+        _inLoop++;
+    }
+
+    private void exitLoopSpace() {
+        System.out.println("ExitLoopSpace");
+        _inLoop--;
     }
 
     private void hiddeScopeSpaceAndExit() {
@@ -71,13 +92,16 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public ExecutionASTVisitor() {
         _symTable = new SymbolTable();
         _scope = 0;
+        _inFunction = 0;
+        _inLoop = 0;
     }
 
     @Override
     public void visit(Program node) throws ASTVisitorException {
         System.out.println("-Program");
-
         for (Statement stmt : node.getStatements()) {
+           if(stmt != null)
+
             stmt.accept(this);
         }
 
@@ -125,6 +149,20 @@ public class ExecutionASTVisitor implements ASTVisitor {
         if (node.getExpression() != null) {
             node.getExpression().accept(this);
         } else {
+             IdentifierExpression name = (IdentifierExpression)node.getLvalue();
+             HashMap<String, Object> returnVal = _symTable.lookUpVariable(name.getIdentifier(), _scope);
+            ASymTableEntry symTableEntry = (ASymTableEntry) returnVal.get("symbolTableEntry");
+
+            if (symTableEntry != null) {
+               
+                if (symTableEntry instanceof AFunctionEntry)
+                         {
+
+                    String msg = "Using function: "+  name.getIdentifier()
+                            + " as lvalue.";
+                    ASTUtils.error(node, msg);
+                }
+            }
             node.getLvalue().accept(this);
         }
     }
@@ -249,14 +287,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public void visit(ObjectDefinition node) throws ASTVisitorException {
         System.out.println("-ObjectDefinition");
 
-        enterScopeSpace();
         if (!node.getIndexedElementList().isEmpty()) {
             for (IndexedElement indexed : node.getIndexedElementList()) {
                 indexed.accept(this);
 
             }
         }
-        hiddeScopeSpaceAndExit();
 
     }
 
@@ -271,11 +307,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public void visit(ArrayDef node) throws ASTVisitorException {
         System.out.println("-ArrayDef");
-
+     if(node.getExpressionList()!=null){
         for (Expression expression : node.getExpressionList()) {
             expression.accept(this);
 
         }
+    }
 
     }
 
@@ -353,9 +390,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         ASymTableEntry symEntry = new UserFunctionEntry(node.getFuncName(), args, _scope);
         _symTable.insertSymbolTable(symEntry);
-
+        enterFunctionSpace();
         node.getBody().accept(this);
-
+        exitFunctionSpace();
     }
 
     @Override
@@ -411,7 +448,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
         System.out.println("-WhileStatement");
 
         node.getExpression().accept(this);
+        enterLoopSpace();
         node.getStatement().accept(this);
+        exitLoopSpace();
     }
 
     @Override
@@ -427,24 +466,38 @@ public class ExecutionASTVisitor implements ASTVisitor {
         for (Expression expression : node.getExpressionList2()) {
             expression.accept(this);
         }
-
+        enterLoopSpace(); 
         node.getStatement().accept(this);
+        exitLoopSpace();
     }
 
     @Override
     public void visit(BreakStatement node) throws ASTVisitorException {
         System.out.println("-BreakStatement");
-
+         if( _inLoop == 0) {
+              
+              ASTUtils.error(node, "Use of 'break' while not in a loop.");
+        }
     }
 
     @Override
     public void visit(ContinueStatement node) throws ASTVisitorException {
         System.out.println("-ContinueStatement");
+           if( _inLoop == 0) {
+              
+              ASTUtils.error(node, "Use of 'continue' while not in a loop.");
+        }
     }
 
     @Override
     public void visit(ReturnStatement node) throws ASTVisitorException {
+
         System.out.println("-ReturnStatement");
+        if( _inFunction == 0) {
+              
+              ASTUtils.error(node, "Use of 'return' while not in a function.");
+        }
+       if(node.getExpression()!=null)
 
         node.getExpression().accept(this);
     }

@@ -49,8 +49,10 @@ public class PrintASTVisitor implements ASTVisitor{
 
     @Override
     public void visit(Program node) throws ASTVisitorException {
-    	for(Statement stmt : node.getStatements())
+    	for(Statement stmt : node.getStatements()){
+             if(stmt != null)
     		stmt.accept(this);
+       }
     }
 
     @Override
@@ -186,10 +188,12 @@ public class PrintASTVisitor implements ASTVisitor{
     @Override
     public void visit(ArrayDef node) throws ASTVisitorException {
     	System.out.print("[");
+     if(node.getExpressionList()!=null){
     	for(Expression expression : node.getExpressionList()){
     		expression.accept(this);
     		System.out.print(",");
     	}
+    }
     	System.out.print("]");
     }
 
@@ -298,7 +302,10 @@ public class PrintASTVisitor implements ASTVisitor{
     @Override
     public void visit(ReturnStatement node) throws ASTVisitorException {
     	System.out.print("return ");
-    	node.getExpression().accept(this);
+    	  if(node.getExpression()!=null)
+
+        node.getExpression().accept(this);
+    }
     	System.out.println(";");
     }
 }

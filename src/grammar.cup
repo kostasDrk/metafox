@@ -572,7 +572,7 @@ funcdef ::= FUNCTION  functionName:funcName LEFT_PARENTHESIS idlist:idl RIGHT_PA
 			:}
 			| FUNCTION  functionName:funcName LEFT_PARENTHESIS idlist:idl RIGHT_PARENTHESIS OPEN_BLOCK CLOSE_BLOCK
 			{:
-				RESULT = new FunctionDef(funcName, idl, null);
+				RESULT = new FunctionDef(funcName, idl, new Block());
 				RESULT.setLine(funcNameleft);
 				RESULT.setColumn(funcNameright);
 			:}

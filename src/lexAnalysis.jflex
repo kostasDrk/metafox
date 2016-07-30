@@ -104,20 +104,20 @@ whiteSpace     = {LineTerminator} | [ \t\f] | " "
   "."   { return symbol(sym.DOT);}
 
   /*Operators*/
+   ">="  { return symbol(sym.GREATER_OR_EQUAL);}
+  "<="  { return symbol(sym.LESS_OR_EQUAL);}
   ">"   { return symbol(sym.GREATER);}
   "<"   { return symbol(sym.LESS);}
-  ">="  { return symbol(sym.GREATER_OR_EQUAL);}
-  "=<"  { return symbol(sym.LESS_OR_EQUAL);}
-  "="   { return symbol(sym.ASSIGN);}
   "=="  { return symbol(sym.CMP_EQUAL);}
+  "="   { return symbol(sym.ASSIGN);}
   "!="  { return symbol(sym.NOT_EQUAL);}
+  "++"  { return symbol(sym.PLUS_PLUS);}
+  "--"  { return symbol(sym.MINUS_MINUS);}
   "+"   { return symbol(sym.PLUS);}
   "-"   { return symbol(sym.MINUS);}
   "*"   { return symbol(sym.MUL);}
   "/"   { return symbol(sym.DIV);}
   "%"   { return symbol(sym.MOD);}
-  "++"  { return symbol(sym.PLUS_PLUS);}
-  "--"  { return symbol(sym.MINUS_MINUS);}
   "!"   { return symbol(sym.NOT);}
 
  {whiteSpace}		   { }
@@ -198,6 +198,7 @@ whiteSpace     = {LineTerminator} | [ \t\f] | " "
 	   }
 
 	   .       { }
+      {whiteSpace}      { }
 
 }
 
