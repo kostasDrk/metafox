@@ -35,8 +35,10 @@ import ast.TrueLiteral;
 import ast.UnaryExpression;
 import ast.WhileStatement;
 import ast.utils.ASTUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.ArrayDeque;
 
 import symbolTable.SymbolTable;
 import symbolTable.entries.AFunctionEntry;
@@ -49,6 +51,8 @@ import symbolTable.libraryFunctions.LibraryFunctions;
 
 public class ExecutionASTVisitor implements ASTVisitor {
 
+    private ArrayDeque<SymbolTable> _envStack;
+    private SymbolTable _genv;
     private final SymbolTable _symTable;
     private int _scope;
     private int _inFunction;  
@@ -83,14 +87,17 @@ public class ExecutionASTVisitor implements ASTVisitor {
         _inLoop--;
     }
 
-    private void hiddeScopeSpaceAndExit() {
+    private void hideScopeeSpaceAndExit() {
         System.out.println("HiddeScopeSpaceAndExit");
         _symTable.hide(_scope);
         _scope--;
     }
 
     public ExecutionASTVisitor() {
-        _symTable = new SymbolTable();
+        _genv = new SymbolTable();
+        _envStack = new ArrayDeque<SymbolTable>();
+        _envStack.push(_genv);
+        _symTable = _genv;
         _scope = 0;
         _inFunction = 0;
         _inLoop = 0;
@@ -324,7 +331,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         for (Statement stmt : node.getStatementList()) {
             stmt.accept(this);
         }
-        hiddeScopeSpaceAndExit();
+        hideScopeeSpaceAndExit();
     }
 
     @Override

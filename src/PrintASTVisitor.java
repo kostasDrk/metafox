@@ -302,10 +302,9 @@ public class PrintASTVisitor implements ASTVisitor{
     @Override
     public void visit(ReturnStatement node) throws ASTVisitorException {
     	System.out.print("return ");
-    	  if(node.getExpression()!=null)
-
-        node.getExpression().accept(this);
+    	if(node.getExpression()!=null)
+            node.getExpression().accept(this);
+        System.out.println(";");
     }
-    	System.out.println(";");
-    }
+    	
 }
