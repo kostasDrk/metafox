@@ -149,6 +149,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         if (node.getExpression() != null) {
             node.getExpression().accept(this);
         } else {
+            if (node.getLvalue() instanceof IdentifierExpression){
              IdentifierExpression name = (IdentifierExpression)node.getLvalue();
              HashMap<String, Object> returnVal = _symTable.lookUpVariable(name.getIdentifier(), _scope);
             ASymTableEntry symTableEntry = (ASymTableEntry) returnVal.get("symbolTableEntry");
@@ -163,6 +164,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
                     ASTUtils.error(node, msg);
                 }
             }
+        }
             node.getLvalue().accept(this);
         }
     }
@@ -287,13 +289,14 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public void visit(ObjectDefinition node) throws ASTVisitorException {
         System.out.println("-ObjectDefinition");
 
+            enterScopeSpace();
         if (!node.getIndexedElementList().isEmpty()) {
             for (IndexedElement indexed : node.getIndexedElementList()) {
                 indexed.accept(this);
 
             }
         }
-
+         hiddeScopeSpaceAndExit();
     }
 
     @Override
