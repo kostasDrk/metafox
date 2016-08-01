@@ -87,7 +87,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         _inLoop--;
     }
 
-    private void hideScopeeSpaceAndExit() {
+    private void hideScopeSpaceAndExit() {
         System.out.println("HiddeScopeSpaceAndExit");
         _symTable.hide(_scope);
         _scope--;
@@ -303,7 +303,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
             }
         }
-         hiddeScopeSpaceAndExit();
+         hideScopeSpaceAndExit();
     }
 
     @Override
@@ -334,7 +334,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         for (Statement stmt : node.getStatementList()) {
             stmt.accept(this);
         }
-        hideScopeeSpaceAndExit();
+        hideScopeSpaceAndExit();
     }
 
     @Override
