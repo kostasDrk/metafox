@@ -1,5 +1,7 @@
 package ast;
 
+import symbols.value.Value;
+
 public class LvalueCall extends Call {
 
 	private Lvalue _lvalue;
@@ -27,7 +29,7 @@ public class LvalueCall extends Call {
 	}
 
 	@Override
-	public void accept(ASTVisitor visitor) throws ASTVisitorException {
-		visitor.visit(this);
+	public Value accept(ASTVisitor visitor) throws ASTVisitorException {
+		return visitor.visit(this);
 	}
 }

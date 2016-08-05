@@ -1,5 +1,7 @@
 package ast;
 
+import symbols.value.Value;
+
 public class IdentifierExpression extends Lvalue {
 
 	private String _identifier;
@@ -27,8 +29,8 @@ public class IdentifierExpression extends Lvalue {
 	}
 
 	@Override
-	public void accept(ASTVisitor visitor) throws ASTVisitorException {
-		visitor.visit(this);
+	public Value accept(ASTVisitor visitor) throws ASTVisitorException {
+		return visitor.visit(this);
 	}
 	
 }

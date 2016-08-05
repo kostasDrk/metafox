@@ -1,5 +1,7 @@
 package ast;
 
+import symbols.value.Value;
+
 public class DoubleLiteral extends Constant{
 
 	private Double _literal;
@@ -17,7 +19,7 @@ public class DoubleLiteral extends Constant{
 	}
 
 	@Override
-	public void accept(ASTVisitor visitor) throws ASTVisitorException {
-		visitor.visit(this);
+	public Value accept(ASTVisitor visitor) throws ASTVisitorException {
+		return visitor.visit(this);
 	}
 }

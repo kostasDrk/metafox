@@ -1,5 +1,7 @@
 package ast;
 
+import symbols.value.Value;
+
 public class UnaryExpression extends TermExpression {
 
 	private Operator _operator;
@@ -37,8 +39,8 @@ public class UnaryExpression extends TermExpression {
 	}
 
 	@Override
-	public void accept(ASTVisitor visitor) throws ASTVisitorException {
-		visitor.visit(this);
+	public Value accept(ASTVisitor visitor) throws ASTVisitorException {
+		return visitor.visit(this);
 	}
 	
 }

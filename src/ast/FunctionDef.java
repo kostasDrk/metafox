@@ -1,6 +1,7 @@
 package ast;
 
 import java.util.ArrayList;
+import symbols.value.Value;
 
 public class FunctionDef extends Statement {
 
@@ -45,7 +46,7 @@ public class FunctionDef extends Statement {
 	}
 
 	@Override
-	public void accept(ASTVisitor visitor) throws ASTVisitorException {
-		visitor.visit(this);
+	public Value accept(ASTVisitor visitor) throws ASTVisitorException {
+		return visitor.visit(this);
 	}
 }

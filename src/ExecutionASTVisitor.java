@@ -92,7 +92,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     }
 
     @Override
-    public void visit(Program node) throws ASTVisitorException {
+    public Value visit(Program node) throws ASTVisitorException {
         System.out.println("-Program");
         for (Statement stmt : node.getStatements()) {
             if (stmt != null) {
@@ -100,43 +100,45 @@ public class ExecutionASTVisitor implements ASTVisitor {
             }
         }
 
+        return null;
     }
 
     @Override
-    public void visit(ExpressionStatement node) throws ASTVisitorException {
+    public Value visit(ExpressionStatement node) throws ASTVisitorException {
         System.out.println("-ExpressionStatement");
-
-        node.getExpression().accept(this);
-
+        Value val = null;
+        val = node.getExpression().accept(this);
+        return null;
     }
 
     @Override
-    public void visit(AssignmentExpression node) throws ASTVisitorException {
+    public Value visit(AssignmentExpression node) throws ASTVisitorException {
         System.out.println("-AssignmentExpression");
-
-        node.getLvalue().accept(this);
-        node.getExpression().accept(this);
+        Value left = node.getLvalue().accept(this);
+        Value right = node.getExpression().accept(this);
+        return null;
     }
 
     @Override
-    public void visit(BinaryExpression node) throws ASTVisitorException {
+    public Value visit(BinaryExpression node) throws ASTVisitorException {
         System.out.println("-BinaryExpression");
+        Value result = null;
+        Value left = node.getExpression1().accept(this);
+        Value right = node.getExpression2().accept(this);
 
-        node.getExpression1().accept(this);
-        //System.out.print(" " + node.getOperator() + " ");
-        node.getExpression2().accept(this);
+        return result;
     }
 
     @Override
-    public void visit(TermExpressionStmt node) throws ASTVisitorException {
+    public Value visit(TermExpressionStmt node) throws ASTVisitorException {
         System.out.println("-TermExpressionStmt");
 
         node.getExpression().accept(this);
-
+        return null;
     }
 
     @Override
-    public void visit(UnaryExpression node) throws ASTVisitorException {
+    public Value visit(UnaryExpression node) throws ASTVisitorException {
         System.out.println("-UnaryExpression");
 
         //System.out.print(node.getOperator());
@@ -157,10 +159,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
             }
             node.getLvalue().accept(this);
         }
+        return null;
     }
 
     @Override
-    public void visit(IdentifierExpression node) throws ASTVisitorException {
+    public Value visit(IdentifierExpression node) throws ASTVisitorException {
         System.out.println("-IdentifierExpression");
         String name = node.getIdentifier();
 
@@ -171,17 +174,17 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 String msg = "Global variable: " + name + " doesn't exist";
                 ASTUtils.error(node, msg);
             }
-
         } else {
             Value symbolInfo = _envStack.lookupAll(name);
             if (symbolInfo == null) {
                 _envStack.insertSymbol(name);
             }
         }
+        return null;
     }
 
     @Override
-    public void visit(Member node) throws ASTVisitorException {
+    public Value visit(Member node) throws ASTVisitorException {
         System.out.println("-Member");
 
         if (node.getLvalue() != null) {
@@ -195,12 +198,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         } else if (node.getExpression() != null) {
             node.getExpression().accept(this);
-
         }
+        return null;
     }
 
     @Override
-    public void visit(ExtendedCall node) throws ASTVisitorException {
+    public Value visit(ExtendedCall node) throws ASTVisitorException {
         System.out.println("-ExtendedCall");
 
         node.getCall().accept(this);
@@ -208,21 +211,21 @@ public class ExecutionASTVisitor implements ASTVisitor {
         node.getExpressionList();
         for (Expression expression : node.getExpressionList()) {
             expression.accept(this);
-
         }
-
+        return null;
     }
 
     @Override
-    public void visit(LvalueCall node) throws ASTVisitorException {
+    public Value visit(LvalueCall node) throws ASTVisitorException {
         System.out.println("-LvalueCall");
 
         node.getLvalue().accept(this);
         node.getCallSuffix().accept(this);
+        return null;
     }
 
     @Override
-    public void visit(AnonymousFunctionCall node) throws ASTVisitorException {
+    public Value visit(AnonymousFunctionCall node) throws ASTVisitorException {
         System.out.println("-AnonymousFunctionCall");
 
         node.getFunctionDef().accept(this);
@@ -230,66 +233,67 @@ public class ExecutionASTVisitor implements ASTVisitor {
         for (Expression expression : node.getExpressionList()) {
             expression.accept(this);
         }
-
+        return null;
     }
 
     @Override
-    public void visit(NormCall node) throws ASTVisitorException {
+    public Value visit(NormCall node) throws ASTVisitorException {
         System.out.println("-NormCall");
 
         for (Expression expression : node.getExpressionList()) {
             expression.accept(this);
 
         }
-
+        return null;
     }
 
     @Override
-    public void visit(MethodCall node) throws ASTVisitorException {
+    public Value visit(MethodCall node) throws ASTVisitorException {
         System.out.println("-MethodCall");
 
         //System.out.print(".." + node.getIdentifier() + "(");
         for (Expression expression : node.getExpressionList()) {
             expression.accept(this);
-
         }
-
+        return null;
     }
 
     @Override
-    public void visit(ObjectDefinition node) throws ASTVisitorException {
+    public Value visit(ObjectDefinition node) throws ASTVisitorException {
         System.out.println("-ObjectDefinition");
 
         if (!node.getIndexedElementList().isEmpty()) {
             for (IndexedElement indexed : node.getIndexedElementList()) {
                 indexed.accept(this);
-
             }
         }
+
+        return null;
     }
 
     @Override
-    public void visit(IndexedElement node) throws ASTVisitorException {
+    public Value visit(IndexedElement node) throws ASTVisitorException {
         System.out.println("-IndexedElement");
 
         node.getExpression1().accept(this);
         node.getExpression2().accept(this);
+        return null;
     }
 
     @Override
-    public void visit(ArrayDef node) throws ASTVisitorException {
+    public Value visit(ArrayDef node) throws ASTVisitorException {
         System.out.println("-ArrayDef");
+
         if (node.getExpressionList() != null) {
             for (Expression expression : node.getExpressionList()) {
                 expression.accept(this);
-
             }
         }
-
+        return null;
     }
 
     @Override
-    public void visit(Block node) throws ASTVisitorException {
+    public Value visit(Block node) throws ASTVisitorException {
         System.out.println("-Block");
 
         enterScopeSpace();
@@ -297,17 +301,20 @@ public class ExecutionASTVisitor implements ASTVisitor {
             stmt.accept(this);
         }
         exitScopeSpace();
+
+        return null;
     }
 
     @Override
-    public void visit(FunctionDefExpression node) throws ASTVisitorException {
+    public Value visit(FunctionDefExpression node) throws ASTVisitorException {
         System.out.println("-FunctionDefExpression");
 
         node.getFunctionDef().accept(this);
+        return null;
     }
 
     @Override
-    public void visit(FunctionDef node) throws ASTVisitorException {
+    public Value visit(FunctionDef node) throws ASTVisitorException {
         System.out.println("-FunctionDef");
 
         String name = node.getFuncName();
@@ -363,46 +370,47 @@ public class ExecutionASTVisitor implements ASTVisitor {
         //enterFunctionSpace();
         //node.getBody().accept(this);
         //exitFunctionSpace();
+        return null;
     }
 
     @Override
-    public void visit(IntegerLiteral node) throws ASTVisitorException {
+    public Value visit(IntegerLiteral node) throws ASTVisitorException {
         System.out.println("-IntegerLiteral");
-
+        return new Value(Value_t.INTEGER, node.getLiteral());
     }
 
     @Override
-    public void visit(DoubleLiteral node) throws ASTVisitorException {
+    public Value visit(DoubleLiteral node) throws ASTVisitorException {
         System.out.println("-DoubleLiteral");
-
+        return new Value(Value_t.BOOLEAN, node.getLiteral());
     }
 
     @Override
-    public void visit(StringLiteral node) throws ASTVisitorException {
+    public Value visit(StringLiteral node) throws ASTVisitorException {
         System.out.println("-StringLiteral");
-
+        return new Value(Value_t.STRING, node.getLiteral());
     }
 
     @Override
-    public void visit(NullLiteral node) throws ASTVisitorException {
+    public Value visit(NullLiteral node) throws ASTVisitorException {
         System.out.println("-NullLiteral");
-
+        return new Value(Value_t.NULL, null);
     }
 
     @Override
-    public void visit(TrueLiteral node) throws ASTVisitorException {
+    public Value visit(TrueLiteral node) throws ASTVisitorException {
         System.out.println("-TrueLiteral");
-
+        return new Value(Value_t.BOOLEAN, Boolean.TRUE);
     }
 
     @Override
-    public void visit(FalseLiteral node) throws ASTVisitorException {
+    public Value visit(FalseLiteral node) throws ASTVisitorException {
         System.out.println("-FalseLiteral");
-
+        return new Value(Value_t.BOOLEAN, Boolean.FALSE);
     }
 
     @Override
-    public void visit(IfStatement node) throws ASTVisitorException {
+    public Value visit(IfStatement node) throws ASTVisitorException {
         System.out.println("-IfStatement");
 
         node.getExpression().accept(this);
@@ -411,20 +419,22 @@ public class ExecutionASTVisitor implements ASTVisitor {
         if (node.getElseStatement() != null) {
             node.getElseStatement().accept(this);
         }
+        return null;
     }
 
     @Override
-    public void visit(WhileStatement node) throws ASTVisitorException {
+    public Value visit(WhileStatement node) throws ASTVisitorException {
         System.out.println("-WhileStatement");
 
         node.getExpression().accept(this);
         enterLoopSpace();
         node.getStatement().accept(this);
         exitLoopSpace();
+        return null;
     }
 
     @Override
-    public void visit(ForStatement node) throws ASTVisitorException {
+    public Value visit(ForStatement node) throws ASTVisitorException {
         System.out.println("-ForStatement");
 
         for (Expression expression : node.getExpressionList1()) {
@@ -439,30 +449,33 @@ public class ExecutionASTVisitor implements ASTVisitor {
         enterLoopSpace();
         node.getStatement().accept(this);
         exitLoopSpace();
+        return null;
     }
 
     @Override
-    public void visit(BreakStatement node) throws ASTVisitorException {
+    public Value visit(BreakStatement node) throws ASTVisitorException {
         System.out.println("-BreakStatement");
         if (_inLoop == 0) {
 
             ASTUtils.error(node, "Use of 'break' while not in a loop.");
         }
+        return null;
     }
 
     @Override
-    public void visit(ContinueStatement node) throws ASTVisitorException {
+    public Value visit(ContinueStatement node) throws ASTVisitorException {
         System.out.println("-ContinueStatement");
         if (_inLoop == 0) {
 
             ASTUtils.error(node, "Use of 'continue' while not in a loop.");
         }
+        return null;
     }
 
     @Override
-    public void visit(ReturnStatement node) throws ASTVisitorException {
-
+    public Value visit(ReturnStatement node) throws ASTVisitorException {
         System.out.println("-ReturnStatement");
+
         if (_inFunction == 0) {
 
             ASTUtils.error(node, "Use of 'return' while not in a function.");
@@ -470,5 +483,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
         if (node.getExpression() != null) {
             node.getExpression().accept(this);
         }
+        return null;
     }
 }

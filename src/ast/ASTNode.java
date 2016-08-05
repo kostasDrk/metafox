@@ -2,6 +2,7 @@ package ast;
 
 import java.util.HashMap;
 import java.util.Map;
+import symbols.value.Value;
 
 /**
  * Abstract syntax tree node.
@@ -67,8 +68,9 @@ public abstract class ASTNode {
      * Accept an abstract syntax tree visitor.
      * 
      * @param visitor The AST visitor.
+     * @return 
      * @throws ASTVisitorException In case a visitor error occurs.
      */
-	public abstract void accept(ASTVisitor visitor) throws ASTVisitorException;
+	public abstract Value accept(ASTVisitor visitor) throws ASTVisitorException;
 	
 }

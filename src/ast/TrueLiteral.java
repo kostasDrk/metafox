@@ -1,5 +1,7 @@
 package ast;
 
+import symbols.value.Value;
+
 public class TrueLiteral extends Constant{
 
 	public TrueLiteral(){
@@ -7,7 +9,7 @@ public class TrueLiteral extends Constant{
 	}
 
 	@Override
-	public void accept(ASTVisitor visitor) throws ASTVisitorException {
-		visitor.visit(this);
+	public Value accept(ASTVisitor visitor) throws ASTVisitorException {
+		return visitor.visit(this);
 	}
 }

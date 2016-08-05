@@ -1,5 +1,6 @@
 package ast;
 import java.util.ArrayList;
+import symbols.value.Value;
 
 public class NormCall extends CallSuffix {
 
@@ -22,7 +23,7 @@ public class NormCall extends CallSuffix {
 	}
 
 	@Override
-	public void accept(ASTVisitor visitor) throws ASTVisitorException {
-		visitor.visit(this);
+	public Value accept(ASTVisitor visitor) throws ASTVisitorException {
+		return visitor.visit(this);
 	}
 }

@@ -1,5 +1,7 @@
 package ast;
 
+import symbols.value.Value;
+
 public class TermExpressionStmt extends TermExpression {
 
 	private Expression _expression;
@@ -17,7 +19,7 @@ public class TermExpressionStmt extends TermExpression {
 	}
 
 	@Override
-	public void accept(ASTVisitor visitor) throws ASTVisitorException {
-		visitor.visit(this);
+	public Value accept(ASTVisitor visitor) throws ASTVisitorException {
+		return visitor.visit(this);
 	}
 }

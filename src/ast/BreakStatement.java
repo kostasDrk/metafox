@@ -1,5 +1,7 @@
 package ast;
 
+import symbols.value.Value;
+
 public class BreakStatement extends Statement{
 
 	public BreakStatement(){
@@ -7,7 +9,7 @@ public class BreakStatement extends Statement{
 	}
 
 	@Override
-	public void accept(ASTVisitor visitor) throws ASTVisitorException {
-		visitor.visit(this);
-	}				
+	public Value accept(ASTVisitor visitor) throws ASTVisitorException {
+		return visitor.visit(this);
+	}			
 }

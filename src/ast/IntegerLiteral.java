@@ -1,5 +1,7 @@
 package ast;
 
+import symbols.value.Value;
+
 public class IntegerLiteral extends Constant{
 
 	private Integer _literal;
@@ -17,7 +19,7 @@ public class IntegerLiteral extends Constant{
 	}
 
 	@Override
-	public void accept(ASTVisitor visitor) throws ASTVisitorException {
-		visitor.visit(this);
+	public Value accept(ASTVisitor visitor) throws ASTVisitorException {
+		return visitor.visit(this);
 	}
 }
