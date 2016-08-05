@@ -36,48 +36,45 @@ import ast.UnaryExpression;
 import ast.WhileStatement;
 import ast.utils.ASTUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.ArrayDeque;
+import environment.EnvironmentStack;
+import environment.Value;
+import environment.Value_t;
 
-import symbolTable.SymbolTable;
-import symbolTable.entries.AFunctionEntry;
-import symbolTable.entries.ASymTableEntry;
-import symbolTable.entries.FormalVariableEntry;
-import symbolTable.entries.GlobalVariableEntry;
-import symbolTable.entries.LocalVariableEntry;
-import symbolTable.entries.UserFunctionEntry;
 import symbolTable.libraryFunctions.LibraryFunctions;
 
 public class ExecutionASTVisitor implements ASTVisitor {
 
-    private ArrayDeque<SymbolTable> _envStack;
-    private SymbolTable _genv;
-    private final SymbolTable _symTable;
+    private EnvironmentStack _envStack;
     private int _scope;
-    private int _inFunction;  
-    private int _inLoop;  
+    private int _inFunction;
+    private int _inLoop;
 
     private void enterScopeSpace() {
         System.out.println("EnterScopeSpace");
         _scope++;
+        _envStack.enterBlock(_scope);
     }
 
     private void exitScopeSpace() {
         System.out.println("ExitScopeSpace");
+
+        _envStack.exitBlock();
         _scope--;
     }
+
     private void enterFunctionSpace() {
         System.out.println("EnterFunctionSpace");
         _inFunction++;
+        _envStack.enterFunction();
     }
 
-    private void exitFunctionSpace() {
+    private Value exitFunctionSpace() {
         System.out.println("ExitFunctionSpace");
         _inFunction--;
+        return _envStack.exitFunction();
     }
 
-     private void enterLoopSpace() {
+    private void enterLoopSpace() {
         System.out.println("EnterLoopSpace");
         _inLoop++;
     }
@@ -87,17 +84,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
         _inLoop--;
     }
 
-    private void hideScopeSpaceAndExit() {
-        System.out.println("HiddeScopeSpaceAndExit");
-        _symTable.hide(_scope);
-        _scope--;
-    }
-
     public ExecutionASTVisitor() {
-        _genv = new SymbolTable();
-        _envStack = new ArrayDeque<SymbolTable>();
-        _envStack.push(_genv);
-        _symTable = _genv;
+        _envStack = new EnvironmentStack();
         _scope = 0;
         _inFunction = 0;
         _inLoop = 0;
@@ -107,12 +95,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public void visit(Program node) throws ASTVisitorException {
         System.out.println("-Program");
         for (Statement stmt : node.getStatements()) {
-           if(stmt != null)
-
-            stmt.accept(this);
+            if (stmt != null) {
+                stmt.accept(this);
+            }
         }
 
-        this._symTable.printAll();
     }
 
     @Override
@@ -156,22 +143,18 @@ public class ExecutionASTVisitor implements ASTVisitor {
         if (node.getExpression() != null) {
             node.getExpression().accept(this);
         } else {
-            if (node.getLvalue() instanceof IdentifierExpression){
-             IdentifierExpression name = (IdentifierExpression)node.getLvalue();
-             HashMap<String, Object> returnVal = _symTable.lookUpVariable(name.getIdentifier(), _scope);
-            ASymTableEntry symTableEntry = (ASymTableEntry) returnVal.get("symbolTableEntry");
+            if (node.getLvalue() instanceof IdentifierExpression) {
+                IdentifierExpression id = (IdentifierExpression) node.getLvalue();
+                String name = id.getIdentifier();
+                Value sybmolInfo = _envStack.lookupAll(name);
 
-            if (symTableEntry != null) {
-               
-                if (symTableEntry instanceof AFunctionEntry)
-                         {
+                if (sybmolInfo.getType() == Value_t.USER_FUNCTION
+                        || sybmolInfo.getType() == Value_t.LIBRARY_FUNCTION) {
 
-                    String msg = "Using function: "+  name.getIdentifier()
-                            + " as lvalue.";
+                    String msg = "Using function: " + name + " as lvalue.";
                     ASTUtils.error(node, msg);
                 }
             }
-        }
             node.getLvalue().accept(this);
         }
     }
@@ -183,35 +166,16 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         //if variable have :: at the front it is "global"
         if (!node.isLocal()) {
-            ASymTableEntry symTableEntry = _symTable.lookupGlobalScope(name);
-            if (symTableEntry == null) {
+            Value symbolInfo = _envStack.lookupGlobalScope(name);
+            if (symbolInfo == null) {
                 String msg = "Global variable: " + name + " doesn't exist";
                 ASTUtils.error(node, msg);
             }
 
         } else {
-            HashMap<String, Object> returnVal = _symTable.lookUpVariable(name, _scope);
-            ASymTableEntry symTableEntry = (ASymTableEntry) returnVal.get("symbolTableEntry");
-            boolean foundUserFunction = (boolean) returnVal.get("foundUserFunction");
-
-            if (symTableEntry == null) {
-                if (!node.isLocal() || this._scope == 0) {
-                    symTableEntry = new GlobalVariableEntry(name);
-                } else {
-                    symTableEntry = new LocalVariableEntry(name, _scope);
-                }
-
-                _symTable.insertSymbolTable(symTableEntry);
-            } else {
-                if (foundUserFunction
-                        && !symTableEntry.hasGlobalScope()
-                        && !(symTableEntry instanceof AFunctionEntry)
-                        && (_scope != symTableEntry.getScope())) {
-
-                    String msg = "Cannot access symbol: " + name
-                            + " (in scope " + symTableEntry.getScope() + " ).";
-                    ASTUtils.error(node, msg);
-                }
+            Value symbolInfo = _envStack.lookupAll(name);
+            if (symbolInfo == null) {
+                _envStack.insertSymbol(name);
             }
         }
     }
@@ -296,14 +260,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public void visit(ObjectDefinition node) throws ASTVisitorException {
         System.out.println("-ObjectDefinition");
 
-            enterScopeSpace();
         if (!node.getIndexedElementList().isEmpty()) {
             for (IndexedElement indexed : node.getIndexedElementList()) {
                 indexed.accept(this);
 
             }
         }
-         hideScopeSpaceAndExit();
     }
 
     @Override
@@ -317,12 +279,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public void visit(ArrayDef node) throws ASTVisitorException {
         System.out.println("-ArrayDef");
-     if(node.getExpressionList()!=null){
-        for (Expression expression : node.getExpressionList()) {
-            expression.accept(this);
+        if (node.getExpressionList() != null) {
+            for (Expression expression : node.getExpressionList()) {
+                expression.accept(this);
 
+            }
         }
-    }
 
     }
 
@@ -334,7 +296,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         for (Statement stmt : node.getStatementList()) {
             stmt.accept(this);
         }
-        hideScopeSpaceAndExit();
+        exitScopeSpace();
     }
 
     @Override
@@ -350,11 +312,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         String name = node.getFuncName();
         /*Function Name*/
-        ASymTableEntry symbolTableEntry = _symTable.lookUpLocalScope(name, _scope);
+        Value symbolInfo = _envStack.lookupCurrentScope(name);
         boolean isLibraryFunction = LibraryFunctions.isLibraryFunction(name);
 
-        if (symbolTableEntry != null) {
-            boolean isUserFunction = symbolTableEntry instanceof UserFunctionEntry;
+        if (symbolInfo != null) {
+            boolean isUserFunction = symbolInfo.getType() == Value_t.USER_FUNCTION;
             String msg;
             if (isUserFunction) {
                 msg = "Redeclaration of User-Function: " + name + ".";
@@ -374,14 +336,16 @@ public class ExecutionASTVisitor implements ASTVisitor {
             }
         }
 
+        symbolInfo = new Value(Value_t.USER_FUNCTION, node);
+        _envStack.insertSymbol(name, symbolInfo);
+
         /*Function arguments*/
         enterScopeSpace();
-        ArrayList<FormalVariableEntry> args = new ArrayList();
         for (IdentifierExpression argument : node.getArguments()) {
             name = argument.getIdentifier();
-            ASymTableEntry entry = _symTable.lookUpLocalScope(name, _scope);
+            symbolInfo = _envStack.lookupCurrentScope(name);
 
-            if (entry != null) {
+            if (symbolInfo != null) {
                 String msg = "Redeclaration of Formal-Argument: " + name + ".";
                 ASTUtils.error(node, msg);
             }
@@ -390,19 +354,15 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 String msg = "Formal-Argument shadows Library-Function: " + name + ".";
                 ASTUtils.error(node, msg);
             }
+            _envStack.insertSymbol(name);
 
-            FormalVariableEntry formalArg = new FormalVariableEntry(name, _scope);
-            args.add(formalArg);
-
-            _symTable.insertSymbolTable(formalArg);
         }
         exitScopeSpace();
 
-        ASymTableEntry symEntry = new UserFunctionEntry(node.getFuncName(), args, _scope);
-        _symTable.insertSymbolTable(symEntry);
-        enterFunctionSpace();
-        node.getBody().accept(this);
-        exitFunctionSpace();
+        //Do this on function call
+        //enterFunctionSpace();
+        //node.getBody().accept(this);
+        //exitFunctionSpace();
     }
 
     @Override
@@ -476,7 +436,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         for (Expression expression : node.getExpressionList2()) {
             expression.accept(this);
         }
-        enterLoopSpace(); 
+        enterLoopSpace();
         node.getStatement().accept(this);
         exitLoopSpace();
     }
@@ -484,18 +444,18 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public void visit(BreakStatement node) throws ASTVisitorException {
         System.out.println("-BreakStatement");
-         if( _inLoop == 0) {
-              
-              ASTUtils.error(node, "Use of 'break' while not in a loop.");
+        if (_inLoop == 0) {
+
+            ASTUtils.error(node, "Use of 'break' while not in a loop.");
         }
     }
 
     @Override
     public void visit(ContinueStatement node) throws ASTVisitorException {
         System.out.println("-ContinueStatement");
-           if( _inLoop == 0) {
-              
-              ASTUtils.error(node, "Use of 'continue' while not in a loop.");
+        if (_inLoop == 0) {
+
+            ASTUtils.error(node, "Use of 'continue' while not in a loop.");
         }
     }
 
@@ -503,12 +463,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public void visit(ReturnStatement node) throws ASTVisitorException {
 
         System.out.println("-ReturnStatement");
-        if( _inFunction == 0) {
-              
-              ASTUtils.error(node, "Use of 'return' while not in a function.");
-        }
-       if(node.getExpression()!=null)
+        if (_inFunction == 0) {
 
-        node.getExpression().accept(this);
+            ASTUtils.error(node, "Use of 'return' while not in a function.");
+        }
+        if (node.getExpression() != null) {
+            node.getExpression().accept(this);
+        }
     }
 }
