@@ -20,7 +20,6 @@ public abstract class ASymTableEntry {
         this._name = name;
         this._scope = scope;
         this._nextScopeListNode = null;
-        this._value = null;
     }
 
     public boolean isActive() {
@@ -49,14 +48,6 @@ public abstract class ASymTableEntry {
 
     public void setNextScopeListNode(ASymTableEntry nextScopeListNode) {
         this._nextScopeListNode = nextScopeListNode;
-    }
-
-    public Object getValue(){
-        return this._value;
-    }
-
-    public void setValue(Object value){
-        this._value = value;
     }
 
     @Override

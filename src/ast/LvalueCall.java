@@ -27,7 +27,7 @@ public class LvalueCall extends Call {
 	}
 
 	@Override
-	public Object accept(ASTVisitor visitor) throws ASTVisitorException {
+	public Value accept(ASTVisitor visitor) throws ASTVisitorException {
 		return visitor.visit(this);
 	}
 }

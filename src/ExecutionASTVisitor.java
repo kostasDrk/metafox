@@ -120,27 +120,27 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(ExpressionStatement node) throws ASTVisitorException {
         System.out.println("-ExpressionStatement");
-
-        node.getExpression().accept(this);
+        Value val = null;
+        val = node.getExpression().accept(this);
         return null;
     }
 
     @Override
     public Value visit(AssignmentExpression node) throws ASTVisitorException {
         System.out.println("-AssignmentExpression");
-        node.getLvalue().accept(this);
-        node.getExpression().accept(this);
+        Value left = node.getLvalue().accept(this);
+        Value right = node.getExpression().accept(this);
         return null;
     }
 
     @Override
     public Value visit(BinaryExpression node) throws ASTVisitorException {
         System.out.println("-BinaryExpression");
+        Value result = null;
+        Value left = node.getExpression1().accept(this);
+        Value right = node.getExpression2().accept(this);
 
-        node.getExpression1().accept(this);
-        //System.out.print(" " + node.getOperator() + " ");
-        node.getExpression2().accept(this);
-        return null;
+        return result;
     }
 
     @Override
@@ -438,7 +438,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(TrueLiteral node) throws ASTVisitorException {
         System.out.println("-TrueLiteral");
-        return new Value(true);
+        return new Value(Boolean.TRUE);
     }
 
     @Override
