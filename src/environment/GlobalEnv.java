@@ -1,5 +1,7 @@
 package environment;
 
+import symbols.value.Value_t;
+import symbols.value.Value;
 import libraryFunctions.LibraryFunctions;
 import static utils.Constants.GLOBAL_SCOPE;
 

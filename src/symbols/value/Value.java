@@ -1,4 +1,4 @@
-package environment;
+package symbols.value;
 
 public class Value<T> {
 

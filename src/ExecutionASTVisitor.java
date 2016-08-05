@@ -37,8 +37,8 @@ import ast.WhileStatement;
 import ast.utils.ASTUtils;
 
 import environment.EnvironmentStack;
-import environment.Value;
-import environment.Value_t;
+import symbols.value.Value;
+import symbols.value.Value_t;
 
 import libraryFunctions.LibraryFunctions;
 

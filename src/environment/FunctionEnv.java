@@ -1,5 +1,7 @@
 package environment;
 
+import symbols.value.Value;
+
 public class FunctionEnv extends Environment {
 
     private Value _returnVal;
