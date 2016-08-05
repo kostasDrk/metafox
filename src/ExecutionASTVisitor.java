@@ -40,7 +40,7 @@ import environment.EnvironmentStack;
 import environment.Value;
 import environment.Value_t;
 
-import symbolTable.libraryFunctions.LibraryFunctions;
+import libraryFunctions.LibraryFunctions;
 
 public class ExecutionASTVisitor implements ASTVisitor {
 

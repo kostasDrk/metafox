@@ -6,7 +6,7 @@
 package symbolTable;
 
 import ast.ASTVisitorException;
-import symbolTable.libraryFunctions.LibraryFunctions;
+import libraryFunctions.LibraryFunctions;
 
 import symbolTable.entries.ASymTableEntry;
 import symbolTable.entries.LibraryFunctionEntry;

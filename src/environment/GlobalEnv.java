@@ -1,6 +1,6 @@
 package environment;
 
-import symbolTable.libraryFunctions.LibraryFunctions;
+import libraryFunctions.LibraryFunctions;
 import static utils.Constants.GLOBAL_SCOPE;
 
 public class GlobalEnv extends Environment {
