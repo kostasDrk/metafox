@@ -11,6 +11,7 @@ rm parser.java
 
 rm sym.java
 
-rm symbolTable/*class
-rm symbolTable/libraryFunctions/*class
-rm symbolTable/entries/*class
+rm libraryFunctions/*class
+
+rm utils/*class
+rm environment/*class

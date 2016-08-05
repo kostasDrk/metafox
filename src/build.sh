@@ -16,10 +16,14 @@ javac MyLexer.java
 echo "[+] Compiling AST package"
 javac ast/*.java
 
-echo "[+] Compiling SymTable"
-javac symbolTable/libraryFunctions/*.java
-javac symbolTable/entries/*.java
-javac symbolTable/*.java
+echo "[+] Compiling LIbraryFunctions"
+javac libraryFunctions/*.java
+
+echo "[+] Compiling Utils"
+javac utils/*.java
+
+echo "[+] Compiling Environment"
+javac environment/*.java
 
 echo "[+] Compiling ASTVisitor"
 javac PrintASTVisitor.java
