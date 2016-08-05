@@ -69,6 +69,6 @@ public abstract class ASTNode {
      * @param visitor The AST visitor.
      * @throws ASTVisitorException In case a visitor error occurs.
      */
-	public abstract void accept(ASTVisitor visitor) throws ASTVisitorException;
+	public abstract Object accept(ASTVisitor visitor) throws ASTVisitorException;
 	
 }

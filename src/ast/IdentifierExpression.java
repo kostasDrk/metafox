@@ -27,8 +27,8 @@ public class IdentifierExpression extends Lvalue {
 	}
 
 	@Override
-	public void accept(ASTVisitor visitor) throws ASTVisitorException {
-		visitor.visit(this);
+	public Object accept(ASTVisitor visitor) throws ASTVisitorException {
+		return visitor.visit(this);
 	}
 	
 }

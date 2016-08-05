@@ -10,7 +10,6 @@ public abstract class AVariableEntry extends ASymTableEntry {
      */
     protected AVariableEntry(String name, int scope) {
         super(name, scope);
-
     }
 
 }
