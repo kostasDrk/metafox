@@ -27,6 +27,42 @@ public class Value<T> {
         this._data = _data;
     }
 
+    public boolean isNumeric(){
+        if(this.getType().equals(Value_t.INTEGER) || this.getType().equals(Value_t.REAL))
+            return true;
+        return false;
+    }
+
+    public boolean isInteger(){
+        if(this.getType().equals(Value_t.INTEGER))
+                return true;
+            return false;   
+    }
+
+    public boolean isReal(){
+        if(this.getType().equals(Value_t.REAL))
+                return true;
+            return false;   
+    }
+
+    public boolean isBoolean(){
+        if(this.getType().equals(Value_t.BOOLEAN))
+            return true;
+        return false;
+    }
+
+    public boolean isString(){
+        if(this.getType().equals(Value_t.STRING))
+            return true;
+        return false;
+    }
+
+    public boolean isUndefined(){
+        if(this.getType().equals(Value_t.UNDEFINED))
+            return true;
+        return false;
+    }
+
     @Override
     public String toString() {
         return String.format("Value_t: %-25s Data: %s", _type, _data)+".\t";
