@@ -5,6 +5,7 @@ import ast.AnonymousFunctionCall;
 import ast.ArrayDef;
 import ast.AssignmentExpression;
 import ast.BinaryExpression;
+import ast.Operator;
 import ast.Block;
 import ast.BreakStatement;
 import ast.ContinueStatement;
@@ -125,7 +126,74 @@ public class ExecutionASTVisitor implements ASTVisitor {
         Value result = null;
         Value left = node.getExpression1().accept(this);
         Value right = node.getExpression2().accept(this);
+        Operator op = node.getOperator();
 
+        
+
+        String typeError = "Incompatible operand types for '"+node.getOperator()+"': "+left.getType()+" and "+right.getType();
+        if((!left.isNumeric() || !right.isNumeric()) && (!left.isBoolean() || !right.isBoolean())){
+            if(left.isString() && right.isString() && op.equals(Operator.PLUS)){
+                result = new Value(Value_t.STRING, (String)left.getData()+(String)right.getData());
+            }else{
+                ASTUtils.error(node, typeError);
+            }
+        }
+
+        if(left.isNumeric()){
+            Double leftVal = (left.isReal()) ? (Double) left.getData() : ((Integer) left.getData()).doubleValue();
+            Double rightVal = (right.isReal()) ? (Double) right.getData() : ((Integer) right.getData()).doubleValue();
+            Double resultVal;
+            boolean realResult = false;
+            
+            if(op.isLogical()){
+                if(op.equals(Operator.CMP_EQUAL))
+                    result = new Value<Boolean>(Value_t.BOOLEAN, (Double.compare(leftVal, rightVal) == 0));
+                else if(op.equals(Operator.NOT_EQUAL))
+                    result = new Value<Boolean>(Value_t.BOOLEAN, (Double.compare(leftVal, rightVal) != 0));
+                else if(op.equals(Operator.GREATER_OR_EQUAL))
+                    result = new Value<Boolean>(Value_t.BOOLEAN, (leftVal >= rightVal));
+                else if(op.equals(Operator.GREATER))
+                    result = new Value<Boolean>(Value_t.BOOLEAN, (leftVal > rightVal));
+                else if(op.equals(Operator.LESS_OR_EQUAL))
+                    result = new Value<Boolean>(Value_t.BOOLEAN, (leftVal <= rightVal));
+                else if(op.equals(Operator.LESS))
+                    result = new Value<Boolean>(Value_t.BOOLEAN, (leftVal < rightVal));
+                else
+                    ASTUtils.error(node, typeError);
+            }else{
+                realResult = (left.isReal() || right.isReal()) ? true : false;
+                if(op.equals(Operator.PLUS))
+                    result = (realResult) ? new Value<Double>(Value_t.REAL, leftVal + rightVal)
+                                          : new Value<Integer>(Value_t.INTEGER, (Integer)((Double)(leftVal + rightVal)).intValue());
+                else if(op.equals(Operator.MINUS))
+                    result = (realResult) ? new Value<Double>(Value_t.REAL, leftVal - rightVal)
+                                          : new Value<Integer>(Value_t.INTEGER, (Integer)((Double)(leftVal - rightVal)).intValue());
+                else if(op.equals(Operator.MUL))
+                    result = (realResult) ? new Value<Double>(Value_t.REAL, leftVal * rightVal)
+                                          : new Value<Integer>(Value_t.INTEGER, (Integer)((Double)(leftVal * rightVal)).intValue());
+                else if(op.equals(Operator.DIV))
+                    result = (realResult) ? new Value<Double>(Value_t.REAL, leftVal / rightVal)
+                                          : new Value<Integer>(Value_t.INTEGER, (Integer)((Double)(leftVal / rightVal)).intValue());
+                else if(op.equals(Operator.MOD))
+                    result = (realResult) ? new Value<Double>(Value_t.REAL, leftVal%rightVal)
+                                          : new Value<Integer>(Value_t.INTEGER, (Integer)((Double)(leftVal % rightVal)).intValue());
+                }
+        }else{
+            // Boolean values
+            Boolean leftVal = (Boolean) left.getData();
+            Boolean rightVal = (Boolean) right.getData();
+            if(op.equals(Operator.LOGIC_AND))
+                result = new Value<Boolean>(Value_t.BOOLEAN, (leftVal && rightVal));
+            else if(op.equals(Operator.LOGIC_OR))
+                result = new Value<Boolean>(Value_t.BOOLEAN, (leftVal || rightVal));
+            else if(op.equals(Operator.CMP_EQUAL))
+                result = new Value<Boolean>(Value_t.BOOLEAN, (leftVal == rightVal));
+            else if(op.equals(Operator.NOT_EQUAL))
+                result = new Value<Boolean>(Value_t.BOOLEAN, (leftVal != rightVal));
+            else
+                ASTUtils.error(node, typeError);
+        }
+        // System.out.println("RESULT: "+result.getData());
         return result;
     }
 
@@ -133,8 +201,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(TermExpressionStmt node) throws ASTVisitorException {
         System.out.println("-TermExpressionStmt");
 
-        node.getExpression().accept(this);
-        return null;
+        Value result = node.getExpression().accept(this);
+        return result;
     }
 
     @Override
