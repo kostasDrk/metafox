@@ -13,6 +13,9 @@ javac parser.java
 echo "[+] Compiling Lexer"
 javac MyLexer.java
 
+echo "[+] Compiling Symbols package"
+javac symbols/value/*.java
+
 echo "[+] Compiling AST package"
 javac ast/*.java
 

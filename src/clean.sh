@@ -14,4 +14,7 @@ rm sym.java
 rm libraryFunctions/*class
 
 rm utils/*class
+
 rm environment/*class
+
+rm symbols/value/*.class
