@@ -382,7 +382,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(DoubleLiteral node) throws ASTVisitorException {
         System.out.println("-DoubleLiteral");
-        return new Value(Value_t.BOOLEAN, node.getLiteral());
+        return new Value(Value_t.REAL, node.getLiteral());
     }
 
     @Override
