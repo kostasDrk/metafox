@@ -40,7 +40,7 @@ import environment.EnvironmentStack;
 import symbols.value.Value;
 import symbols.value.Value_t;
 
-import libraryFunctions.LibraryFunctions;
+import libraryFunctions.LibraryFunction_t;
 
 public class ExecutionASTVisitor implements ASTVisitor {
 
@@ -320,7 +320,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         String name = node.getFuncName();
         /*Function Name*/
         Value symbolInfo = _envStack.lookupCurrentScope(name);
-        boolean isLibraryFunction = LibraryFunctions.isLibraryFunction(name);
+        boolean isLibraryFunction = LibraryFunction_t.isLibraryFunction(name);
 
         if (symbolInfo != null) {
             boolean isUserFunction = symbolInfo.getType() == Value_t.USER_FUNCTION;
@@ -357,7 +357,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 ASTUtils.error(node, msg);
             }
 
-            if (LibraryFunctions.isLibraryFunction(name)) {
+            if (LibraryFunction_t.isLibraryFunction(name)) {
                 String msg = "Formal-Argument shadows Library-Function: " + name + ".";
                 ASTUtils.error(node, msg);
             }
