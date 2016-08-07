@@ -27,45 +27,41 @@ public class Value<T> {
         this._data = _data;
     }
 
-    public boolean isNumeric(){
-        if(this.getType().equals(Value_t.INTEGER) || this.getType().equals(Value_t.REAL))
-            return true;
-        return false;
+    public boolean isUserFunction() {
+        return _type.equals(Value_t.USER_FUNCTION);
     }
 
-    public boolean isInteger(){
-        if(this.getType().equals(Value_t.INTEGER))
-                return true;
-            return false;   
+    public boolean isLibraryFunction() {
+        return _type.equals(Value_t.LIBRARY_FUNCTION);
     }
 
-    public boolean isReal(){
-        if(this.getType().equals(Value_t.REAL))
-                return true;
-            return false;   
+    public boolean isNumeric() {
+        return _type.equals(Value_t.INTEGER) || _type.equals(Value_t.REAL);
     }
 
-    public boolean isBoolean(){
-        if(this.getType().equals(Value_t.BOOLEAN))
-            return true;
-        return false;
+    public boolean isInteger() {
+        return _type.equals(Value_t.INTEGER);
     }
 
-    public boolean isString(){
-        if(this.getType().equals(Value_t.STRING))
-            return true;
-        return false;
+    public boolean isReal() {
+        return _type.equals(Value_t.REAL);
     }
 
-    public boolean isUndefined(){
-        if(this.getType().equals(Value_t.UNDEFINED))
-            return true;
-        return false;
+    public boolean isBoolean() {
+        return _type.equals(Value_t.BOOLEAN);
+    }
+
+    public boolean isString() {
+        return _type.equals(Value_t.STRING);
+    }
+
+    public boolean isUndefined() {
+        return _type.equals(Value_t.UNDEFINED);
     }
 
     @Override
     public String toString() {
-        return String.format("Value_t: %-25s Data: %s", _type, _data)+".\t";
+        return String.format("Value_t: %-25s Data: %s", _type, _data) + ".\t";
     }
 
 }

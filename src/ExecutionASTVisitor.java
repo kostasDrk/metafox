@@ -38,14 +38,20 @@ import ast.WhileStatement;
 import ast.utils.ASTUtils;
 
 import environment.EnvironmentStack;
+
 import symbols.value.Value;
 import symbols.value.Value_t;
 
 import libraryFunctions.LibraryFunction_t;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import libraryFunctions.LibraryFunctions;
+import static utils.Constants.LIBRARY_FUNC_ARG;
+
 public class ExecutionASTVisitor implements ASTVisitor {
 
-    private EnvironmentStack _envStack;
+    private final EnvironmentStack _envStack;
     private int _scope;
     private int _inFunction;
     private int _inLoop;
@@ -69,6 +75,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         System.out.println("EnterFunctionSpace");
         _inFunction++;
         _envStack.enterFunction();
+        enterScopeSpace();
     }
 
     private Value exitFunctionSpace() {
@@ -306,8 +313,46 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(LvalueCall node) throws ASTVisitorException {
         System.out.println("-LvalueCall");
 
-        node.getLvalue().accept(this);
-        node.getCallSuffix().accept(this);
+        Value function = node.getLvalue().accept(this);
+//        if (!function.isUserFunction() && !function.isLibraryFunction()) {
+//            String msg = "Function call: Symbol does not a function.";
+//            ASTUtils.error(node, msg);
+//        }
+
+        enterFunctionSpace();
+
+        if (function.isUserFunction()) {
+            //Get Actual Arguments
+            Value parameters = node.getCallSuffix().accept(this);
+            HashMap<Integer, Value> actualArguments = (HashMap<Integer, Value>) parameters.getData();
+
+            int count = 0;
+            ArrayList<IdentifierExpression> arguments = ((FunctionDef) function.getData()).getArguments();
+
+            for (IdentifierExpression argument : arguments) {
+                String name = argument.getIdentifier();
+                System.out.println(name);
+                Value argumentInfo = actualArguments.get(count);
+                _envStack.insertSymbol(name, argumentInfo);
+
+                count++;
+
+            }
+
+            ((FunctionDef) function.getData()).getBody().accept(this);
+        } else if (function.isLibraryFunction()) {
+            //Get Actual Arguments
+            Value parameters = node.getCallSuffix().accept(this);
+            HashMap<Integer, Value> actualArguments = (HashMap<Integer, Value>) parameters.getData();
+
+            int count = 0;
+            for (int i = 0; i < actualArguments.size(); i++) {
+                _envStack.insertSymbol(LIBRARY_FUNC_ARG + i, actualArguments.get(i));
+            }
+            LibraryFunctions.libraryFunction_print();
+        }
+        exitFunctionSpace();
+
         return null;
     }
 
@@ -326,12 +371,17 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(NormCall node) throws ASTVisitorException {
         System.out.println("-NormCall");
-
+        HashMap<Integer, Value> arguments = new HashMap<>();
+        int count = 0;
         for (Expression expression : node.getExpressionList()) {
-            expression.accept(this);
-
+            Value argValue = expression.accept(this);
+            arguments.put(count, argValue);
+            System.out.println(argValue);
+            count++;
         }
-        return null;
+
+        //Change to fox Table.
+        return new Value(Value_t.TABLE, arguments);
     }
 
     @Override
@@ -430,7 +480,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         symbolInfo = new Value(Value_t.USER_FUNCTION, node);
         _envStack.insertSymbol(name, symbolInfo);
 
-        /*Function arguments*/
+        /*Function ONLY Check Arguments*/
         enterScopeSpace();
         for (IdentifierExpression argument : node.getArguments()) {
             name = argument.getIdentifier();
@@ -450,11 +500,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         }
         exitScopeSpace();
 
-        //Do this on function call
-        //enterFunctionSpace();
-        //node.getBody().accept(this);
-        //exitFunctionSpace();
-        return null;
+        return symbolInfo;
     }
 
     @Override
