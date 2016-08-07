@@ -382,35 +382,41 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(ObjectDefinition node) throws ASTVisitorException {
         System.out.println("-ObjectDefinition");
-
+        HashMap<Value, Value> objectData = new HashMap<>();
         if (!node.getIndexedElementList().isEmpty()) {
             for (IndexedElement indexed : node.getIndexedElementList()) {
-                indexed.accept(this);
+               ArrayList <Value> data = (ArrayList <Value>)indexed.accept(this).getData();
+                objectData.put(data.get(0), data.get(1));
             }
+          
         }
 
-        return null;
+        return new Value(Value_t.OBJECT, objectData);
     }
 
     @Override
     public Value visit(IndexedElement node) throws ASTVisitorException {
         System.out.println("-IndexedElement");
-
-        node.getExpression1().accept(this);
-        node.getExpression2().accept(this);
-        return null;
+        ArrayList <Value> objectData = new ArrayList <>();
+         objectData.add(node.getExpression1().accept(this));
+         objectData.add(node.getExpression2().accept(this));
+        return new Value(Value_t.UNDEFINED, objectData);
     }
 
     @Override
     public Value visit(ArrayDef node) throws ASTVisitorException {
         System.out.println("-ArrayDef");
-
+        HashMap<Integer, Value> arrayData = new HashMap<>();
+        int count = 0;
         if (node.getExpressionList() != null) {
             for (Expression expression : node.getExpressionList()) {
-                expression.accept(this);
+            Value argValue = expression.accept(this);
+            arrayData.put(count, argValue);
+            System.out.println(argValue);
+            count++;
             }
         }
-        return null;
+        return new Value(Value_t.TABLE, arrayData);
     }
 
     @Override
