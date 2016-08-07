@@ -148,14 +148,15 @@ public class ExecutionASTVisitor implements ASTVisitor {
             if (node.getLvalue() instanceof IdentifierExpression) {
                 IdentifierExpression id = (IdentifierExpression) node.getLvalue();
                 String name = id.getIdentifier();
-                Value sybmolInfo = _envStack.lookupAll(name);
-
+                 Value sybmolInfo = _envStack.lookupAll(name);
+           if (sybmolInfo!=null) {
                 if (sybmolInfo.getType() == Value_t.USER_FUNCTION
                         || sybmolInfo.getType() == Value_t.LIBRARY_FUNCTION) {
 
                     String msg = "Using function: " + name + " as lvalue.";
                     ASTUtils.error(node, msg);
                 }
+            }
             }
             node.getLvalue().accept(this);
         }
