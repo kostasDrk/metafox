@@ -125,7 +125,6 @@ non terminal FunctionDef funcdef;
 non terminal String functionName;
 non terminal AssignmentExpression assignexpr;
 non terminal TermExpression term;
-non terminal Operator op;
 non terminal Lvalue lvalue;
 non terminal Primary primary;
 non terminal Call call;
@@ -233,9 +232,81 @@ expr ::=	assignexpr:assignex
 			{:
 				RESULT = assignex;
 			:}
-			|expr:ex1 op:oper expr:ex2
+			|expr:ex1 PLUS expr:ex2
 			{:
-				RESULT = new BinaryExpression(oper, ex1, ex2);
+				RESULT = new BinaryExpression(Operator.PLUS, ex1, ex2);
+				RESULT.setLine(ex1left);
+				RESULT.setColumn(ex1right);
+			:}
+			|expr:ex1 MINUS expr:ex2
+			{:
+				RESULT = new BinaryExpression(Operator.MINUS, ex1, ex2);
+				RESULT.setLine(ex1left);
+				RESULT.setColumn(ex1right);
+			:}
+			|expr:ex1 MUL expr:ex2
+			{:
+				RESULT = new BinaryExpression(Operator.MUL, ex1, ex2);
+				RESULT.setLine(ex1left);
+				RESULT.setColumn(ex1right);
+			:}
+			|expr:ex1 DIV expr:ex2
+			{:
+				RESULT = new BinaryExpression(Operator.DIV, ex1, ex2);
+				RESULT.setLine(ex1left);
+				RESULT.setColumn(ex1right);
+			:}
+			|expr:ex1 MOD expr:ex2
+			{:
+				RESULT = new BinaryExpression(Operator.MOD, ex1, ex2);
+				RESULT.setLine(ex1left);
+				RESULT.setColumn(ex1right);
+			:}
+			|expr:ex1 LOGIC_AND expr:ex2
+			{:
+				RESULT = new BinaryExpression(Operator.LOGIC_AND, ex1, ex2);
+				RESULT.setLine(ex1left);
+				RESULT.setColumn(ex1right);
+			:}
+			|expr:ex1 LOGIC_OR expr:ex2
+			{:
+				RESULT = new BinaryExpression(Operator.LOGIC_OR, ex1, ex2);
+				RESULT.setLine(ex1left);
+				RESULT.setColumn(ex1right);
+			:}
+			|expr:ex1 CMP_EQUAL expr:ex2
+			{:
+				RESULT = new BinaryExpression(Operator.CMP_EQUAL, ex1, ex2);
+				RESULT.setLine(ex1left);
+				RESULT.setColumn(ex1right);
+			:}
+			|expr:ex1 NOT_EQUAL expr:ex2
+			{:
+				RESULT = new BinaryExpression(Operator.NOT_EQUAL, ex1, ex2);
+				RESULT.setLine(ex1left);
+				RESULT.setColumn(ex1right);
+			:}
+			|expr:ex1 GREATER_OR_EQUAL expr:ex2
+			{:
+				RESULT = new BinaryExpression(Operator.GREATER_OR_EQUAL, ex1, ex2);
+				RESULT.setLine(ex1left);
+				RESULT.setColumn(ex1right);
+			:}
+			|expr:ex1 GREATER expr:ex2
+			{:
+				RESULT = new BinaryExpression(Operator.GREATER, ex1, ex2);
+				RESULT.setLine(ex1left);
+				RESULT.setColumn(ex1right);
+			:}
+			|expr:ex1 LESS_OR_EQUAL expr:ex2
+			{:
+				RESULT = new BinaryExpression(Operator.LESS_OR_EQUAL, ex1, ex2);
+				RESULT.setLine(ex1left);
+				RESULT.setColumn(ex1right);
+			:}
+			|expr:ex1 LESS expr:ex2
+			{:
+				RESULT = new BinaryExpression(Operator.LESS, ex1, ex2);
 				RESULT.setLine(ex1left);
 				RESULT.setColumn(ex1right);
 			:}
@@ -246,7 +317,7 @@ expr ::=	assignexpr:assignex
 			;
 
 
-op ::=       PLUS
+/*op ::=       PLUS
 			{:
 				RESULT = Operator.PLUS;
 			:}
@@ -303,7 +374,7 @@ op ::=       PLUS
 				RESULT = Operator.LOGIC_NOT;
 			:}
             ;
-
+*/
 term ::=	 LEFT_PARENTHESIS expr:ex RIGHT_PARENTHESIS
 			{:
 				//RESULT = ex;
