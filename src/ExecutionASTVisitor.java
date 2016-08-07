@@ -49,6 +49,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
     private int _scope;
     private int _inFunction;
     private int _inLoop;
+    private boolean _inAssignment;
+    private String _lvalueAssign;
 
     private void enterScopeSpace() {
         System.out.println("EnterScopeSpace");
@@ -90,6 +92,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
         _scope = 0;
         _inFunction = 0;
         _inLoop = 0;
+        _inAssignment = false;
+        _lvalueAssign = null;
     }
 
     @Override
@@ -115,8 +119,13 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(AssignmentExpression node) throws ASTVisitorException {
         System.out.println("-AssignmentExpression");
+        _inAssignment = true;
         Value left = node.getLvalue().accept(this);
+        _inAssignment = false;
         Value right = node.getExpression().accept(this);
+        _envStack.insertSymbol(_lvalueAssign, right);
+        _lvalueAssign = null;
+        // return right;
         return null;
     }
 
@@ -134,6 +143,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
         if((!left.isNumeric() || !right.isNumeric()) && (!left.isBoolean() || !right.isBoolean())){
             if(left.isString() && right.isString() && op.equals(Operator.PLUS)){
                 result = new Value(Value_t.STRING, (String)left.getData()+(String)right.getData());
+                // System.out.println("RESULT: "+result.getData());
+                return result;
             }else{
                 ASTUtils.error(node, typeError);
             }
@@ -193,7 +204,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
             else
                 ASTUtils.error(node, typeError);
         }
-        // System.out.println("RESULT: "+result.getData());
+        System.out.println("RESULT: "+result.getData());
         return result;
     }
 
@@ -234,21 +245,29 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(IdentifierExpression node) throws ASTVisitorException {
         System.out.println("-IdentifierExpression");
         String name = node.getIdentifier();
+        Value symbolInfo = null;
 
         //if variable have :: at the front it is "global"
         if (!node.isLocal()) {
-            Value symbolInfo = _envStack.lookupGlobalScope(name);
+            symbolInfo = _envStack.lookupGlobalScope(name);
             if (symbolInfo == null) {
                 String msg = "Global variable: " + name + " doesn't exist";
                 ASTUtils.error(node, msg);
             }
         } else {
-            Value symbolInfo = _envStack.lookupAll(name);
+            symbolInfo = _envStack.lookupAll(name);
             if (symbolInfo == null) {
-                _envStack.insertSymbol(name);
+                if(_inAssignment){
+                    _lvalueAssign = name;
+                    _envStack.insertSymbol(name);
+                    symbolInfo = _envStack.lookupCurrentScope(name); // Retrieve newly added symbol
+                }else{
+                    String msg = "Undefined reference to: "+name;
+                    ASTUtils.error(node, msg);
+                }
             }
         }
-        return null;
+        return symbolInfo;
     }
 
     @Override
@@ -395,10 +414,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
             String msg;
             if (isUserFunction) {
                 msg = "Redeclaration of User-Function: " + name + ".";
-
             } else if (isLibraryFunction) {
                 msg = "User-Function shadows Library-Function: " + name + ".";
-
             } else {
                 msg = "User-Function already declared as Variable: " + name + ".";
             }
@@ -407,7 +424,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
             if (isLibraryFunction) {
                 String msg = "User-Function Shadows Library-Function: " + name + ".";
                 ASTUtils.error(node, msg);
-
             }
         }
 
