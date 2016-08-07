@@ -27,9 +27,17 @@ public class Value<T> {
         this._data = _data;
     }
 
+    public boolean isUserFunction() {
+        return _type.equals(Value_t.USER_FUNCTION);
+    }
+
+    public boolean isLibraryFunction() {
+        return _type.equals(Value_t.LIBRARY_FUNCTION);
+    }
+
     @Override
     public String toString() {
-        return String.format("Value_t: %-25s Data: %s", _type, _data)+".\t";
+        return String.format("Value_t: %-25s Data: %s", _type, _data) + ".\t";
     }
 
 }
