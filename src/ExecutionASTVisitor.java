@@ -49,6 +49,7 @@ import libraryFunctions.LibraryFunctions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 import static utils.Constants.ENTER_FUNCTION_ENV_INIT_SCOPE;
 import static utils.Constants.LIBRARY_FUNC_ARG;
@@ -163,41 +164,41 @@ public class ExecutionASTVisitor implements ASTVisitor {
             Double leftVal = (left.isReal()) ? (Double) left.getData() : ((Integer) left.getData()).doubleValue();
             Double rightVal = (right.isReal()) ? (Double) right.getData() : ((Integer) right.getData()).doubleValue();
             Double resultVal;
-            boolean realResult = false;
+            boolean realResult;
 
             if (op.isLogical()) {
                 if (op.equals(Operator.CMP_EQUAL)) {
-                    result = new StaticVal<Boolean>(Value_t.BOOLEAN, (Double.compare(leftVal, rightVal) == 0));
+                    result = new StaticVal<>(Value_t.BOOLEAN, (Double.compare(leftVal, rightVal) == 0));
                 } else if (op.equals(Operator.NOT_EQUAL)) {
-                    result = new StaticVal<Boolean>(Value_t.BOOLEAN, (Double.compare(leftVal, rightVal) != 0));
+                    result = new StaticVal<>(Value_t.BOOLEAN, (Double.compare(leftVal, rightVal) != 0));
                 } else if (op.equals(Operator.GREATER_OR_EQUAL)) {
-                    result = new StaticVal<Boolean>(Value_t.BOOLEAN, (leftVal >= rightVal));
+                    result = new StaticVal<>(Value_t.BOOLEAN, (leftVal >= rightVal));
                 } else if (op.equals(Operator.GREATER)) {
-                    result = new StaticVal<Boolean>(Value_t.BOOLEAN, (leftVal > rightVal));
+                    result = new StaticVal<>(Value_t.BOOLEAN, (leftVal > rightVal));
                 } else if (op.equals(Operator.LESS_OR_EQUAL)) {
-                    result = new StaticVal<Boolean>(Value_t.BOOLEAN, (leftVal <= rightVal));
+                    result = new StaticVal<>(Value_t.BOOLEAN, (leftVal <= rightVal));
                 } else if (op.equals(Operator.LESS)) {
-                    result = new StaticVal<Boolean>(Value_t.BOOLEAN, (leftVal < rightVal));
+                    result = new StaticVal<>(Value_t.BOOLEAN, (leftVal < rightVal));
                 } else {
                     ASTUtils.error(node, typeError);
                 }
             } else {
-                realResult = (left.isReal() || right.isReal()) ? true : false;
+                realResult = (left.isReal() || right.isReal());
                 if (op.equals(Operator.PLUS)) {
-                    result = (realResult) ? new StaticVal<Double>(Value_t.REAL, leftVal + rightVal)
-                            : new StaticVal<Integer>(Value_t.INTEGER, (Integer) ((Double) (leftVal + rightVal)).intValue());
+                    result = (realResult) ? new StaticVal<>(Value_t.REAL, leftVal + rightVal)
+                            : new StaticVal<>(Value_t.INTEGER, (Integer) ((Double) (leftVal + rightVal)).intValue());
                 } else if (op.equals(Operator.MINUS)) {
-                    result = (realResult) ? new StaticVal<Double>(Value_t.REAL, leftVal - rightVal)
-                            : new StaticVal<Integer>(Value_t.INTEGER, (Integer) ((Double) (leftVal - rightVal)).intValue());
+                    result = (realResult) ? new StaticVal<>(Value_t.REAL, leftVal - rightVal)
+                            : new StaticVal<>(Value_t.INTEGER, (Integer) ((Double) (leftVal - rightVal)).intValue());
                 } else if (op.equals(Operator.MUL)) {
-                    result = (realResult) ? new StaticVal<Double>(Value_t.REAL, leftVal * rightVal)
-                            : new StaticVal<Integer>(Value_t.INTEGER, (Integer) ((Double) (leftVal * rightVal)).intValue());
+                    result = (realResult) ? new StaticVal<>(Value_t.REAL, leftVal * rightVal)
+                            : new StaticVal<>(Value_t.INTEGER, (Integer) ((Double) (leftVal * rightVal)).intValue());
                 } else if (op.equals(Operator.DIV)) {
-                    result = (realResult) ? new StaticVal<Double>(Value_t.REAL, leftVal / rightVal)
-                            : new StaticVal<Integer>(Value_t.INTEGER, (Integer) ((Double) (leftVal / rightVal)).intValue());
+                    result = (realResult) ? new StaticVal<>(Value_t.REAL, leftVal / rightVal)
+                            : new StaticVal<>(Value_t.INTEGER, (Integer) ((Double) (leftVal / rightVal)).intValue());
                 } else if (op.equals(Operator.MOD)) {
-                    result = (realResult) ? new StaticVal<Double>(Value_t.REAL, leftVal % rightVal)
-                            : new StaticVal<Integer>(Value_t.INTEGER, (Integer) ((Double) (leftVal % rightVal)).intValue());
+                    result = (realResult) ? new StaticVal<>(Value_t.REAL, leftVal % rightVal)
+                            : new StaticVal<>(Value_t.INTEGER, (Integer) ((Double) (leftVal % rightVal)).intValue());
                 }
             }
         } else {
@@ -205,13 +206,13 @@ public class ExecutionASTVisitor implements ASTVisitor {
             Boolean leftVal = (Boolean) left.getData();
             Boolean rightVal = (Boolean) right.getData();
             if (op.equals(Operator.LOGIC_AND)) {
-                result = new StaticVal<Boolean>(Value_t.BOOLEAN, (leftVal && rightVal));
+                result = new StaticVal<>(Value_t.BOOLEAN, (leftVal && rightVal));
             } else if (op.equals(Operator.LOGIC_OR)) {
-                result = new StaticVal<Boolean>(Value_t.BOOLEAN, (leftVal || rightVal));
+                result = new StaticVal<>(Value_t.BOOLEAN, (leftVal || rightVal));
             } else if (op.equals(Operator.CMP_EQUAL)) {
-                result = new StaticVal<Boolean>(Value_t.BOOLEAN, (leftVal == rightVal));
+                result = new StaticVal<>(Value_t.BOOLEAN, (Objects.equals(leftVal, rightVal)));
             } else if (op.equals(Operator.NOT_EQUAL)) {
-                result = new StaticVal<Boolean>(Value_t.BOOLEAN, (leftVal != rightVal));
+                result = new StaticVal<>(Value_t.BOOLEAN, (!Objects.equals(leftVal, rightVal)));
             } else {
                 ASTUtils.error(node, typeError);
             }
@@ -258,7 +259,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(IdentifierExpression node) throws ASTVisitorException {
         System.out.println("-IdentifierExpression");
         String name = node.getIdentifier();
-        Value symbolInfo = null;
+        Value symbolInfo;
 
         //if variable has :: at the front it is "global"
         if (!node.isLocal()) {
