@@ -30,6 +30,12 @@ public class EnvironmentStack {
         return returnVal;
     }
 
+    public void setReturnValue(Value value){
+        System.out.println("##settingRetValue");
+        FunctionEnv functionEnv = (FunctionEnv)topEnv();
+        functionEnv.setReturnVal(value);
+    }
+
     public void enterBlock(int scope) {
         System.out.println("##enterBlock: " + scope);
         topEnv().push(new EnvironmentScope(scope));
@@ -77,6 +83,11 @@ public class EnvironmentStack {
         System.out.print("##insertSymbol: " + name);
         topEnv().insert(name, new Value());
         System.out.println(toString());
+    }
+
+    public void setValue(Value dest, Value src){
+        dest.setType(src.getType());
+        dest.setData(src.getData());
     }
 
     @Override
