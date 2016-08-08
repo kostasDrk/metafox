@@ -41,12 +41,15 @@ import environment.EnvironmentStack;
 
 import symbols.value.Value;
 import symbols.value.Value_t;
+import symbols.value.StaticVal;
+import symbols.value.DynamicVal;
 
 import libraryFunctions.LibraryFunction_t;
+import libraryFunctions.LibraryFunctions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import libraryFunctions.LibraryFunctions;
+
 import static utils.Constants.LIBRARY_FUNC_ARG;
 
 public class ExecutionASTVisitor implements ASTVisitor {
@@ -123,7 +126,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         System.out.println("-AssignmentExpression");
         Value left = node.getLvalue().accept(this);
         Value right = node.getExpression().accept(this);
-        _envStack.setValue(left, right);
+        _envStack.setValue((DynamicVal) left, right);
         System.out.println(_envStack.toString());
         return null;
     }
@@ -136,71 +139,74 @@ public class ExecutionASTVisitor implements ASTVisitor {
         Value right = node.getExpression2().accept(this);
         Operator op = node.getOperator();
 
-        System.out.println("left: "+left);
-        String typeError = "Incompatible operand types for '"+node.getOperator()+"': "+left.getType()+" and "+right.getType();
-        if((!left.isNumeric() || !right.isNumeric()) && (!left.isBoolean() || !right.isBoolean())){
-            if(left.isString() && right.isString() && op.equals(Operator.PLUS)){
-                result = new Value(Value_t.STRING, (String)left.getData()+(String)right.getData());
+        System.out.println("left: " + left);
+        String typeError = "Incompatible operand types for '" + node.getOperator() + "': " + left.getType() + " and " + right.getType();
+        if ((!left.isNumeric() || !right.isNumeric()) && (!left.isBoolean() || !right.isBoolean())) {
+            if (left.isString() && right.isString() && op.equals(Operator.PLUS)) {
+                result = new StaticVal(Value_t.STRING, (String) left.getData() + (String) right.getData());
                 // System.out.println("RESULT: "+result.getData());
                 return result;
-            }else{
+            } else {
                 ASTUtils.error(node, typeError);
             }
         }
 
-        if(left.isNumeric()){
+        if (left.isNumeric()) {
             Double leftVal = (left.isReal()) ? (Double) left.getData() : ((Integer) left.getData()).doubleValue();
             Double rightVal = (right.isReal()) ? (Double) right.getData() : ((Integer) right.getData()).doubleValue();
             Double resultVal;
             boolean realResult = false;
-            
-            if(op.isLogical()){
-                if(op.equals(Operator.CMP_EQUAL))
-                    result = new Value<Boolean>(Value_t.BOOLEAN, (Double.compare(leftVal, rightVal) == 0));
-                else if(op.equals(Operator.NOT_EQUAL))
-                    result = new Value<Boolean>(Value_t.BOOLEAN, (Double.compare(leftVal, rightVal) != 0));
-                else if(op.equals(Operator.GREATER_OR_EQUAL))
-                    result = new Value<Boolean>(Value_t.BOOLEAN, (leftVal >= rightVal));
-                else if(op.equals(Operator.GREATER))
-                    result = new Value<Boolean>(Value_t.BOOLEAN, (leftVal > rightVal));
-                else if(op.equals(Operator.LESS_OR_EQUAL))
-                    result = new Value<Boolean>(Value_t.BOOLEAN, (leftVal <= rightVal));
-                else if(op.equals(Operator.LESS))
-                    result = new Value<Boolean>(Value_t.BOOLEAN, (leftVal < rightVal));
-                else
+
+            if (op.isLogical()) {
+                if (op.equals(Operator.CMP_EQUAL)) {
+                    result = new StaticVal<Boolean>(Value_t.BOOLEAN, (Double.compare(leftVal, rightVal) == 0));
+                } else if (op.equals(Operator.NOT_EQUAL)) {
+                    result = new StaticVal<Boolean>(Value_t.BOOLEAN, (Double.compare(leftVal, rightVal) != 0));
+                } else if (op.equals(Operator.GREATER_OR_EQUAL)) {
+                    result = new StaticVal<Boolean>(Value_t.BOOLEAN, (leftVal >= rightVal));
+                } else if (op.equals(Operator.GREATER)) {
+                    result = new StaticVal<Boolean>(Value_t.BOOLEAN, (leftVal > rightVal));
+                } else if (op.equals(Operator.LESS_OR_EQUAL)) {
+                    result = new StaticVal<Boolean>(Value_t.BOOLEAN, (leftVal <= rightVal));
+                } else if (op.equals(Operator.LESS)) {
+                    result = new StaticVal<Boolean>(Value_t.BOOLEAN, (leftVal < rightVal));
+                } else {
                     ASTUtils.error(node, typeError);
-            }else{
-                realResult = (left.isReal() || right.isReal()) ? true : false;
-                if(op.equals(Operator.PLUS))
-                    result = (realResult) ? new Value<Double>(Value_t.REAL, leftVal + rightVal)
-                                          : new Value<Integer>(Value_t.INTEGER, (Integer)((Double)(leftVal + rightVal)).intValue());
-                else if(op.equals(Operator.MINUS))
-                    result = (realResult) ? new Value<Double>(Value_t.REAL, leftVal - rightVal)
-                                          : new Value<Integer>(Value_t.INTEGER, (Integer)((Double)(leftVal - rightVal)).intValue());
-                else if(op.equals(Operator.MUL))
-                    result = (realResult) ? new Value<Double>(Value_t.REAL, leftVal * rightVal)
-                                          : new Value<Integer>(Value_t.INTEGER, (Integer)((Double)(leftVal * rightVal)).intValue());
-                else if(op.equals(Operator.DIV))
-                    result = (realResult) ? new Value<Double>(Value_t.REAL, leftVal / rightVal)
-                                          : new Value<Integer>(Value_t.INTEGER, (Integer)((Double)(leftVal / rightVal)).intValue());
-                else if(op.equals(Operator.MOD))
-                    result = (realResult) ? new Value<Double>(Value_t.REAL, leftVal%rightVal)
-                                          : new Value<Integer>(Value_t.INTEGER, (Integer)((Double)(leftVal % rightVal)).intValue());
                 }
-        }else{
+            } else {
+                realResult = (left.isReal() || right.isReal()) ? true : false;
+                if (op.equals(Operator.PLUS)) {
+                    result = (realResult) ? new StaticVal<Double>(Value_t.REAL, leftVal + rightVal)
+                            : new StaticVal<Integer>(Value_t.INTEGER, (Integer) ((Double) (leftVal + rightVal)).intValue());
+                } else if (op.equals(Operator.MINUS)) {
+                    result = (realResult) ? new StaticVal<Double>(Value_t.REAL, leftVal - rightVal)
+                            : new StaticVal<Integer>(Value_t.INTEGER, (Integer) ((Double) (leftVal - rightVal)).intValue());
+                } else if (op.equals(Operator.MUL)) {
+                    result = (realResult) ? new StaticVal<Double>(Value_t.REAL, leftVal * rightVal)
+                            : new StaticVal<Integer>(Value_t.INTEGER, (Integer) ((Double) (leftVal * rightVal)).intValue());
+                } else if (op.equals(Operator.DIV)) {
+                    result = (realResult) ? new StaticVal<Double>(Value_t.REAL, leftVal / rightVal)
+                            : new StaticVal<Integer>(Value_t.INTEGER, (Integer) ((Double) (leftVal / rightVal)).intValue());
+                } else if (op.equals(Operator.MOD)) {
+                    result = (realResult) ? new StaticVal<Double>(Value_t.REAL, leftVal % rightVal)
+                            : new StaticVal<Integer>(Value_t.INTEGER, (Integer) ((Double) (leftVal % rightVal)).intValue());
+                }
+            }
+        } else {
             // Boolean values
             Boolean leftVal = (Boolean) left.getData();
             Boolean rightVal = (Boolean) right.getData();
-            if(op.equals(Operator.LOGIC_AND))
-                result = new Value<Boolean>(Value_t.BOOLEAN, (leftVal && rightVal));
-            else if(op.equals(Operator.LOGIC_OR))
-                result = new Value<Boolean>(Value_t.BOOLEAN, (leftVal || rightVal));
-            else if(op.equals(Operator.CMP_EQUAL))
-                result = new Value<Boolean>(Value_t.BOOLEAN, (leftVal == rightVal));
-            else if(op.equals(Operator.NOT_EQUAL))
-                result = new Value<Boolean>(Value_t.BOOLEAN, (leftVal != rightVal));
-            else
+            if (op.equals(Operator.LOGIC_AND)) {
+                result = new StaticVal<Boolean>(Value_t.BOOLEAN, (leftVal && rightVal));
+            } else if (op.equals(Operator.LOGIC_OR)) {
+                result = new StaticVal<Boolean>(Value_t.BOOLEAN, (leftVal || rightVal));
+            } else if (op.equals(Operator.CMP_EQUAL)) {
+                result = new StaticVal<Boolean>(Value_t.BOOLEAN, (leftVal == rightVal));
+            } else if (op.equals(Operator.NOT_EQUAL)) {
+                result = new StaticVal<Boolean>(Value_t.BOOLEAN, (leftVal != rightVal));
+            } else {
                 ASTUtils.error(node, typeError);
+            }
         }
         // System.out.println("RESULT: "+result.getData());
         return result;
@@ -225,15 +231,15 @@ public class ExecutionASTVisitor implements ASTVisitor {
             if (node.getLvalue() instanceof IdentifierExpression) {
                 IdentifierExpression id = (IdentifierExpression) node.getLvalue();
                 String name = id.getIdentifier();
-                 Value sybmolInfo = _envStack.lookupAll(name);
-           if (sybmolInfo!=null) {
-                if (sybmolInfo.getType() == Value_t.USER_FUNCTION
-                        || sybmolInfo.getType() == Value_t.LIBRARY_FUNCTION) {
+                Value sybmolInfo = _envStack.lookupAll(name);
+                if (sybmolInfo != null) {
+                    if (sybmolInfo.getType() == Value_t.USER_FUNCTION
+                            || sybmolInfo.getType() == Value_t.LIBRARY_FUNCTION) {
 
-                    String msg = "Using function: " + name + " as lvalue.";
-                    ASTUtils.error(node, msg);
+                        String msg = "Using function: " + name + " as lvalue.";
+                        ASTUtils.error(node, msg);
+                    }
                 }
-            }
             }
             node.getLvalue().accept(this);
         }
@@ -304,7 +310,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
 //            String msg = "Function call: Symbol does not a function.";
 //            ASTUtils.error(node, msg);
 //        }
-
         enterFunctionSpace();
 
         if (function.isUserFunction()) {
@@ -318,7 +323,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
             for (IdentifierExpression argument : arguments) {
                 String name = argument.getIdentifier();
                 System.out.println(name);
-                Value argumentInfo = actualArguments.get(count);
+
+                String errorInfo = name;
+                DynamicVal argumentInfo = new DynamicVal(actualArguments.get(count), errorInfo);
                 _envStack.insertSymbol(name, argumentInfo);
 
                 count++;
@@ -333,7 +340,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
             int count = 0;
             for (int i = 0; i < actualArguments.size(); i++) {
-                _envStack.insertSymbol(LIBRARY_FUNC_ARG + i, actualArguments.get(i));
+                String errorInfo = LIBRARY_FUNC_ARG + i;
+                DynamicVal argumentInfo = new DynamicVal(actualArguments.get(i), errorInfo);
+                _envStack.insertSymbol(LIBRARY_FUNC_ARG + i, argumentInfo);
             }
             LibraryFunctions.libraryFunction_print();
         }
@@ -368,7 +377,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         }
 
         //Change to fox Table.
-        return new Value(Value_t.TABLE, arguments);
+        return new StaticVal(Value_t.UNDEFINED, arguments);
     }
 
     @Override
@@ -388,22 +397,22 @@ public class ExecutionASTVisitor implements ASTVisitor {
         HashMap<Value, Value> objectData = new HashMap<>();
         if (!node.getIndexedElementList().isEmpty()) {
             for (IndexedElement indexed : node.getIndexedElementList()) {
-               ArrayList <Value> data = (ArrayList <Value>)indexed.accept(this).getData();
+                ArrayList<Value> data = (ArrayList<Value>) indexed.accept(this).getData();
                 objectData.put(data.get(0), data.get(1));
             }
-          
+
         }
 
-        return new Value(Value_t.OBJECT, objectData);
+        return new StaticVal(Value_t.OBJECT, objectData);
     }
 
     @Override
     public Value visit(IndexedElement node) throws ASTVisitorException {
         System.out.println("-IndexedElement");
-        ArrayList <Value> objectData = new ArrayList <>();
-         objectData.add(node.getExpression1().accept(this));
-         objectData.add(node.getExpression2().accept(this));
-        return new Value(Value_t.UNDEFINED, objectData);
+        ArrayList<Value> objectData = new ArrayList<>();
+        objectData.add(node.getExpression1().accept(this));
+        objectData.add(node.getExpression2().accept(this));
+        return new StaticVal(Value_t.UNDEFINED, objectData);
     }
 
     @Override
@@ -413,13 +422,13 @@ public class ExecutionASTVisitor implements ASTVisitor {
         int count = 0;
         if (node.getExpressionList() != null) {
             for (Expression expression : node.getExpressionList()) {
-            Value argValue = expression.accept(this);
-            arrayData.put(count, argValue);
-            System.out.println(argValue);
-            count++;
+                Value argValue = expression.accept(this);
+                arrayData.put(count, argValue);
+                System.out.println(argValue);
+                count++;
             }
         }
-        return new Value(Value_t.TABLE, arrayData);
+        return new StaticVal(Value_t.TABLE, arrayData);
     }
 
     @Override
@@ -449,7 +458,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         String name = node.getFuncName();
         /*Function Name*/
-        Value symbolInfo = _envStack.lookupCurrentScope(name);
+        DynamicVal symbolInfo = _envStack.lookupCurrentScope(name);
         boolean isLibraryFunction = LibraryFunction_t.isLibraryFunction(name);
 
         if (symbolInfo != null) {
@@ -460,6 +469,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
             } else if (isLibraryFunction) {
                 msg = "User-Function shadows Library-Function: " + name + ".";
             } else {
+                //Think to remove this else statment.
                 msg = "User-Function already declared as Variable: " + name + ".";
             }
             ASTUtils.error(node, msg);
@@ -470,7 +480,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
             }
         }
 
-        symbolInfo = new Value(Value_t.USER_FUNCTION, node);
+        String errorInfo = name;
+        symbolInfo = new DynamicVal(Value_t.USER_FUNCTION, node, errorInfo);
         _envStack.insertSymbol(name, symbolInfo);
 
         /*Function ONLY Check Arguments*/
@@ -499,37 +510,37 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(IntegerLiteral node) throws ASTVisitorException {
         System.out.println("-IntegerLiteral");
-        return new Value(Value_t.INTEGER, node.getLiteral());
+        return new StaticVal(Value_t.INTEGER, node.getLiteral());
     }
 
     @Override
     public Value visit(DoubleLiteral node) throws ASTVisitorException {
         System.out.println("-DoubleLiteral");
-        return new Value(Value_t.REAL, node.getLiteral());
+        return new StaticVal(Value_t.REAL, node.getLiteral());
     }
 
     @Override
     public Value visit(StringLiteral node) throws ASTVisitorException {
         System.out.println("-StringLiteral");
-        return new Value(Value_t.STRING, node.getLiteral());
+        return new StaticVal(Value_t.STRING, node.getLiteral());
     }
 
     @Override
     public Value visit(NullLiteral node) throws ASTVisitorException {
         System.out.println("-NullLiteral");
-        return new Value(Value_t.NULL, null);
+        return new StaticVal(Value_t.NULL, null);
     }
 
     @Override
     public Value visit(TrueLiteral node) throws ASTVisitorException {
         System.out.println("-TrueLiteral");
-        return new Value(Value_t.BOOLEAN, Boolean.TRUE);
+        return new StaticVal(Value_t.BOOLEAN, Boolean.TRUE);
     }
 
     @Override
     public Value visit(FalseLiteral node) throws ASTVisitorException {
         System.out.println("-FalseLiteral");
-        return new Value(Value_t.BOOLEAN, Boolean.FALSE);
+        return new StaticVal(Value_t.BOOLEAN, Boolean.FALSE);
     }
 
     @Override
@@ -537,9 +548,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
         System.out.println("-IfStatement");
 
         Value val = node.getExpression().accept(this);
-        if((Boolean)val.getData())
+        if ((Boolean) val.getData()) {
             node.getStatement().accept(this);
-        else{
+        } else {
             if (node.getElseStatement() != null) {
                 node.getElseStatement().accept(this);
             }

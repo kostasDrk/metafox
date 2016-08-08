@@ -1,5 +1,6 @@
 package environment;
 
+import symbols.value.StaticVal;
 import symbols.value.Value;
 
 public class FunctionEnv extends Environment {
@@ -16,7 +17,7 @@ public class FunctionEnv extends Environment {
     }
 
     public void setReturnVal(Value returnVal) {
-        _returnVal = returnVal;
+        _returnVal = new StaticVal(returnVal);
     }
 
 }
