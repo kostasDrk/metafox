@@ -55,8 +55,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
     private int _scope;
     private int _inFunction;
     private int _inLoop;
-    private boolean _inAssignment;
-    private String _lvalueAssign;
 
     private void enterScopeSpace() {
         System.out.println("EnterScopeSpace");
@@ -99,8 +97,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
         _scope = 0;
         _inFunction = 0;
         _inLoop = 0;
-        _inAssignment = false;
-        _lvalueAssign = null;
     }
 
     @Override
@@ -111,7 +107,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 stmt.accept(this);
             }
         }
-
         return null;
     }
 
@@ -126,13 +121,10 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(AssignmentExpression node) throws ASTVisitorException {
         System.out.println("-AssignmentExpression");
-        _inAssignment = true;
         Value left = node.getLvalue().accept(this);
-        _inAssignment = false;
         Value right = node.getExpression().accept(this);
-        _envStack.insertSymbol(_lvalueAssign, right);
-        _lvalueAssign = null;
-        // return right;
+        _envStack.setValue(left, right);
+        System.out.println(_envStack.toString());
         return null;
     }
 
@@ -144,8 +136,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         Value right = node.getExpression2().accept(this);
         Operator op = node.getOperator();
 
-        
-
+        System.out.println("left: "+left);
         String typeError = "Incompatible operand types for '"+node.getOperator()+"': "+left.getType()+" and "+right.getType();
         if((!left.isNumeric() || !right.isNumeric()) && (!left.isBoolean() || !right.isBoolean())){
             if(left.isString() && right.isString() && op.equals(Operator.PLUS)){
@@ -211,7 +202,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
             else
                 ASTUtils.error(node, typeError);
         }
-        System.out.println("RESULT: "+result.getData());
+        // System.out.println("RESULT: "+result.getData());
         return result;
     }
 
@@ -254,7 +245,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         String name = node.getIdentifier();
         Value symbolInfo = null;
 
-        //if variable have :: at the front it is "global"
+        //if variable has :: at the front it is "global"
         if (!node.isLocal()) {
             symbolInfo = _envStack.lookupGlobalScope(name);
             if (symbolInfo == null) {
@@ -264,14 +255,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
         } else {
             symbolInfo = _envStack.lookupAll(name);
             if (symbolInfo == null) {
-                if(_inAssignment){
-                    _lvalueAssign = name;
-                    _envStack.insertSymbol(name);
-                    symbolInfo = _envStack.lookupCurrentScope(name); // Retrieve newly added symbol
-                }else{
-                    String msg = "Undefined reference to: "+name;
-                    ASTUtils.error(node, msg);
-                }
+                _envStack.insertSymbol(name);
+                symbolInfo = _envStack.lookupCurrentScope(name); // Retrieve newly added symbol
             }
         }
         return symbolInfo;
@@ -283,13 +268,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         if (node.getLvalue() != null) {
             node.getLvalue().accept(this);
-
         } else if (node.getCall() != null) {
             node.getCall().accept(this);
         }
+
         if (node.getIdentifier() != null) {
             //System.out.print("." + node.getIdentifier());
-
         } else if (node.getExpression() != null) {
             node.getExpression().accept(this);
         }
@@ -314,6 +298,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         System.out.println("-LvalueCall");
 
         Value function = node.getLvalue().accept(this);
+
 //        if (!function.isUserFunction() && !function.isLibraryFunction()) {
 //            String msg = "Function call: Symbol does not a function.";
 //            ASTUtils.error(node, msg);
@@ -351,9 +336,10 @@ public class ExecutionASTVisitor implements ASTVisitor {
             }
             LibraryFunctions.libraryFunction_print();
         }
-        exitFunctionSpace();
 
-        return null;
+        Value ret = exitFunctionSpace();
+
+        return ret;
     }
 
     @Override
@@ -543,11 +529,13 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(IfStatement node) throws ASTVisitorException {
         System.out.println("-IfStatement");
 
-        node.getExpression().accept(this);
-
-        node.getStatement().accept(this);
-        if (node.getElseStatement() != null) {
-            node.getElseStatement().accept(this);
+        Value val = node.getExpression().accept(this);
+        if((Boolean)val.getData())
+            node.getStatement().accept(this);
+        else{
+            if (node.getElseStatement() != null) {
+                node.getElseStatement().accept(this);
+            }
         }
         return null;
     }
@@ -556,7 +544,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(WhileStatement node) throws ASTVisitorException {
         System.out.println("-WhileStatement");
 
-        node.getExpression().accept(this);
+        Value val = node.getExpression().accept(this);
         enterLoopSpace();
         node.getStatement().accept(this);
         exitLoopSpace();
@@ -605,14 +593,15 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(ReturnStatement node) throws ASTVisitorException {
         System.out.println("-ReturnStatement");
+        Value ret = null;
 
         if (_inFunction == 0) {
-
             ASTUtils.error(node, "Use of 'return' while not in a function.");
         }
         if (node.getExpression() != null) {
-            node.getExpression().accept(this);
+            ret = node.getExpression().accept(this);
+            _envStack.setReturnValue(ret);
         }
-        return null;
+        return ret;
     }
 }

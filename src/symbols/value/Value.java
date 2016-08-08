@@ -2,7 +2,7 @@ package symbols.value;
 
 public class Value<T> {
 
-    private final Value_t _type;
+    private Value_t _type;
     private T _data;
 
     public Value() {
@@ -17,6 +17,10 @@ public class Value<T> {
 
     public Value_t getType() {
         return _type;
+    }
+
+    public void setType(Value_t type){
+        this._type = type;
     }
 
     public T getData() {
