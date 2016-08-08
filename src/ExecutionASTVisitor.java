@@ -136,7 +136,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
         Value right = node.getExpression2().accept(this);
         Operator op = node.getOperator();
 
-        System.out.println("left: "+left);
         String typeError = "Incompatible operand types for '"+node.getOperator()+"': "+left.getType()+" and "+right.getType();
         if((!left.isNumeric() || !right.isNumeric()) && (!left.isBoolean() || !right.isBoolean())){
             if(left.isString() && right.isString() && op.equals(Operator.PLUS)){
@@ -545,9 +544,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
         System.out.println("-WhileStatement");
 
         Value val = node.getExpression().accept(this);
-        enterLoopSpace();
-        node.getStatement().accept(this);
-        exitLoopSpace();
+        while( (Boolean)((Value) node.getExpression().accept(this)).getData()){
+            enterLoopSpace();
+            node.getStatement().accept(this);
+            exitLoopSpace();
+        }
         return null;
     }
 
