@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 
 import symbols.value.Value;
 import symbols.value.DynamicVal;
+import static utils.Constants.ENTER_FUNCTION_ENV_INIT_SCOPE;
 
 public class EnvironmentStack {
 
@@ -23,6 +24,7 @@ public class EnvironmentStack {
     public void enterFunction() {
         System.out.println("##enterFunction");
         _environmentStack.push(new FunctionEnv());
+        topEnv().push(new EnvironmentScope(ENTER_FUNCTION_ENV_INIT_SCOPE));
     }
 
     public Value exitFunction() {

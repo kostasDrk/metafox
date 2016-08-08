@@ -50,12 +50,14 @@ import libraryFunctions.LibraryFunctions;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static utils.Constants.ENTER_FUNCTION_ENV_INIT_SCOPE;
 import static utils.Constants.LIBRARY_FUNC_ARG;
 
 public class ExecutionASTVisitor implements ASTVisitor {
 
     private final EnvironmentStack _envStack;
     private int _scope;
+    private int _tmpKeepScope;
     private int _inFunction;
     private int _inLoop;
 
@@ -74,13 +76,17 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     private void enterFunctionSpace() {
         System.out.println("EnterFunctionSpace");
+        _tmpKeepScope = _scope;
+        _scope = ENTER_FUNCTION_ENV_INIT_SCOPE;
         _inFunction++;
         _envStack.enterFunction();
-        enterScopeSpace();
+
     }
 
     private Value exitFunctionSpace() {
         System.out.println("ExitFunctionSpace");
+        _scope = _tmpKeepScope;
+        _tmpKeepScope = -1;
         _inFunction--;
         return _envStack.exitFunction();
     }
@@ -98,8 +104,10 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public ExecutionASTVisitor() {
         _envStack = new EnvironmentStack();
         _scope = 0;
+        _tmpKeepScope = -1;
         _inFunction = 0;
         _inLoop = 0;
+
     }
 
     @Override
