@@ -136,7 +136,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         Value right = node.getExpression().accept(this);
         _envStack.setValue((DynamicVal) left, right);
         System.out.println(_envStack.toString());
-        return null;
+        return left;
     }
 
     @Override
