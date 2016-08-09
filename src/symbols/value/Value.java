@@ -55,6 +55,19 @@ public abstract class Value<T> {
         return _type.equals(Value_t.UNDEFINED);
     }
 
+    public boolean isConvertedToNumeric() {
+        if (!isString()) {
+            return false;
+        }
+
+        try {
+            double d = Double.parseDouble((String) _data);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public String toString() {
         return String.format("Value_t: %-25s Data: %s", _type, _data) + ".\t";

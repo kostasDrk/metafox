@@ -38,6 +38,8 @@ import ast.WhileStatement;
 import ast.utils.ASTUtils;
 
 import environment.EnvironmentStack;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import symbols.value.Value;
 import symbols.value.Value_t;
@@ -50,6 +52,8 @@ import libraryFunctions.LibraryFunctions;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static utils.Constants.ENTER_FUNCTION_ENV_INIT_SCOPE;
 import static utils.Constants.LIBRARY_FUNC_ARG;
@@ -314,11 +318,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
         System.out.println("-LvalueCall");
 
         Value function = node.getLvalue().accept(this);
-
-//        if (!function.isUserFunction() && !function.isLibraryFunction()) {
-//            String msg = "Function call: Symbol does not a function.";
-//            ASTUtils.error(node, msg);
-//        }
+        System.out.println(function);
+        if (!function.isUserFunction() && !function.isLibraryFunction()) {
+            String msg = "Function call: Symbol-" + ((DynamicVal) function).getErrorInfo() + " does not a function.";
+            ASTUtils.error(node, msg);
+        }
         enterFunctionSpace();
 
         if (function.isUserFunction()) {
@@ -347,13 +351,19 @@ public class ExecutionASTVisitor implements ASTVisitor {
             Value parameters = node.getCallSuffix().accept(this);
             HashMap<Integer, Value> actualArguments = (HashMap<Integer, Value>) parameters.getData();
 
-            int count = 0;
             for (int i = 0; i < actualArguments.size(); i++) {
                 String errorInfo = LIBRARY_FUNC_ARG + i;
                 DynamicVal argumentInfo = new DynamicVal(actualArguments.get(i), errorInfo);
                 _envStack.insertSymbol(LIBRARY_FUNC_ARG + i, argumentInfo);
             }
-            LibraryFunctions.libraryFunction_print();
+
+            try {
+                Method method = (Method) function.getData();
+                method.invoke(null, _envStack.getFunctionEnv());
+                
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                Logger.getLogger(ExecutionASTVisitor.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
         Value ret = exitFunctionSpace();

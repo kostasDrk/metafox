@@ -34,6 +34,10 @@ class EnvironmentScope {
         _env.put(name, dynamicVal);
     }
 
+    int size() {
+        return _env.size();
+    }
+
     @Override
     public String toString() {
         String msg = "\n-------------------------- Scope: " + _scope + " --------------------------\n";

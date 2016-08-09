@@ -3,6 +3,7 @@ package libraryFunctions;
 public enum LibraryFunction_t {
 
     PRINT("print"),
+    PRINT_LN("println"),
     SQRT("sqrt"),
     COS("cos"),
     SIN("sin");
@@ -10,12 +11,12 @@ public enum LibraryFunction_t {
     private final String _name;
 
     private LibraryFunction_t(String name) {
-        this._name = name;
+        _name = name;
     }
 
     @Override
     public String toString() {
-        return this._name;
+        return _name;
     }
 
     public static boolean isLibraryFunction(String name) {
