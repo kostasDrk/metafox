@@ -119,6 +119,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 stmt.accept(this);
             }
         }
+        System.out.println(_envStack.toString());
         return null;
     }
 
@@ -610,18 +611,30 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(ForStatement node) throws ASTVisitorException {
         System.out.println("-ForStatement");
 
+        Value ret = null;
+
+        enterLoopSpace();
         for (Expression expression : node.getExpressionList1()) {
             expression.accept(this);
         }
 
-        node.getExpression().accept(this);
-
-        for (Expression expression : node.getExpressionList2()) {
-            expression.accept(this);
+        while((Boolean)((Value) node.getExpression().accept(this)).getData()){
+            ret = node.getStatement().accept(this);
+            
+            if(ret != null){
+                if(ret.getData().equals("break"))
+                    break;
+                else if(ret.getData().equals("continue")){
+                    for (Expression expression : node.getExpressionList2())
+                        expression.accept(this);
+                    continue;
+                }
+            }
+            for (Expression expression : node.getExpressionList2())
+                expression.accept(this);
         }
-        enterLoopSpace();
-        node.getStatement().accept(this);
         exitLoopSpace();
+
         return null;
     }
 
@@ -632,7 +645,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
             ASTUtils.error(node, "Use of 'break' while not in a loop.");
         }
         return new StaticVal(Value_t.STRING, "break");
-        // return null;
     }
 
     @Override
