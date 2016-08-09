@@ -47,17 +47,15 @@ import symbols.value.StaticVal;
 import symbols.value.DynamicVal;
 
 import libraryFunctions.LibraryFunction_t;
-import libraryFunctions.LibraryFunctions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import utils.Constants;
+
 import static utils.Constants.BREAK;
 import static utils.Constants.CONTINUE;
-
 import static utils.Constants.ENTER_FUNCTION_ENV_INIT_SCOPE;
 import static utils.Constants.LIBRARY_FUNC_ARG;
 
@@ -604,7 +602,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         System.out.println("-WhileStatement");
 
         Value val = node.getExpression().accept(this);
-        Value ret = null;
+        Value ret;
 
         enterLoopSpace();
         while( (Boolean)((Value) node.getExpression().accept(this)).getData()){
@@ -624,7 +622,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(ForStatement node) throws ASTVisitorException {
         System.out.println("-ForStatement");
 
-        Value ret = null;
+        Value ret;
 
         enterLoopSpace();
         for (Expression expression : node.getExpressionList1()) {
