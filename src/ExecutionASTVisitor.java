@@ -328,6 +328,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
             int count = 0;
             ArrayList<IdentifierExpression> arguments = ((FunctionDef) function.getData()).getArguments();
 
+            if(arguments.size() != actualArguments.size()){
+                String msg = "Call to '"+((DynamicVal)function).getErrorInfo()+"' requires "+arguments.size()+" arguments"+
+                ": "+actualArguments.size()+" found";
+                ASTUtils.error(node, msg);
+            }
             for (IdentifierExpression argument : arguments) {
                 String name = argument.getIdentifier();
                 System.out.println(name);
