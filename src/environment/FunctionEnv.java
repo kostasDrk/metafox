@@ -8,7 +8,7 @@ public class FunctionEnv extends Environment {
     private Value _returnVal;
 
     public FunctionEnv() {
-        _returnVal = null;
+        _returnVal = new StaticVal();
 
     }
 
