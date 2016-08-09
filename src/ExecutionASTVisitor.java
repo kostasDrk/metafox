@@ -323,7 +323,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
             }
 
-            ((FunctionDef) function.getData()).getBody().accept(this);
+           ((FunctionDef) function.getData()).getBody().accept(this);
+         // System.out.println(returnData.getData());
         } else if (function.isLibraryFunction()) {
             //Get Actual Arguments
             Value parameters = node.getCallSuffix().accept(this);
@@ -425,7 +426,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         enterScopeSpace();
         for (Statement stmt : node.getStatementList()) {
-            stmt.accept(this);
+           Value data =  stmt.accept(this);
+            if(stmt instanceof ReturnStatement) {  exitScopeSpace(); return data;}
         }
         exitScopeSpace();
 
@@ -598,13 +600,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(ReturnStatement node) throws ASTVisitorException {
         System.out.println("-ReturnStatement");
-
         if (_inFunction == 0) {
 
             ASTUtils.error(node, "Use of 'return' while not in a function.");
         }
         if (node.getExpression() != null) {
-            node.getExpression().accept(this);
+         node.getExpression().accept(this);
         }
         return null;
     }
