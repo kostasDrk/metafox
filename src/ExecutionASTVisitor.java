@@ -1,4 +1,5 @@
 
+import ast.ASTNode;
 import ast.ASTVisitor;
 import ast.ASTVisitorException;
 import ast.AnonymousFunctionCall;
@@ -107,6 +108,16 @@ public class ExecutionASTVisitor implements ASTVisitor {
         _inLoop--;
     }
 
+    private void setNodeIsLValueIfMember(ASTNode node) {
+        System.out.print("SetNodeIsLValueIfMember: ");
+        if (node instanceof Member) {
+            ((Member) node).setIsLValue();
+            System.out.println("TRUE");
+        } else {
+            System.out.println("FALSE");
+        }
+    }
+
     public ExecutionASTVisitor() {
         _envStack = new EnvironmentStack();
         _scope = 0;
@@ -139,8 +150,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(AssignmentExpression node) throws ASTVisitorException {
         System.out.println("-AssignmentExpression");
+        setNodeIsLValueIfMember(node.getLvalue());
         Value left = node.getLvalue().accept(this);
+
+        setNodeIsLValueIfMember(node.getExpression());
         Value right = node.getExpression().accept(this);
+
         _envStack.setValue((DynamicVal) left, right);
         System.out.println(_envStack.toString());
         return left;
@@ -240,6 +255,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         //System.out.print(node.getOperator());
         if (node.getExpression() != null) {
+            setNodeIsLValueIfMember(node.getExpression());
             node.getExpression().accept(this);
         } else {
             if (node.getLvalue() instanceof IdentifierExpression) {
@@ -254,6 +270,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
                         ASTUtils.error(node, msg);
                     }
                 }
+            } else {
+                setNodeIsLValueIfMember(node.getLvalue());
             }
             node.getLvalue().accept(this);
         }
@@ -287,18 +305,51 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(Member node) throws ASTVisitorException {
         System.out.println("-Member");
 
-        if (node.getLvalue() != null) {
-            node.getLvalue().accept(this);
-        } else if (node.getCall() != null) {
-            node.getCall().accept(this);
+        Value lvalue;
+        String id = node.getIdentifier();
+        Value call = null;
+        Value expr = null;
+        Value retVal = null;
+
+        if ((node.getLvalue() != null) && (id != null)) { // lvalue.id 
+            lvalue = node.getLvalue().accept(this);
+            if (!lvalue.isObject()) {
+                String msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' it's not Object type to get member '" + id + "'.";
+                ASTUtils.error(node, msg);
+            }
+
+            HashMap<Value, Value> objectData = (HashMap<Value, Value>) lvalue.getData();
+            Value key = new StaticVal(Value_t.STRING, id);
+            Value value = objectData.get(key);
+
+            if (value == null) {
+                if (node.isLValue()) {
+                    String errorInfo = "Object." + "id.";
+
+                    retVal = new DynamicVal(errorInfo);
+                    objectData.put(key, retVal);
+                } else {
+                    retVal = new StaticVal(Value_t.NULL, null);
+                }
+
+            } else {
+                retVal = value;
+            }
+
+        } else if ((node.getLvalue() != null) && (node.getExpression() != null)) { // lvalue (exp)
+            //lvalue = node.getLvalue().accept(this);
+            //expr = node.getExpression().accept(this);
+
+        } else if ((id != null) && (node.getCall() != null)) { // call.id
+            //call = node.getCall().accept(this);
+
+        } else if ((node.getCall() != null) && (node.getExpression() != null)) { // call (expr)
+            //call = node.getCall().accept(this);
+            //expr = node.getExpression().accept(this);
+
         }
 
-        if (node.getIdentifier() != null) {
-            //System.out.print("." + node.getIdentifier());
-        } else if (node.getExpression() != null) {
-            node.getExpression().accept(this);
-        }
-        return null;
+        return retVal;
     }
 
     @Override
@@ -383,7 +434,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
             String msg = "Error during Function Execution @'" + ((DynamicVal) function).getErrorInfo() + "'  - " + ret.getData();
             ASTUtils.error(node, msg);
         }
-        
+
         return ret;
     }
 
@@ -433,7 +484,10 @@ public class ExecutionASTVisitor implements ASTVisitor {
         if (!node.getIndexedElementList().isEmpty()) {
             for (IndexedElement indexed : node.getIndexedElementList()) {
                 ArrayList<Value> data = (ArrayList<Value>) indexed.accept(this).getData();
-                objectData.put(data.get(0), data.get(1));
+
+                String errorInfo = "Object.(" + data.get(0) + ")";
+                Value value = new DynamicVal(data.get(1), errorInfo);
+                objectData.put(data.get(0), value);
             }
 
         }
