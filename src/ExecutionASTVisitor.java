@@ -54,6 +54,9 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import utils.Constants;
+import static utils.Constants.BREAK;
+import static utils.Constants.CONTINUE;
 
 import static utils.Constants.ENTER_FUNCTION_ENV_INIT_SCOPE;
 import static utils.Constants.LIBRARY_FUNC_ARG;
@@ -464,7 +467,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         for (Statement stmt : node.getStatementList()) {
             ret = stmt.accept(this);
             if(ret != null)
-                if(ret.getData().equals("break") || ret.getData().equals("continue"))
+                if(ret.getData().equals(BREAK) || ret.getData().equals(CONTINUE))
                     return ret;
         }
         exitScopeSpace();
@@ -581,14 +584,14 @@ public class ExecutionASTVisitor implements ASTVisitor {
         if ((Boolean) val.getData()) {
             ret = node.getStatement().accept(this);
             if(ret != null){
-                if(ret.getData().equals("break") || ret.getData().equals("continue"))
+                if(ret.getData().equals(BREAK) || ret.getData().equals(CONTINUE))
                     return ret;
             }
         } else {
             if (node.getElseStatement() != null) {
                 ret = node.getElseStatement().accept(this);
                 if(ret != null){
-                    if(ret.getData().equals("break") || ret.getData().equals("continue"))
+                    if(ret.getData().equals(BREAK) || ret.getData().equals(CONTINUE))
                         return ret;
                 }
             }
@@ -607,9 +610,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
         while( (Boolean)((Value) node.getExpression().accept(this)).getData()){
             ret = node.getStatement().accept(this);
             if(ret != null){
-                if(ret.getData().equals("break"))
+                if(ret.getData().equals(BREAK))
                     break;
-                else if(ret.getData().equals("continue"))
+                else if(ret.getData().equals(CONTINUE))
                     continue;
             }
         }
@@ -632,9 +635,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
             ret = node.getStatement().accept(this);
             
             if(ret != null){
-                if(ret.getData().equals("break"))
+                if(ret.getData().equals(BREAK))
                     break;
-                else if(ret.getData().equals("continue")){
+                else if(ret.getData().equals(CONTINUE)){
                     for (Expression expression : node.getExpressionList2())
                         expression.accept(this);
                     continue;
@@ -654,7 +657,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         if (_inLoop == 0) {
             ASTUtils.error(node, "Use of 'break' while not in a loop.");
         }
-        return new StaticVal(Value_t.STRING, "break");
+        return new StaticVal(Value_t.STRING, BREAK);
     }
 
     @Override
@@ -663,7 +666,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         if (_inLoop == 0) {
             ASTUtils.error(node, "Use of 'continue' while not in a loop.");
         }
-        return new StaticVal(Value_t.STRING, "continue");
+        return new StaticVal(Value_t.STRING, CONTINUE);
     }
 
     @Override
