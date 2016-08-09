@@ -575,7 +575,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(BreakStatement node) throws ASTVisitorException {
         System.out.println("-BreakStatement");
         if (_inLoop == 0) {
-
             ASTUtils.error(node, "Use of 'break' while not in a loop.");
         }
         return null;
