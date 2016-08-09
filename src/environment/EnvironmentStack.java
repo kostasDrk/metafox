@@ -1,7 +1,10 @@
 package environment;
 
-import symbols.value.Value;
 import java.util.ArrayDeque;
+
+import symbols.value.Value;
+import symbols.value.DynamicVal;
+import static utils.Constants.ENTER_FUNCTION_ENV_INIT_SCOPE;
 
 public class EnvironmentStack {
 
@@ -21,18 +24,18 @@ public class EnvironmentStack {
     public void enterFunction() {
         System.out.println("##enterFunction");
         _environmentStack.push(new FunctionEnv());
+        topEnv().push(new EnvironmentScope(ENTER_FUNCTION_ENV_INIT_SCOPE));
     }
 
     public Value exitFunction() {
         System.out.println("##exitFunction");
         FunctionEnv functionEnv = (FunctionEnv) _environmentStack.pop();
-        Value returnVal = functionEnv.getReturnVal();
-        return returnVal;
+        return functionEnv.getReturnVal();
     }
 
-    public void setReturnValue(Value value){
+    public void setReturnValue(Value value) {
         System.out.println("##settingRetValue");
-        FunctionEnv functionEnv = (FunctionEnv)topEnv();
+        FunctionEnv functionEnv = (FunctionEnv) topEnv();
         functionEnv.setReturnVal(value);
     }
 
@@ -46,7 +49,7 @@ public class EnvironmentStack {
         topEnv().pop();
     }
 
-    public Value lookupGlobalScope(String name) {
+    public DynamicVal lookupGlobalScope(String name) {
         return _globalEnv.lookupBottom(name);
     }
 
@@ -57,12 +60,12 @@ public class EnvironmentStack {
      * @param name
      * @return
      */
-    public Value lookupCurrentScope(String name) {
+    public DynamicVal lookupCurrentScope(String name) {
         return topEnv().lookupTop(name);
     }
 
-    public Value lookupAll(String name) {
-        Value varInfo = topEnv().lookupAll(name);
+    public DynamicVal lookupAll(String name) {
+        DynamicVal varInfo = topEnv().lookupAll(name);
 
         //If we don't find the variable in the top environment then check in 
         //in the global.
@@ -73,7 +76,7 @@ public class EnvironmentStack {
         return varInfo;
     }
 
-    public void insertSymbol(String name, Value value) {
+    public void insertSymbol(String name, DynamicVal value) {
         System.out.print("##insertSymbol: " + name + ", " + value.getType());
         topEnv().insert(name, value);
         System.out.println(toString());
@@ -81,11 +84,11 @@ public class EnvironmentStack {
 
     public void insertSymbol(String name) {
         System.out.print("##insertSymbol: " + name);
-        topEnv().insert(name, new Value());
+        topEnv().insert(name);
         System.out.println(toString());
     }
 
-    public void setValue(Value dest, Value src){
+    public void setValue(DynamicVal dest, Value src) {
         dest.setType(src.getType());
         dest.setData(src.getData());
     }
@@ -93,7 +96,7 @@ public class EnvironmentStack {
     @Override
     public String toString() {
         String msg = "############################## EnvStack ##############################\n";
-        int count = _environmentStack.size()-1;
+        int count = _environmentStack.size() - 1;
         for (Environment env : _environmentStack) {
             msg += "\n_______________________ Environment (" + count + ") ______________________";
             msg += env.toString();

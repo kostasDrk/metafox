@@ -10,6 +10,7 @@ public enum Value_t {
     USER_FUNCTION("USER_FUNCTION"),
     LIBRARY_FUNCTION("LIBRARY_FUNCTION"),
     NULL("NULL"),
+    OBJECT("OBJECT"),
     UNDEFINED("UNDEFINED");
 
     private final String _type;
