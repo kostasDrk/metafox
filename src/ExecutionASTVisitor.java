@@ -334,9 +334,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
             int count = 0;
             ArrayList<IdentifierExpression> arguments = ((FunctionDef) function.getData()).getArguments();
 
-            if(arguments.size() != actualArguments.size()){
-                String msg = "Call to '"+((DynamicVal)function).getErrorInfo()+"' requires "+arguments.size()+" arguments"+
-                ": "+actualArguments.size()+" found";
+            if (arguments.size() != actualArguments.size()) {
+                String msg = "Call to '" + ((DynamicVal) function).getErrorInfo() + "' requires " + arguments.size() + " arguments"
+                        + ": " + actualArguments.size() + " found.";
                 ASTUtils.error(node, msg);
             }
             for (IdentifierExpression argument : arguments) {
@@ -357,6 +357,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
             Value parameters = node.getCallSuffix().accept(this);
             HashMap<Integer, Value> actualArguments = (HashMap<Integer, Value>) parameters.getData();
 
+            if (actualArguments.size() < 1) {
+                String msg = "Call to '" + ((DynamicVal) function).getErrorInfo() + "' requires at least ONE argument"
+                        + ": " + actualArguments.size() + " found.";
+                ASTUtils.error(node, msg);
+            }
+
             for (int i = 0; i < actualArguments.size(); i++) {
                 String errorInfo = LIBRARY_FUNC_ARG + i;
                 DynamicVal argumentInfo = new DynamicVal(actualArguments.get(i), errorInfo);
@@ -366,14 +372,18 @@ public class ExecutionASTVisitor implements ASTVisitor {
             try {
                 Method method = (Method) function.getData();
                 method.invoke(null, _envStack.getFunctionEnv());
-                
+
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                 Logger.getLogger(ExecutionASTVisitor.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
         Value ret = exitFunctionSpace();
-
+        if (ret.getType().equals(Value_t.ERROR)) {
+            String msg = "Error during Function Execution @'" + ((DynamicVal) function).getErrorInfo() + "'  - " + ret.getData();
+            ASTUtils.error(node, msg);
+        }
+        
         return ret;
     }
 
@@ -464,9 +474,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
         enterScopeSpace();
         for (Statement stmt : node.getStatementList()) {
             ret = stmt.accept(this);
-            if(ret != null)
-                if(ret.getData().equals(BREAK) || ret.getData().equals(CONTINUE))
+            if (ret != null) {
+                if (ret.getData().equals(BREAK) || ret.getData().equals(CONTINUE)) {
                     return ret;
+                }
+            }
         }
         exitScopeSpace();
 
@@ -581,16 +593,18 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         if ((Boolean) val.getData()) {
             ret = node.getStatement().accept(this);
-            if(ret != null){
-                if(ret.getData().equals(BREAK) || ret.getData().equals(CONTINUE))
+            if (ret != null) {
+                if (ret.getData().equals(BREAK) || ret.getData().equals(CONTINUE)) {
                     return ret;
+                }
             }
         } else {
             if (node.getElseStatement() != null) {
                 ret = node.getElseStatement().accept(this);
-                if(ret != null){
-                    if(ret.getData().equals(BREAK) || ret.getData().equals(CONTINUE))
+                if (ret != null) {
+                    if (ret.getData().equals(BREAK) || ret.getData().equals(CONTINUE)) {
                         return ret;
+                    }
                 }
             }
         }
@@ -605,13 +619,14 @@ public class ExecutionASTVisitor implements ASTVisitor {
         Value ret;
 
         enterLoopSpace();
-        while( (Boolean)((Value) node.getExpression().accept(this)).getData()){
+        while ((Boolean) ((Value) node.getExpression().accept(this)).getData()) {
             ret = node.getStatement().accept(this);
-            if(ret != null){
-                if(ret.getData().equals(BREAK))
+            if (ret != null) {
+                if (ret.getData().equals(BREAK)) {
                     break;
-                else if(ret.getData().equals(CONTINUE))
+                } else if (ret.getData().equals(CONTINUE)) {
                     continue;
+                }
             }
         }
         exitLoopSpace();
@@ -629,20 +644,22 @@ public class ExecutionASTVisitor implements ASTVisitor {
             expression.accept(this);
         }
 
-        while((Boolean)((Value) node.getExpression().accept(this)).getData()){
+        while ((Boolean) ((Value) node.getExpression().accept(this)).getData()) {
             ret = node.getStatement().accept(this);
-            
-            if(ret != null){
-                if(ret.getData().equals(BREAK))
+
+            if (ret != null) {
+                if (ret.getData().equals(BREAK)) {
                     break;
-                else if(ret.getData().equals(CONTINUE)){
-                    for (Expression expression : node.getExpressionList2())
+                } else if (ret.getData().equals(CONTINUE)) {
+                    for (Expression expression : node.getExpressionList2()) {
                         expression.accept(this);
+                    }
                     continue;
                 }
             }
-            for (Expression expression : node.getExpressionList2())
+            for (Expression expression : node.getExpressionList2()) {
                 expression.accept(this);
+            }
         }
         exitLoopSpace();
 

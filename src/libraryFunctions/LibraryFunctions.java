@@ -9,18 +9,15 @@ import symbols.value.Value_t;
 
 import static utils.Constants.LIBRARY_FUNC_ARG;
 
-//        int totalActuals = env.totalActuals();
-//        if (totalActuals != 1) {
-//            String msg = "Library Function call: SQRT- needs  exactly ONE argument.";
-//            ASTUtils.error(node, msg);
-//        }
 public class LibraryFunctions {
 
     public static void print(Environment env) {
         int totalActuals = env.totalActuals();
 
         for (int i = 0; i < totalActuals; i++) {
-            String data = env.getActualArgument(LIBRARY_FUNC_ARG + i).getData().toString();
+            String data = env.getActualArgument(LIBRARY_FUNC_ARG + i).getType().equals(Value_t.UNDEFINED)
+                    ? "UNDEFINED"
+                    : env.getActualArgument(LIBRARY_FUNC_ARG + i).getData().toString();
             System.out.print(data);
         }
     }
@@ -32,7 +29,7 @@ public class LibraryFunctions {
 
     public static void sqrt(Environment env) {
 
-        double data = 0;
+        double data;
         Value value = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
         if (value.isReal()) {
             data = (double) value.getData();
@@ -42,6 +39,14 @@ public class LibraryFunctions {
 
         } else if (value.isString() && value.isConvertedToNumeric()) {
             data = Double.parseDouble((String) value.getData());
+        } else if (value.isUndefined()) {
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument is UNDEFINED.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        } else {
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument can not cast to Double.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
         }
 
         StaticVal retVal;
@@ -69,6 +74,14 @@ public class LibraryFunctions {
 
         } else if (value.isString() && value.isConvertedToNumeric()) {
             data = Double.parseDouble((String) value.getData());
+        } else if (value.isUndefined()) {
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument is UNDEFINED.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        } else {
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument can not cast to Double.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
         }
 
         data = Math.cos(data);
@@ -90,6 +103,14 @@ public class LibraryFunctions {
 
         } else if (value.isString() && value.isConvertedToNumeric()) {
             data = Double.parseDouble((String) value.getData());
+        } else if (value.isUndefined()) {
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument is UNDEFINED.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        } else {
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument can not cast to Double.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
         }
 
         data = Math.sin(data);
