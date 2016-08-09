@@ -123,6 +123,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 stmt.accept(this);
             }
         }
+        System.out.println(_envStack.toString());
         return null;
     }
 
@@ -152,7 +153,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
         Value right = node.getExpression2().accept(this);
         Operator op = node.getOperator();
 
-        System.out.println("left: " + left);
         String typeError = "Incompatible operand types for '" + node.getOperator() + "': " + left.getType() + " and " + right.getType();
         if ((!left.isNumeric() || !right.isNumeric()) && (!left.isBoolean() || !right.isBoolean())) {
             if (left.isString() && right.isString() && op.equals(Operator.PLUS)) {
@@ -333,6 +333,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
             int count = 0;
             ArrayList<IdentifierExpression> arguments = ((FunctionDef) function.getData()).getArguments();
 
+            if(arguments.size() != actualArguments.size()){
+                String msg = "Call to '"+((DynamicVal)function).getErrorInfo()+"' requires "+arguments.size()+" arguments"+
+                ": "+actualArguments.size()+" found";
+                ASTUtils.error(node, msg);
+            }
             for (IdentifierExpression argument : arguments) {
                 String name = argument.getIdentifier();
                 System.out.println(name);
@@ -453,14 +458,18 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(Block node) throws ASTVisitorException {
         System.out.println("-Block");
+        Value ret = null;
 
         enterScopeSpace();
         for (Statement stmt : node.getStatementList()) {
-            stmt.accept(this);
+            ret = stmt.accept(this);
+            if(ret != null)
+                if(ret.getData().equals("break") || ret.getData().equals("continue"))
+                    return ret;
         }
         exitScopeSpace();
 
-        return null;
+        return ret;
     }
 
     @Override
@@ -567,14 +576,24 @@ public class ExecutionASTVisitor implements ASTVisitor {
         System.out.println("-IfStatement");
 
         Value val = node.getExpression().accept(this);
+        Value ret = null;
+
         if ((Boolean) val.getData()) {
-            node.getStatement().accept(this);
+            ret = node.getStatement().accept(this);
+            if(ret != null){
+                if(ret.getData().equals("break") || ret.getData().equals("continue"))
+                    return ret;
+            }
         } else {
             if (node.getElseStatement() != null) {
-                node.getElseStatement().accept(this);
+                ret = node.getElseStatement().accept(this);
+                if(ret != null){
+                    if(ret.getData().equals("break") || ret.getData().equals("continue"))
+                        return ret;
+                }
             }
         }
-        return null;
+        return ret;
     }
 
     @Override
@@ -582,8 +601,18 @@ public class ExecutionASTVisitor implements ASTVisitor {
         System.out.println("-WhileStatement");
 
         Value val = node.getExpression().accept(this);
+        Value ret = null;
+
         enterLoopSpace();
-        node.getStatement().accept(this);
+        while( (Boolean)((Value) node.getExpression().accept(this)).getData()){
+            ret = node.getStatement().accept(this);
+            if(ret != null){
+                if(ret.getData().equals("break"))
+                    break;
+                else if(ret.getData().equals("continue"))
+                    continue;
+            }
+        }
         exitLoopSpace();
         return null;
     }
@@ -592,18 +621,30 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(ForStatement node) throws ASTVisitorException {
         System.out.println("-ForStatement");
 
+        Value ret = null;
+
+        enterLoopSpace();
         for (Expression expression : node.getExpressionList1()) {
             expression.accept(this);
         }
 
-        node.getExpression().accept(this);
-
-        for (Expression expression : node.getExpressionList2()) {
-            expression.accept(this);
+        while((Boolean)((Value) node.getExpression().accept(this)).getData()){
+            ret = node.getStatement().accept(this);
+            
+            if(ret != null){
+                if(ret.getData().equals("break"))
+                    break;
+                else if(ret.getData().equals("continue")){
+                    for (Expression expression : node.getExpressionList2())
+                        expression.accept(this);
+                    continue;
+                }
+            }
+            for (Expression expression : node.getExpressionList2())
+                expression.accept(this);
         }
-        enterLoopSpace();
-        node.getStatement().accept(this);
         exitLoopSpace();
+
         return null;
     }
 
@@ -611,20 +652,18 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(BreakStatement node) throws ASTVisitorException {
         System.out.println("-BreakStatement");
         if (_inLoop == 0) {
-
             ASTUtils.error(node, "Use of 'break' while not in a loop.");
         }
-        return null;
+        return new StaticVal(Value_t.STRING, "break");
     }
 
     @Override
     public Value visit(ContinueStatement node) throws ASTVisitorException {
         System.out.println("-ContinueStatement");
         if (_inLoop == 0) {
-
             ASTUtils.error(node, "Use of 'continue' while not in a loop.");
         }
-        return null;
+        return new StaticVal(Value_t.STRING, "continue");
     }
 
     @Override
