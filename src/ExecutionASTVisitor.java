@@ -41,6 +41,7 @@ import ast.utils.ASTUtils;
 import environment.EnvironmentStack;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayDeque;
 
 import symbols.value.Value;
 import symbols.value.Value_t;
@@ -64,7 +65,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     private final EnvironmentStack _envStack;
     private int _scope;
-    private int _tmpKeepScope;
     private int _inFunction;
     private int _inLoop;
 
@@ -83,7 +83,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     private void enterFunctionSpace() {
         System.out.println("EnterFunctionSpace");
-        _tmpKeepScope = _scope;
         _scope = ENTER_FUNCTION_ENV_INIT_SCOPE;
         _inFunction++;
         _envStack.enterFunction();
@@ -92,10 +91,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     private Value exitFunctionSpace() {
         System.out.println("ExitFunctionSpace");
-        _scope = _tmpKeepScope;
-        _tmpKeepScope = -1;
         _inFunction--;
-        return _envStack.exitFunction();
+
+        Value value = _envStack.exitFunction();
+        _scope = _envStack.topEnvScope();
+        
+        return value;
     }
 
     private void enterLoopSpace() {
@@ -121,7 +122,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public ExecutionASTVisitor() {
         _envStack = new EnvironmentStack();
         _scope = 0;
-        _tmpKeepScope = -1;
         _inFunction = 0;
         _inLoop = 0;
 
@@ -386,13 +386,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
             }
         }
 
-        enterFunctionSpace();
-
         if (lvalue.isUserFunction()) {
             //Get Actual Arguments
             Value parameters = node.getCallSuffix().accept(this);
             HashMap<Integer, Value> actualArguments = (HashMap<Integer, Value>) parameters.getData();
 
+            enterFunctionSpace();
             int count = 0;
             ArrayList<IdentifierExpression> arguments = ((FunctionDef) lvalue.getData()).getArguments();
 
@@ -419,6 +418,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
             Value parameters = node.getCallSuffix().accept(this);
             HashMap<Integer, Value> actualArguments = (HashMap<Integer, Value>) parameters.getData();
 
+            enterFunctionSpace();
             if (actualArguments.size() < 1) {
                 String msg = "Call to '" + ((DynamicVal) lvalue).getErrorInfo() + "' requires at least ONE argument"
                         + ": " + actualArguments.size() + " found.";
@@ -455,9 +455,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
             //Get Actual Arguments
             Value parameters = node.getCallSuffix().accept(this);
             HashMap<Integer, Value> actualArguments = (HashMap<Integer, Value>) parameters.getData();
-
             ArrayList<IdentifierExpression> arguments = ((FunctionDef) function.getData()).getArguments();
 
+            enterFunctionSpace();
             if (arguments.size() != (actualArguments.size() + 1)) {
                 String msg = "Call to '" + ((DynamicVal) lvalue).getErrorInfo() + "' requires " + arguments.size() + " arguments"
                         + ": " + actualArguments.size() + " found.";
@@ -475,7 +475,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 System.out.println(name);
 
                 errorInfo = name;
-                argumentInfo = new DynamicVal(actualArguments.get(count-1), errorInfo);
+                argumentInfo = new DynamicVal(actualArguments.get(count - 1), errorInfo);
                 _envStack.insertSymbol(name, argumentInfo);
 
                 count++;
