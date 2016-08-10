@@ -51,6 +51,14 @@ public class Environment {
         return _environment.pop();
     }
 
+    public int totalActuals() {
+        return _environment.peekFirst().size();
+    }
+
+    public DynamicVal getActualArgument(String arg) {
+        return _environment.peekFirst().lookup(arg);
+    }
+
     @Override
     public String toString() {
         return _environment.toString();

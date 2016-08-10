@@ -33,6 +33,10 @@ public class EnvironmentStack {
         return functionEnv.getReturnVal();
     }
 
+    public Environment getFunctionEnv() {
+        return topEnv();
+    }
+
     public void setReturnValue(Value value) {
         System.out.println("##settingRetValue");
         FunctionEnv functionEnv = (FunctionEnv) topEnv();
