@@ -124,7 +124,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 stmt.accept(this);
             }
         }
-        System.out.println(_envStack.toString());
+        // System.out.println(_envStack.toString());
         return null;
     }
 
