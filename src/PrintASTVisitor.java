@@ -41,6 +41,7 @@ import ast.FunctionDef;
 import ast.FunctionDefExpression;
 import ast.ObjectDefinition;
 import ast.IndexedElement;
+import symbols.value.StaticVal;
 import symbols.value.Value_t;
 
 public class PrintASTVisitor implements ASTVisitor{
@@ -247,7 +248,7 @@ public class PrintASTVisitor implements ASTVisitor{
     @Override
     public Value visit(IntegerLiteral node) throws ASTVisitorException {
     	System.out.print(node.getLiteral());
-        return new Value(Value_t.INTEGER, node.getLiteral());
+        return new StaticVal(Value_t.INTEGER, node.getLiteral());
     }
 
     @Override

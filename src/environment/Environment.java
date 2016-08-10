@@ -1,7 +1,8 @@
 package environment;
 
-import symbols.value.Value;
 import java.util.ArrayDeque;
+
+import symbols.value.DynamicVal;
 
 public class Environment {
 
@@ -16,13 +17,13 @@ public class Environment {
         push(new EnvironmentScope(scope));
     }
 
-    Value lookupTop(String name) {
+    DynamicVal lookupTop(String name) {
         return _environment.peek().lookup(name);
     }
 
-    Value lookupAll(String name) {
+    DynamicVal lookupAll(String name) {
         for (EnvironmentScope envScope : _environment) {
-            Value value = envScope.lookup(name);
+            DynamicVal value = envScope.lookup(name);
             if (value != null) {
                 return value;
             }
@@ -30,11 +31,15 @@ public class Environment {
         return null;
     }
 
-    Value lookupBottom(String name) {
+    DynamicVal lookupBottom(String name) {
         return _environment.peekLast().lookup(name);
     }
 
-    void insert(String name, Value value) {
+    void insert(String name) {
+        _environment.peek().insert(name);
+    }
+
+    void insert(String name, DynamicVal value) {
         _environment.peek().insert(name, value);
     }
 

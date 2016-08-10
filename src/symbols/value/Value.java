@@ -1,9 +1,9 @@
 package symbols.value;
 
-public class Value<T> {
+public abstract class Value<T> {
 
-    private final Value_t _type;
-    private T _data;
+    protected Value_t _type;
+    protected T _data;
 
     public Value() {
         _type = Value_t.UNDEFINED;
@@ -21,10 +21,6 @@ public class Value<T> {
 
     public T getData() {
         return _data;
-    }
-
-    public void setData(T _data) {
-        this._data = _data;
     }
 
     public boolean isUserFunction() {

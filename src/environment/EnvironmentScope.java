@@ -1,13 +1,13 @@
 package environment;
 
-import symbols.value.Value;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+
+import symbols.value.DynamicVal;
 
 class EnvironmentScope {
 
-    private final HashMap<String, Value> _env;
+    private final HashMap<String, DynamicVal> _env;
     private final int _scope;
 
     EnvironmentScope(int scope) {
@@ -19,20 +19,26 @@ class EnvironmentScope {
         return _scope;
     }
 
-    Value lookup(String name) {
+    DynamicVal lookup(String name) {
         return _env.get(name);
     }
 
-    void insert(String name, Value value) {
+    void insert(String name) {
         System.out.println(", scope " + _scope);
+        DynamicVal value = new DynamicVal(name);
         _env.put(name, value);
+    }
+
+    void insert(String name, DynamicVal dynamicVal) {
+        System.out.println(", scope " + _scope);
+        _env.put(name, dynamicVal);
     }
 
     @Override
     public String toString() {
         String msg = "\n-------------------------- Scope: " + _scope + " --------------------------\n";
 
-        for (Map.Entry<String, Value> entry : _env.entrySet()) {
+        for (Map.Entry<String, DynamicVal> entry : _env.entrySet()) {
             msg += String.format("%-20s %s", entry.getKey(), entry.getValue()) + "\n";
         }
         return msg;
