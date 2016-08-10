@@ -1,6 +1,9 @@
 package symbols.value;
 
-public abstract class Value<T> {
+import java.io.Serializable;
+import java.util.Objects;
+
+public abstract class Value<T> implements Serializable {
 
     protected Value_t _type;
     protected T _data;
@@ -51,6 +54,18 @@ public abstract class Value<T> {
         return _type.equals(Value_t.STRING);
     }
 
+    public boolean isTable() {
+        return _type.equals(Value_t.TABLE);
+    }
+
+    public boolean isObject() {
+        return _type.equals(Value_t.OBJECT);
+    }
+
+    public boolean isNull() {
+        return _type.equals(Value_t.NULL);
+    }
+
     public boolean isUndefined() {
         return _type.equals(Value_t.UNDEFINED);
     }
@@ -73,4 +88,25 @@ public abstract class Value<T> {
         return String.format("Value_t: %-25s Data: %s", _type, _data) + ".\t";
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Value<?> other = (Value<?>) obj;
+
+        return Objects.equals(_type, other._type) && Objects.equals(_data, other._data);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+
+        hash = 13 * Objects.hashCode(_type) + 37 * Objects.hashCode(_data) + hash;
+
+        return hash;
+    }
 }

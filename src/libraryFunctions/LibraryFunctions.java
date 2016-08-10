@@ -15,9 +15,16 @@ public class LibraryFunctions {
         int totalActuals = env.totalActuals();
 
         for (int i = 0; i < totalActuals; i++) {
-            String data = env.getActualArgument(LIBRARY_FUNC_ARG + i).getType().equals(Value_t.UNDEFINED)
-                    ? "UNDEFINED"
-                    : env.getActualArgument(LIBRARY_FUNC_ARG + i).getData().toString();
+            String data;
+
+            if (env.getActualArgument(LIBRARY_FUNC_ARG + i).isUndefined()) {
+                data = "UNDEFINED";
+            } else if (env.getActualArgument(LIBRARY_FUNC_ARG + i).isNull()) {
+                data = "NULL";
+            } else {
+                data = env.getActualArgument(LIBRARY_FUNC_ARG + i).getData().toString();
+            }
+
             System.out.print(data);
         }
     }

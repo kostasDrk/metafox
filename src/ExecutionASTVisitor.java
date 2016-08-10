@@ -1,4 +1,5 @@
 
+import ast.ASTNode;
 import ast.ASTVisitor;
 import ast.ASTVisitorException;
 import ast.AnonymousFunctionCall;
@@ -107,6 +108,16 @@ public class ExecutionASTVisitor implements ASTVisitor {
         _inLoop--;
     }
 
+    private void setNodeIsLValueIfMember(ASTNode node) {
+        System.out.print("SetNodeIsLValueIfMember: ");
+        if (node instanceof Member) {
+            ((Member) node).setIsLValue();
+            System.out.println("TRUE");
+        } else {
+            System.out.println("FALSE");
+        }
+    }
+
     public ExecutionASTVisitor() {
         _envStack = new EnvironmentStack();
         _scope = 0;
@@ -139,8 +150,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(AssignmentExpression node) throws ASTVisitorException {
         System.out.println("-AssignmentExpression");
+        setNodeIsLValueIfMember(node.getLvalue());
         Value left = node.getLvalue().accept(this);
+
+        setNodeIsLValueIfMember(node.getExpression());
         Value right = node.getExpression().accept(this);
+
         _envStack.setValue((DynamicVal) left, right);
         System.out.println(_envStack.toString());
         return left;
@@ -240,6 +255,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         //System.out.print(node.getOperator());
         if (node.getExpression() != null) {
+            setNodeIsLValueIfMember(node.getExpression());
             node.getExpression().accept(this);
         } else {
             if (node.getLvalue() instanceof IdentifierExpression) {
@@ -254,6 +270,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
                         ASTUtils.error(node, msg);
                     }
                 }
+            } else {
+                setNodeIsLValueIfMember(node.getLvalue());
             }
             node.getLvalue().accept(this);
         }
@@ -287,18 +305,51 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(Member node) throws ASTVisitorException {
         System.out.println("-Member");
 
-        if (node.getLvalue() != null) {
-            node.getLvalue().accept(this);
-        } else if (node.getCall() != null) {
-            node.getCall().accept(this);
+        Value lvalue;
+        String id = node.getIdentifier();
+        Value call = null;
+        Value expr = null;
+        Value retVal = null;
+
+        if ((node.getLvalue() != null) && (id != null)) { // lvalue.id 
+            lvalue = node.getLvalue().accept(this);
+            if (!lvalue.isObject()) {
+                String msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' it's not Object type to get member '" + id + "'.";
+                ASTUtils.error(node, msg);
+            }
+
+            HashMap<Value, Value> objectData = (HashMap<Value, Value>) lvalue.getData();
+            Value key = new StaticVal(Value_t.STRING, id);
+            Value value = objectData.get(key);
+
+            if (value == null) {
+                if (node.isLValue()) {
+                    String errorInfo = "Object." + "id.";
+
+                    retVal = new DynamicVal(errorInfo);
+                    objectData.put(key, retVal);
+                } else {
+                    retVal = new StaticVal(Value_t.NULL, null);
+                }
+
+            } else {
+                retVal = value;
+            }
+
+        } else if ((node.getLvalue() != null) && (node.getExpression() != null)) { // lvalue (exp)
+            //lvalue = node.getLvalue().accept(this);
+            //expr = node.getExpression().accept(this);
+
+        } else if ((id != null) && (node.getCall() != null)) { // call.id
+            //call = node.getCall().accept(this);
+
+        } else if ((node.getCall() != null) && (node.getExpression() != null)) { // call (expr)
+            //call = node.getCall().accept(this);
+            //expr = node.getExpression().accept(this);
+
         }
 
-        if (node.getIdentifier() != null) {
-            //System.out.print("." + node.getIdentifier());
-        } else if (node.getExpression() != null) {
-            node.getExpression().accept(this);
-        }
-        return null;
+        return retVal;
     }
 
     @Override
@@ -318,24 +369,35 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(LvalueCall node) throws ASTVisitorException {
         System.out.println("-LvalueCall");
 
-        Value function = node.getLvalue().accept(this);
-        System.out.println(function);
-        if (!function.isUserFunction() && !function.isLibraryFunction()) {
-            String msg = "Function call: Symbol-" + ((DynamicVal) function).getErrorInfo() + " does not a function.";
-            ASTUtils.error(node, msg);
+        Value lvalue = node.getLvalue().accept(this);
+        System.out.println(lvalue);
+        if (node.getCallSuffix() instanceof NormCall) {
+            if (!lvalue.isUserFunction() && !lvalue.isLibraryFunction()) {
+                String msg = "Function call: Symbol-" + ((DynamicVal) lvalue).getErrorInfo()
+                        + " does not Type-Function, but Type-" + lvalue.getType() + ".";
+                ASTUtils.error(node, msg);
+
+            }
+        } else if (node.getCallSuffix() instanceof MethodCall) {
+            if (!lvalue.isObject()) {
+                String msg = "Function call using lvalue..id(elist): Symbol-" + ((DynamicVal) lvalue).getErrorInfo()
+                        + " does not Type-Object, but Type-" + lvalue.getType() + ".";
+                ASTUtils.error(node, msg);
+            }
         }
+
         enterFunctionSpace();
 
-        if (function.isUserFunction()) {
+        if (lvalue.isUserFunction()) {
             //Get Actual Arguments
             Value parameters = node.getCallSuffix().accept(this);
             HashMap<Integer, Value> actualArguments = (HashMap<Integer, Value>) parameters.getData();
 
             int count = 0;
-            ArrayList<IdentifierExpression> arguments = ((FunctionDef) function.getData()).getArguments();
+            ArrayList<IdentifierExpression> arguments = ((FunctionDef) lvalue.getData()).getArguments();
 
             if (arguments.size() != actualArguments.size()) {
-                String msg = "Call to '" + ((DynamicVal) function).getErrorInfo() + "' requires " + arguments.size() + " arguments"
+                String msg = "Call to '" + ((DynamicVal) lvalue).getErrorInfo() + "' requires " + arguments.size() + " arguments"
                         + ": " + actualArguments.size() + " found.";
                 ASTUtils.error(node, msg);
             }
@@ -351,14 +413,14 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
             }
 
-            ((FunctionDef) function.getData()).getBody().accept(this);
-        } else if (function.isLibraryFunction()) {
+            ((FunctionDef) lvalue.getData()).getBody().accept(this);
+        } else if (lvalue.isLibraryFunction()) {
             //Get Actual Arguments
             Value parameters = node.getCallSuffix().accept(this);
             HashMap<Integer, Value> actualArguments = (HashMap<Integer, Value>) parameters.getData();
 
             if (actualArguments.size() < 1) {
-                String msg = "Call to '" + ((DynamicVal) function).getErrorInfo() + "' requires at least ONE argument"
+                String msg = "Call to '" + ((DynamicVal) lvalue).getErrorInfo() + "' requires at least ONE argument"
                         + ": " + actualArguments.size() + " found.";
                 ASTUtils.error(node, msg);
             }
@@ -370,20 +432,65 @@ public class ExecutionASTVisitor implements ASTVisitor {
             }
 
             try {
-                Method method = (Method) function.getData();
+                Method method = (Method) lvalue.getData();
                 method.invoke(null, _envStack.getFunctionEnv());
 
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                 Logger.getLogger(ExecutionASTVisitor.class.getName()).log(Level.SEVERE, null, ex);
             }
+        } else if (lvalue.isObject()) {
+            //Get lvalue
+            HashMap<Value, Value> objectData = (HashMap<Value, Value>) lvalue.getData();
+            //Get ..id
+            String id = ((MethodCall) node.getCallSuffix()).getIdentifier();
+            Value key = new StaticVal(Value_t.STRING, id);
+            Value function = objectData.get(key);
+
+            if (!function.isUserFunction() && !function.isLibraryFunction()) {
+                String msg = "Function call using lvalue..id(elist):  Symbmol- 'lvalue." + id
+                        + "' does not Type-Function, but Type-" + lvalue.getType() + ".";
+                ASTUtils.error(node, msg);
+            }
+
+            //Get Actual Arguments
+            Value parameters = node.getCallSuffix().accept(this);
+            HashMap<Integer, Value> actualArguments = (HashMap<Integer, Value>) parameters.getData();
+
+            ArrayList<IdentifierExpression> arguments = ((FunctionDef) function.getData()).getArguments();
+
+            if (arguments.size() != (actualArguments.size() + 1)) {
+                String msg = "Call to '" + ((DynamicVal) lvalue).getErrorInfo() + "' requires " + arguments.size() + " arguments"
+                        + ": " + actualArguments.size() + " found.";
+                ASTUtils.error(node, msg);
+            }
+
+            int count = 0;
+            String name = arguments.get(count).getIdentifier();
+            String errorInfo = name;
+            DynamicVal argumentInfo = new DynamicVal(lvalue, errorInfo);
+            _envStack.insertSymbol(name, argumentInfo);
+
+            for (count = 1; count < arguments.size(); count++) {
+                name = arguments.get(count).getIdentifier();
+                System.out.println(name);
+
+                errorInfo = name;
+                argumentInfo = new DynamicVal(actualArguments.get(count-1), errorInfo);
+                _envStack.insertSymbol(name, argumentInfo);
+
+                count++;
+
+            }
+
+            ((FunctionDef) function.getData()).getBody().accept(this);
         }
 
         Value ret = exitFunctionSpace();
         if (ret.getType().equals(Value_t.ERROR)) {
-            String msg = "Error during Function Execution @'" + ((DynamicVal) function).getErrorInfo() + "'  - " + ret.getData();
+            String msg = "Error during Function Execution @'" + ((DynamicVal) lvalue).getErrorInfo() + "'  - " + ret.getData();
             ASTUtils.error(node, msg);
         }
-        
+
         return ret;
     }
 
@@ -418,12 +525,17 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(MethodCall node) throws ASTVisitorException {
         System.out.println("-MethodCall");
-
-        //System.out.print(".." + node.getIdentifier() + "(");
+        HashMap<Integer, Value> arguments = new HashMap<>();
+        int count = 0;
         for (Expression expression : node.getExpressionList()) {
-            expression.accept(this);
+            Value argValue = expression.accept(this);
+            arguments.put(count, argValue);
+            System.out.println(argValue);
+            count++;
         }
-        return null;
+
+        //Change to fox Table.
+        return new StaticVal(Value_t.UNDEFINED, arguments);
     }
 
     @Override
@@ -433,7 +545,10 @@ public class ExecutionASTVisitor implements ASTVisitor {
         if (!node.getIndexedElementList().isEmpty()) {
             for (IndexedElement indexed : node.getIndexedElementList()) {
                 ArrayList<Value> data = (ArrayList<Value>) indexed.accept(this).getData();
-                objectData.put(data.get(0), data.get(1));
+
+                String errorInfo = "Object.(" + data.get(0) + ")";
+                Value value = new DynamicVal(data.get(1), errorInfo);
+                objectData.put(data.get(0), value);
             }
 
         }
