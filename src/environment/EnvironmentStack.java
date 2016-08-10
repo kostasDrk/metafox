@@ -83,13 +83,13 @@ public class EnvironmentStack {
     public void insertSymbol(String name, DynamicVal value) {
         System.out.print("##insertSymbol: " + name + ", " + value.getType());
         topEnv().insert(name, value);
-        System.out.println(toString());
+        // System.out.println(toString());
     }
 
     public void insertSymbol(String name) {
         System.out.print("##insertSymbol: " + name);
         topEnv().insert(name);
-        System.out.println(toString());
+        // System.out.println(toString());
     }
 
     public void setValue(DynamicVal dest, Value src) {
