@@ -322,7 +322,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         if ((node.getLvalue() != null) && (id != null)) { // lvalue.id 
             lvalue = node.getLvalue().accept(this);
             if (!lvalue.isObject()) {
-                String msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' it's not Object type to get member '" + id + "'.";
+                String msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' is not Object type to get member '" + id + "'.";
                 ASTUtils.error(node, msg);
             }
 
