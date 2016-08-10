@@ -64,7 +64,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     private final EnvironmentStack _envStack;
     private int _scope;
-    private int _tmpKeepScope;
     private int _inFunction;
     private int _inLoop;
 
@@ -83,7 +82,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     private void enterFunctionSpace() {
         //System.out.println("EnterFunctionSpace");
-        _tmpKeepScope = _scope;
+
         _scope = ENTER_FUNCTION_ENV_INIT_SCOPE;
         _inFunction++;
         _envStack.enterFunction();
@@ -92,10 +91,13 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     private Value exitFunctionSpace() {
         //System.out.println("ExitFunctionSpace");
-        _scope = _tmpKeepScope;
-        _tmpKeepScope = -1;
+
         _inFunction--;
-        return _envStack.exitFunction();
+
+        Value value = _envStack.exitFunction();
+        _scope = _envStack.topEnvScope();
+
+        return value;
     }
 
     private void enterLoopSpace() {
@@ -121,7 +123,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public ExecutionASTVisitor() {
         _envStack = new EnvironmentStack();
         _scope = 0;
-        _tmpKeepScope = -1;
         _inFunction = 0;
         _inLoop = 0;
 
@@ -169,15 +170,16 @@ public class ExecutionASTVisitor implements ASTVisitor {
         Value right = node.getExpression2().accept(this);
         Operator op = node.getOperator();
 
-        String leftInfo = (left instanceof DynamicVal) ? ((DynamicVal)left).getErrorInfo()+"("+left.getType()+")" : left.getData()+"("+left.getType()+")";
-        leftInfo = "'"+left.getData()+"' ("+left.getType()+")";
-        String rightInfo = (right instanceof DynamicVal) ? ((DynamicVal)right).getErrorInfo()+"("+right.getType()+")" : right.getData()+"("+right.getType()+")";
-        rightInfo = "'"+right.getData()+"' ("+right.getType()+")";
+        String leftInfo = (left instanceof DynamicVal) ? ((DynamicVal) left).getErrorInfo() + "(" + left.getType() + ")" : left.getData() + "(" + left.getType() + ")";
+        leftInfo = "'" + left.getData() + "' (" + left.getType() + ")";
+        String rightInfo = (right instanceof DynamicVal) ? ((DynamicVal) right).getErrorInfo() + "(" + right.getType() + ")" : right.getData() + "(" + right.getType() + ")";
+        rightInfo = "'" + right.getData() + "' (" + right.getType() + ")";
 
         // String typeError = "Incompatible operand types for '" + node.getOperator() + "': " + left.getType() + " and " + right.getType();
         String typeError = "Incompatible operand types for '" + node.getOperator() + "': " + leftInfo + " and " + rightInfo;
-        if(left.isUndefined() || left.isNull() || right.isUndefined() || right.isNull())
+        if (left.isUndefined() || left.isNull() || right.isUndefined() || right.isNull()) {
             ASTUtils.error(node, typeError);
+        }
         if ((!left.isNumeric() || !right.isNumeric()) && (!left.isBoolean() || !right.isBoolean())) {
             if ((left.isString() || right.isString()) && op.equals(Operator.PLUS)) {
                 result = new StaticVal(Value_t.STRING, (String) left.getData().toString() + (String) right.getData().toString());
@@ -394,13 +396,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
             }
         }
 
-        enterFunctionSpace();
-
         if (lvalue.isUserFunction()) {
             //Get Actual Arguments
             Value parameters = node.getCallSuffix().accept(this);
             HashMap<Integer, Value> actualArguments = (HashMap<Integer, Value>) parameters.getData();
 
+            enterFunctionSpace();
             int count = 0;
             ArrayList<IdentifierExpression> arguments = ((FunctionDef) lvalue.getData()).getArguments();
 
@@ -427,6 +428,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
             Value parameters = node.getCallSuffix().accept(this);
             HashMap<Integer, Value> actualArguments = (HashMap<Integer, Value>) parameters.getData();
 
+            enterFunctionSpace();
             if (actualArguments.size() < 1) {
                 String msg = "Call to '" + ((DynamicVal) lvalue).getErrorInfo() + "' requires at least ONE argument"
                         + ": " + actualArguments.size() + " found.";
@@ -463,9 +465,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
             //Get Actual Arguments
             Value parameters = node.getCallSuffix().accept(this);
             HashMap<Integer, Value> actualArguments = (HashMap<Integer, Value>) parameters.getData();
-
             ArrayList<IdentifierExpression> arguments = ((FunctionDef) function.getData()).getArguments();
 
+            enterFunctionSpace();
             if (arguments.size() != (actualArguments.size() + 1)) {
                 String msg = "Call to '" + ((DynamicVal) lvalue).getErrorInfo() + "' requires " + arguments.size() + " arguments"
                         + ": " + actualArguments.size() + " found.";
@@ -483,7 +485,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 //System.out.println(name);
 
                 errorInfo = name;
-                argumentInfo = new DynamicVal(actualArguments.get(count-1), errorInfo);
+                argumentInfo = new DynamicVal(actualArguments.get(count - 1), errorInfo);
                 _envStack.insertSymbol(name, argumentInfo);
 
                 count++;
