@@ -263,29 +263,64 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(UnaryExpression node) throws ASTVisitorException {
         //System.out.println("-UnaryExpression");
 
-        ////System.out.print(node.getOperator());
+        Operator op = node.getOperator();
+        Value returnVal = new StaticVal();
+
         if (node.getExpression() != null) {
             setNodeIsLValueIfMember(node.getExpression());
-            node.getExpression().accept(this);
-        } else {
-            if (node.getLvalue() instanceof IdentifierExpression) {
-                IdentifierExpression id = (IdentifierExpression) node.getLvalue();
-                String name = id.getIdentifier();
-                Value sybmolInfo = _envStack.lookupAll(name);
-                if (sybmolInfo != null) {
-                    if (sybmolInfo.getType() == Value_t.USER_FUNCTION
-                            || sybmolInfo.getType() == Value_t.LIBRARY_FUNCTION) {
+            Value value = node.getExpression().accept(this);
 
-                        String msg = "Using function: " + name + " as lvalue.";
-                        ASTUtils.error(node, msg);
-                    }
+            if (op.equals(Operator.MINUS)) {
+                if (value.isInteger()) {
+                    returnVal = new StaticVal(value.getType(), -(int) value.getData());
+
+                } else if (value.isReal()) {
+                    returnVal = new StaticVal(value.getType(), -(double) value.getData());
+
+                } else {
+                    String msg = "Symbol '" + ((DynamicVal) value).getErrorInfo()
+                            + "' should be numeric type for operation '" + op.toString() + "'.";
+                    ASTUtils.error(node, msg);
                 }
-            } else {
-                setNodeIsLValueIfMember(node.getLvalue());
+            } else if (op.equals(Operator.LOGIC_NOT)) {
+                if (value.isBoolean()) {
+                    returnVal = new StaticVal(Value_t.BOOLEAN, !(boolean) value.getData());
+
+                } else if (value.isInteger() || value.isReal() || value.isString() || value.isUserFunction() || value.isLibraryFunction() || value.isTable() || value.isObject()) {
+                    returnVal = new StaticVal(Value_t.BOOLEAN, Boolean.FALSE);
+
+                } else if (value.isNull()) {
+                    returnVal = new StaticVal(Value_t.BOOLEAN, Boolean.TRUE);
+
+                } else {
+                    String msg = "Symbol '" + ((DynamicVal) value).getErrorInfo()
+                            + "' can not converted to boolean type.";
+                    ASTUtils.error(node, msg);
+                }
             }
-            node.getLvalue().accept(this);
+
+        } else {
+            setNodeIsLValueIfMember(node.getLvalue());
+            Value value = node.getLvalue().accept(this);
+
+            StaticVal assignVal = null;
+            if (value.isInteger()) {
+                int data = op.equals(Operator.PLUS_PLUS) ? (int) value.getData() + 1 : (int) value.getData() - 1;
+                assignVal = new StaticVal(value.getType(), data);
+            } else if (value.isReal()) {
+                double data = op.equals(Operator.PLUS_PLUS) ? (double) value.getData() + 1 : (double) value.getData() - 1;
+                assignVal = new StaticVal(value.getType(), data);
+            } else {
+                String msg = "Symbol '" + ((DynamicVal) value).getErrorInfo()
+                        + "' should be numeric type for operation '" + op.toString() + "'.";
+                ASTUtils.error(node, msg);
+            }
+
+            _envStack.setValue((DynamicVal) value, assignVal);
+
         }
-        return null;
+
+        return returnVal;
     }
 
     @Override
