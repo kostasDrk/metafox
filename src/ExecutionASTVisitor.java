@@ -41,7 +41,6 @@ import ast.utils.ASTUtils;
 import environment.EnvironmentStack;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayDeque;
 
 import symbols.value.Value;
 import symbols.value.Value_t;
@@ -69,20 +68,21 @@ public class ExecutionASTVisitor implements ASTVisitor {
     private int _inLoop;
 
     private void enterScopeSpace() {
-        System.out.println("EnterScopeSpace");
+        //System.out.println("EnterScopeSpace");
         _scope++;
         _envStack.enterBlock(_scope);
     }
 
     private void exitScopeSpace() {
-        System.out.println("ExitScopeSpace");
+        //System.out.println("ExitScopeSpace");
 
         _envStack.exitBlock();
         _scope--;
     }
 
     private void enterFunctionSpace() {
-        System.out.println("EnterFunctionSpace");
+        //System.out.println("EnterFunctionSpace");
+
         _scope = ENTER_FUNCTION_ENV_INIT_SCOPE;
         _inFunction++;
         _envStack.enterFunction();
@@ -90,32 +90,33 @@ public class ExecutionASTVisitor implements ASTVisitor {
     }
 
     private Value exitFunctionSpace() {
-        System.out.println("ExitFunctionSpace");
+        //System.out.println("ExitFunctionSpace");
+
         _inFunction--;
 
         Value value = _envStack.exitFunction();
         _scope = _envStack.topEnvScope();
-        
+
         return value;
     }
 
     private void enterLoopSpace() {
-        System.out.println("EnterLoopSpace");
+        //System.out.println("EnterLoopSpace");
         _inLoop++;
     }
 
     private void exitLoopSpace() {
-        System.out.println("ExitLoopSpace");
+        //System.out.println("ExitLoopSpace");
         _inLoop--;
     }
 
     private void setNodeIsLValueIfMember(ASTNode node) {
-        System.out.print("SetNodeIsLValueIfMember: ");
+        //System.out.print("SetNodeIsLValueIfMember: ");
         if (node instanceof Member) {
             ((Member) node).setIsLValue();
-            System.out.println("TRUE");
+            //System.out.println("TRUE");
         } else {
-            System.out.println("FALSE");
+            //System.out.println("FALSE");
         }
     }
 
@@ -129,19 +130,19 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(Program node) throws ASTVisitorException {
-        System.out.println("-Program");
+        //System.out.println("-Program");
         for (Statement stmt : node.getStatements()) {
             if (stmt != null) {
                 stmt.accept(this);
             }
         }
-        System.out.println(_envStack.toString());
+        // //System.out.println(_envStack.toString());
         return null;
     }
 
     @Override
     public Value visit(ExpressionStatement node) throws ASTVisitorException {
-        System.out.println("-ExpressionStatement");
+        //System.out.println("-ExpressionStatement");
         Value val = null;
         val = node.getExpression().accept(this);
         return null;
@@ -149,7 +150,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(AssignmentExpression node) throws ASTVisitorException {
-        System.out.println("-AssignmentExpression");
+        //System.out.println("-AssignmentExpression");
         setNodeIsLValueIfMember(node.getLvalue());
         Value left = node.getLvalue().accept(this);
 
@@ -157,23 +158,32 @@ public class ExecutionASTVisitor implements ASTVisitor {
         Value right = node.getExpression().accept(this);
 
         _envStack.setValue((DynamicVal) left, right);
-        System.out.println(_envStack.toString());
+        //System.out.println(_envStack.toString());
         return left;
     }
 
     @Override
     public Value visit(BinaryExpression node) throws ASTVisitorException {
-        System.out.println("-BinaryExpression");
+        //System.out.println("-BinaryExpression");
         Value result = null;
         Value left = node.getExpression1().accept(this);
         Value right = node.getExpression2().accept(this);
         Operator op = node.getOperator();
 
-        String typeError = "Incompatible operand types for '" + node.getOperator() + "': " + left.getType() + " and " + right.getType();
+        String leftInfo = (left instanceof DynamicVal) ? ((DynamicVal) left).getErrorInfo() + "(" + left.getType() + ")" : left.getData() + "(" + left.getType() + ")";
+        leftInfo = "'" + left.getData() + "' (" + left.getType() + ")";
+        String rightInfo = (right instanceof DynamicVal) ? ((DynamicVal) right).getErrorInfo() + "(" + right.getType() + ")" : right.getData() + "(" + right.getType() + ")";
+        rightInfo = "'" + right.getData() + "' (" + right.getType() + ")";
+
+        // String typeError = "Incompatible operand types for '" + node.getOperator() + "': " + left.getType() + " and " + right.getType();
+        String typeError = "Incompatible operand types for '" + node.getOperator() + "': " + leftInfo + " and " + rightInfo;
+        if (left.isUndefined() || left.isNull() || right.isUndefined() || right.isNull()) {
+            ASTUtils.error(node, typeError);
+        }
         if ((!left.isNumeric() || !right.isNumeric()) && (!left.isBoolean() || !right.isBoolean())) {
-            if (left.isString() && right.isString() && op.equals(Operator.PLUS)) {
-                result = new StaticVal(Value_t.STRING, (String) left.getData() + (String) right.getData());
-                // System.out.println("RESULT: "+result.getData());
+            if ((left.isString() || right.isString()) && op.equals(Operator.PLUS)) {
+                result = new StaticVal(Value_t.STRING, (String) left.getData().toString() + (String) right.getData().toString());
+                // //System.out.println("RESULT: "+result.getData());
                 return result;
             } else {
                 ASTUtils.error(node, typeError);
@@ -237,13 +247,13 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 ASTUtils.error(node, typeError);
             }
         }
-        // System.out.println("RESULT: "+result.getData());
+        // //System.out.println("RESULT: "+result.getData());
         return result;
     }
 
     @Override
     public Value visit(TermExpressionStmt node) throws ASTVisitorException {
-        System.out.println("-TermExpressionStmt");
+        //System.out.println("-TermExpressionStmt");
 
         Value result = node.getExpression().accept(this);
         return result;
@@ -251,9 +261,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(UnaryExpression node) throws ASTVisitorException {
-        System.out.println("-UnaryExpression");
+        //System.out.println("-UnaryExpression");
 
-        //System.out.print(node.getOperator());
+        ////System.out.print(node.getOperator());
         if (node.getExpression() != null) {
             setNodeIsLValueIfMember(node.getExpression());
             node.getExpression().accept(this);
@@ -280,7 +290,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(IdentifierExpression node) throws ASTVisitorException {
-        System.out.println("-IdentifierExpression");
+        //System.out.println("-IdentifierExpression");
         String name = node.getIdentifier();
         Value symbolInfo;
 
@@ -303,7 +313,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(Member node) throws ASTVisitorException {
-        System.out.println("-Member");
+        //System.out.println("-Member");
 
         Value lvalue;
         String id = node.getIdentifier();
@@ -354,7 +364,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(ExtendedCall node) throws ASTVisitorException {
-        System.out.println("-ExtendedCall");
+        //System.out.println("-ExtendedCall");
 
         node.getCall().accept(this);
 
@@ -367,21 +377,21 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(LvalueCall node) throws ASTVisitorException {
-        System.out.println("-LvalueCall");
+        //System.out.println("-LvalueCall");
 
         Value lvalue = node.getLvalue().accept(this);
-        System.out.println(lvalue);
+        //System.out.println(lvalue);
         if (node.getCallSuffix() instanceof NormCall) {
             if (!lvalue.isUserFunction() && !lvalue.isLibraryFunction()) {
                 String msg = "Function call: Symbol-" + ((DynamicVal) lvalue).getErrorInfo()
-                        + " does not Type-Function, but Type-" + lvalue.getType() + ".";
+                        + " is not Type-Function, but Type-" + lvalue.getType() + ".";
                 ASTUtils.error(node, msg);
 
             }
         } else if (node.getCallSuffix() instanceof MethodCall) {
             if (!lvalue.isObject()) {
                 String msg = "Function call using lvalue..id(elist): Symbol-" + ((DynamicVal) lvalue).getErrorInfo()
-                        + " does not Type-Object, but Type-" + lvalue.getType() + ".";
+                        + " is not Type-Object, but Type-" + lvalue.getType() + ".";
                 ASTUtils.error(node, msg);
             }
         }
@@ -402,7 +412,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
             }
             for (IdentifierExpression argument : arguments) {
                 String name = argument.getIdentifier();
-                System.out.println(name);
+                //System.out.println(name);
 
                 String errorInfo = name;
                 DynamicVal argumentInfo = new DynamicVal(actualArguments.get(count), errorInfo);
@@ -448,7 +458,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
             if (!function.isUserFunction() && !function.isLibraryFunction()) {
                 String msg = "Function call using lvalue..id(elist):  Symbmol- 'lvalue." + id
-                        + "' does not Type-Function, but Type-" + lvalue.getType() + ".";
+                        + "' is not Type-Function, but Type-" + lvalue.getType() + ".";
                 ASTUtils.error(node, msg);
             }
 
@@ -472,7 +482,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
             for (count = 1; count < arguments.size(); count++) {
                 name = arguments.get(count).getIdentifier();
-                System.out.println(name);
+                //System.out.println(name);
 
                 errorInfo = name;
                 argumentInfo = new DynamicVal(actualArguments.get(count - 1), errorInfo);
@@ -496,7 +506,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(AnonymousFunctionCall node) throws ASTVisitorException {
-        System.out.println("-AnonymousFunctionCall");
+        //System.out.println("-AnonymousFunctionCall");
 
         node.getFunctionDef().accept(this);
 
@@ -508,13 +518,13 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(NormCall node) throws ASTVisitorException {
-        System.out.println("-NormCall");
+        //System.out.println("-NormCall");
         HashMap<Integer, Value> arguments = new HashMap<>();
         int count = 0;
         for (Expression expression : node.getExpressionList()) {
             Value argValue = expression.accept(this);
             arguments.put(count, argValue);
-            System.out.println(argValue);
+            //System.out.println(argValue);
             count++;
         }
 
@@ -524,13 +534,13 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(MethodCall node) throws ASTVisitorException {
-        System.out.println("-MethodCall");
+        //System.out.println("-MethodCall");
         HashMap<Integer, Value> arguments = new HashMap<>();
         int count = 0;
         for (Expression expression : node.getExpressionList()) {
             Value argValue = expression.accept(this);
             arguments.put(count, argValue);
-            System.out.println(argValue);
+            //System.out.println(argValue);
             count++;
         }
 
@@ -540,7 +550,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(ObjectDefinition node) throws ASTVisitorException {
-        System.out.println("-ObjectDefinition");
+        //System.out.println("-ObjectDefinition");
         HashMap<Value, Value> objectData = new HashMap<>();
         if (!node.getIndexedElementList().isEmpty()) {
             for (IndexedElement indexed : node.getIndexedElementList()) {
@@ -558,7 +568,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(IndexedElement node) throws ASTVisitorException {
-        System.out.println("-IndexedElement");
+        //System.out.println("-IndexedElement");
         ArrayList<Value> objectData = new ArrayList<>();
         objectData.add(node.getExpression1().accept(this));
         objectData.add(node.getExpression2().accept(this));
@@ -567,14 +577,14 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(ArrayDef node) throws ASTVisitorException {
-        System.out.println("-ArrayDef");
+        //System.out.println("-ArrayDef");
         HashMap<Integer, Value> arrayData = new HashMap<>();
         int count = 0;
         if (node.getExpressionList() != null) {
             for (Expression expression : node.getExpressionList()) {
                 Value argValue = expression.accept(this);
                 arrayData.put(count, argValue);
-                System.out.println(argValue);
+                //System.out.println(argValue);
                 count++;
             }
         }
@@ -583,7 +593,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(Block node) throws ASTVisitorException {
-        System.out.println("-Block");
+        //System.out.println("-Block");
         Value ret = null;
 
         enterScopeSpace();
@@ -602,7 +612,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(FunctionDefExpression node) throws ASTVisitorException {
-        System.out.println("-FunctionDefExpression");
+        //System.out.println("-FunctionDefExpression");
 
         node.getFunctionDef().accept(this);
         return null;
@@ -610,7 +620,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(FunctionDef node) throws ASTVisitorException {
-        System.out.println("-FunctionDef");
+        //System.out.println("-FunctionDef");
 
         String name = node.getFuncName();
         /*Function Name*/
@@ -665,43 +675,43 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(IntegerLiteral node) throws ASTVisitorException {
-        System.out.println("-IntegerLiteral");
+        //System.out.println("-IntegerLiteral");
         return new StaticVal(Value_t.INTEGER, node.getLiteral());
     }
 
     @Override
     public Value visit(DoubleLiteral node) throws ASTVisitorException {
-        System.out.println("-DoubleLiteral");
+        //System.out.println("-DoubleLiteral");
         return new StaticVal(Value_t.REAL, node.getLiteral());
     }
 
     @Override
     public Value visit(StringLiteral node) throws ASTVisitorException {
-        System.out.println("-StringLiteral");
+        //System.out.println("-StringLiteral");
         return new StaticVal(Value_t.STRING, node.getLiteral());
     }
 
     @Override
     public Value visit(NullLiteral node) throws ASTVisitorException {
-        System.out.println("-NullLiteral");
+        //System.out.println("-NullLiteral");
         return new StaticVal(Value_t.NULL, null);
     }
 
     @Override
     public Value visit(TrueLiteral node) throws ASTVisitorException {
-        System.out.println("-TrueLiteral");
+        //System.out.println("-TrueLiteral");
         return new StaticVal(Value_t.BOOLEAN, Boolean.TRUE);
     }
 
     @Override
     public Value visit(FalseLiteral node) throws ASTVisitorException {
-        System.out.println("-FalseLiteral");
+        //System.out.println("-FalseLiteral");
         return new StaticVal(Value_t.BOOLEAN, Boolean.FALSE);
     }
 
     @Override
     public Value visit(IfStatement node) throws ASTVisitorException {
-        System.out.println("-IfStatement");
+        //System.out.println("-IfStatement");
 
         Value val = node.getExpression().accept(this);
         Value ret = null;
@@ -728,7 +738,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(WhileStatement node) throws ASTVisitorException {
-        System.out.println("-WhileStatement");
+        //System.out.println("-WhileStatement");
 
         Value val = node.getExpression().accept(this);
         Value ret;
@@ -750,7 +760,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(ForStatement node) throws ASTVisitorException {
-        System.out.println("-ForStatement");
+        //System.out.println("-ForStatement");
 
         Value ret;
 
@@ -783,7 +793,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(BreakStatement node) throws ASTVisitorException {
-        System.out.println("-BreakStatement");
+        //System.out.println("-BreakStatement");
         if (_inLoop == 0) {
             ASTUtils.error(node, "Use of 'break' while not in a loop.");
         }
@@ -792,7 +802,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(ContinueStatement node) throws ASTVisitorException {
-        System.out.println("-ContinueStatement");
+        //System.out.println("-ContinueStatement");
         if (_inLoop == 0) {
             ASTUtils.error(node, "Use of 'continue' while not in a loop.");
         }
@@ -801,7 +811,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(ReturnStatement node) throws ASTVisitorException {
-        System.out.println("-ReturnStatement");
+        //System.out.println("-ReturnStatement");
         Value ret = null;
 
         if (_inFunction == 0) {
