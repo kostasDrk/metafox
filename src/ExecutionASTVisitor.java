@@ -608,6 +608,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(ObjectDefinition node) throws ASTVisitorException {
         //System.out.println("-ObjectDefinition");
         HashMap<Value, Value> objectData = new HashMap<>();
+        int fieldsNum = node.getIndexedElementList().size();
+        Value sizeVal = new StaticVal(Value_t.STRING, "#size");
+        Value sizeVal1 = new DynamicVal(Value_t.INTEGER, fieldsNum, "#size");
+        objectData.put(sizeVal, sizeVal1);
+
         if (!node.getIndexedElementList().isEmpty()) {
             for (IndexedElement indexed : node.getIndexedElementList()) {
                 ArrayList<Value> data = (ArrayList<Value>) indexed.accept(this).getData();
@@ -616,7 +621,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 Value value = new DynamicVal(data.get(1), errorInfo);
                 objectData.put(data.get(0), value);
             }
-
         }
 
         return new StaticVal(Value_t.OBJECT, objectData);
