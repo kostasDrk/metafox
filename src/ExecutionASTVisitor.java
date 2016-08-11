@@ -353,7 +353,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
         Value retVal;
 
         String id = node.getIdentifier();
-
         if ((node.getLvalue() != null) && (id != null)) { // lvalue.id 
             lvalue = node.getLvalue().accept(this);
             if (!lvalue.isObject()) {
@@ -370,8 +369,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 ASTUtils.error(node, msg);
             }
 
-            key = (lvalue.isObject()) ? node.getExpression().accept(this) : new StaticVal(node.getExpression().accept(this));
-
+             key = node.getExpression().accept(this);
+             
         } else if ((id != null) && (node.getCall() != null)) { // call.id
             lvalue = node.getCall().accept(this);
             if (!lvalue.isObject()) {

@@ -93,9 +93,11 @@ public abstract class Value<T> implements Serializable {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+
+        if (getClass() != obj.getClass() && !(obj instanceof Value)) {
             return false;
         }
+
         final Value<?> other = (Value<?>) obj;
 
         return Objects.equals(_type, other._type) && Objects.equals(_data, other._data);
