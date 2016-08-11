@@ -273,10 +273,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
             if (op.equals(Operator.MINUS)) {
                 if (value.isInteger()) {
                     returnVal = new StaticVal(value.getType(), -(int) value.getData());
-
                 } else if (value.isReal()) {
                     returnVal = new StaticVal(value.getType(), -(double) value.getData());
-
                 } else {
                     String msg = "Symbol '" + ((DynamicVal) value).getErrorInfo()
                             + "' should be numeric type for operation '" + op.toString() + "'.";
@@ -359,44 +357,44 @@ public class ExecutionASTVisitor implements ASTVisitor {
         if ((node.getLvalue() != null) && (id != null)) { // lvalue.id 
             lvalue = node.getLvalue().accept(this);
             if (!lvalue.isObject()) {
-                String msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' it's not Object type to get member '" + id + "'.";
+                String msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' is not Object type to get member '" + id + "'.";
                 ASTUtils.error(node, msg);
             }
 
-            key = new StaticVal(Value_t.STRING, id);
+            key = _envStack.lookupAll(node.getIdentifier());
 
         } else if ((node.getLvalue() != null) && (node.getExpression() != null)) { // lvalue (exp)
             lvalue = node.getLvalue().accept(this);
             if (!lvalue.isObject() && !lvalue.isTable()) {
-                String msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' it's not Object or Array type to get member '" + id + "'.";
+                String msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' is not Object or Array type to get member '" + id + "'.";
                 ASTUtils.error(node, msg);
             }
 
-            key = node.getExpression().accept(this);
+            key = (lvalue.isObject()) ? node.getExpression().accept(this) : new StaticVal(node.getExpression().accept(this));
 
         } else if ((id != null) && (node.getCall() != null)) { // call.id
             lvalue = node.getCall().accept(this);
             if (!lvalue.isObject()) {
                 //Cast error Think about this add all other cases of downcasts of the ExecutionASTVisitor. what to do?
                 //String msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' it's not Object type to get member '" + id + "'.";
-                String msg = "Return value it's not Object type to get member '" + id + "'.";
+                String msg = "Return value is not Object type to get member '" + id + "'.";
                 ASTUtils.error(node, msg);
             }
 
-            key = new StaticVal(Value_t.STRING, id);
+            key = _envStack.lookupAll(node.getIdentifier());
 
         } else if ((node.getCall() != null) && (node.getExpression() != null)) { // call (expr)
             lvalue = node.getCall().accept(this);
             if (!lvalue.isObject() && !lvalue.isTable()) {
                 //Cast error Think about this add all other cases of downcasts of the ExecutionASTVisitor. what to do?
                 //String msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' it's not Object or Array type to get member '" + id + "'.";
-                String msg = "Return value it's not Object or Array type to get member '" + id + "'.";
+                String msg = "Return value is not Object or Array type to get member '" + id + "'.";
                 ASTUtils.error(node, msg);
             }
 
             key = node.getExpression().accept(this);
 
-        }else{
+        } else {
             //fatal error Think how to manage this errors.
         }
 
@@ -610,6 +608,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(ObjectDefinition node) throws ASTVisitorException {
         //System.out.println("-ObjectDefinition");
         HashMap<Value, Value> objectData = new HashMap<>();
+        int fieldsNum = node.getIndexedElementList().size();
+        Value sizeVal = new StaticVal(Value_t.STRING, "#size");
+        Value sizeVal1 = new DynamicVal(Value_t.INTEGER, fieldsNum, "#size");
+        objectData.put(sizeVal, sizeVal1);
+
         if (!node.getIndexedElementList().isEmpty()) {
             for (IndexedElement indexed : node.getIndexedElementList()) {
                 ArrayList<Value> data = (ArrayList<Value>) indexed.accept(this).getData();
@@ -618,7 +621,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 Value value = new DynamicVal(data.get(1), errorInfo);
                 objectData.put(data.get(0), value);
             }
-
         }
 
         return new StaticVal(Value_t.OBJECT, objectData);
