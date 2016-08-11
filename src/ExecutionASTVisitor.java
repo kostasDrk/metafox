@@ -370,7 +370,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 ASTUtils.error(node, msg);
             }
 
-            key = node.getExpression().accept(this);
+            key = (lvalue.isObject()) ? node.getExpression().accept(this) : new StaticVal(node.getExpression().accept(this));
 
         } else if ((id != null) && (node.getCall() != null)) { // call.id
             lvalue = node.getCall().accept(this);
