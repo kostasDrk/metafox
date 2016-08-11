@@ -263,29 +263,64 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(UnaryExpression node) throws ASTVisitorException {
         //System.out.println("-UnaryExpression");
 
-        ////System.out.print(node.getOperator());
+        Operator op = node.getOperator();
+        Value returnVal = new StaticVal();
+
         if (node.getExpression() != null) {
             setNodeIsLValueIfMember(node.getExpression());
-            node.getExpression().accept(this);
-        } else {
-            if (node.getLvalue() instanceof IdentifierExpression) {
-                IdentifierExpression id = (IdentifierExpression) node.getLvalue();
-                String name = id.getIdentifier();
-                Value sybmolInfo = _envStack.lookupAll(name);
-                if (sybmolInfo != null) {
-                    if (sybmolInfo.getType() == Value_t.USER_FUNCTION
-                            || sybmolInfo.getType() == Value_t.LIBRARY_FUNCTION) {
+            Value value = node.getExpression().accept(this);
 
-                        String msg = "Using function: " + name + " as lvalue.";
-                        ASTUtils.error(node, msg);
-                    }
+            if (op.equals(Operator.MINUS)) {
+                if (value.isInteger()) {
+                    returnVal = new StaticVal(value.getType(), -(int) value.getData());
+
+                } else if (value.isReal()) {
+                    returnVal = new StaticVal(value.getType(), -(double) value.getData());
+
+                } else {
+                    String msg = "Symbol '" + ((DynamicVal) value).getErrorInfo()
+                            + "' should be numeric type for operation '" + op.toString() + "'.";
+                    ASTUtils.error(node, msg);
                 }
-            } else {
-                setNodeIsLValueIfMember(node.getLvalue());
+            } else if (op.equals(Operator.LOGIC_NOT)) {
+                if (value.isBoolean()) {
+                    returnVal = new StaticVal(Value_t.BOOLEAN, !(boolean) value.getData());
+
+                } else if (value.isInteger() || value.isReal() || value.isString() || value.isUserFunction() || value.isLibraryFunction() || value.isTable() || value.isObject()) {
+                    returnVal = new StaticVal(Value_t.BOOLEAN, Boolean.FALSE);
+
+                } else if (value.isNull()) {
+                    returnVal = new StaticVal(Value_t.BOOLEAN, Boolean.TRUE);
+
+                } else {
+                    String msg = "Symbol '" + ((DynamicVal) value).getErrorInfo()
+                            + "' can not converted to boolean type.";
+                    ASTUtils.error(node, msg);
+                }
             }
-            node.getLvalue().accept(this);
+
+        } else {
+            setNodeIsLValueIfMember(node.getLvalue());
+            Value value = node.getLvalue().accept(this);
+
+            StaticVal assignVal = null;
+            if (value.isInteger()) {
+                int data = op.equals(Operator.PLUS_PLUS) ? (int) value.getData() + 1 : (int) value.getData() - 1;
+                assignVal = new StaticVal(value.getType(), data);
+            } else if (value.isReal()) {
+                double data = op.equals(Operator.PLUS_PLUS) ? (double) value.getData() + 1 : (double) value.getData() - 1;
+                assignVal = new StaticVal(value.getType(), data);
+            } else {
+                String msg = "Symbol '" + ((DynamicVal) value).getErrorInfo()
+                        + "' should be numeric type for operation '" + op.toString() + "'.";
+                ASTUtils.error(node, msg);
+            }
+
+            _envStack.setValue((DynamicVal) value, assignVal);
+
         }
-        return null;
+
+        return returnVal;
     }
 
     @Override
@@ -315,11 +350,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(Member node) throws ASTVisitorException {
         //System.out.println("-Member");
 
-        Value lvalue;
+        Value lvalue = null;
+        Value key = null;
+        Value retVal;
+
         String id = node.getIdentifier();
-        Value call = null;
-        Value expr = null;
-        Value retVal = null;
 
         if ((node.getLvalue() != null) && (id != null)) { // lvalue.id 
             lvalue = node.getLvalue().accept(this);
@@ -328,35 +363,58 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 ASTUtils.error(node, msg);
             }
 
-            HashMap<Value, Value> objectData = (HashMap<Value, Value>) lvalue.getData();
-            Value key = new StaticVal(Value_t.STRING, id);
-            Value value = objectData.get(key);
-
-            if (value == null) {
-                if (node.isLValue()) {
-                    String errorInfo = "Object." + "id.";
-
-                    retVal = new DynamicVal(errorInfo);
-                    objectData.put(key, retVal);
-                } else {
-                    retVal = new StaticVal(Value_t.NULL, null);
-                }
-
-            } else {
-                retVal = value;
-            }
+            key = new StaticVal(Value_t.STRING, id);
 
         } else if ((node.getLvalue() != null) && (node.getExpression() != null)) { // lvalue (exp)
-            //lvalue = node.getLvalue().accept(this);
-            //expr = node.getExpression().accept(this);
+            lvalue = node.getLvalue().accept(this);
+            if (!lvalue.isObject() && !lvalue.isTable()) {
+                String msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' it's not Object or Array type to get member '" + id + "'.";
+                ASTUtils.error(node, msg);
+            }
+
+            key = node.getExpression().accept(this);
 
         } else if ((id != null) && (node.getCall() != null)) { // call.id
-            //call = node.getCall().accept(this);
+            lvalue = node.getCall().accept(this);
+            if (!lvalue.isObject()) {
+                //Cast error Think about this add all other cases of downcasts of the ExecutionASTVisitor. what to do?
+                //String msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' it's not Object type to get member '" + id + "'.";
+                String msg = "Return value it's not Object type to get member '" + id + "'.";
+                ASTUtils.error(node, msg);
+            }
+
+            key = new StaticVal(Value_t.STRING, id);
 
         } else if ((node.getCall() != null) && (node.getExpression() != null)) { // call (expr)
-            //call = node.getCall().accept(this);
-            //expr = node.getExpression().accept(this);
+            lvalue = node.getCall().accept(this);
+            if (!lvalue.isObject() && !lvalue.isTable()) {
+                //Cast error Think about this add all other cases of downcasts of the ExecutionASTVisitor. what to do?
+                //String msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' it's not Object or Array type to get member '" + id + "'.";
+                String msg = "Return value it's not Object or Array type to get member '" + id + "'.";
+                ASTUtils.error(node, msg);
+            }
 
+            key = node.getExpression().accept(this);
+
+        }else{
+            //fatal error Think how to manage this errors.
+        }
+
+        HashMap<Value, Value> objectData = (HashMap<Value, Value>) lvalue.getData();
+        Value value = objectData.get(key);
+
+        if (value == null) {
+            if (node.isLValue()) {
+                String errorInfo = "Object." + "id.";
+
+                retVal = new DynamicVal(errorInfo);
+                objectData.put(key, retVal);
+            } else {
+                retVal = new StaticVal(Value_t.NULL, null);
+            }
+
+        } else {
+            retVal = value;
         }
 
         return retVal;
@@ -578,13 +636,17 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(ArrayDef node) throws ASTVisitorException {
         //System.out.println("-ArrayDef");
-        HashMap<Integer, Value> arrayData = new HashMap<>();
+        HashMap<Value, Value> arrayData = new HashMap<>();
         int count = 0;
         if (node.getExpressionList() != null) {
             for (Expression expression : node.getExpressionList()) {
-                Value argValue = expression.accept(this);
-                arrayData.put(count, argValue);
-                //System.out.println(argValue);
+                Value index = new StaticVal(Value_t.INTEGER, count);
+                Value value = expression.accept(this);
+
+                String errorInfo = "Object.(" + count + ")";
+                Value element = new DynamicVal(value, errorInfo);
+
+                arrayData.put(index, element);
                 count++;
             }
         }
