@@ -149,7 +149,7 @@ public class PrintASTVisitor implements ASTVisitor {
         System.out.print("(");
         node.getFunctionDef().accept(this);
         System.out.print(")");
-        node.getNormCall().accept(this);
+        node.getLvalueCall().accept(this);
         
         return null;
     }

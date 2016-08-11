@@ -560,11 +560,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(AnonymousFunctionCall node) throws ASTVisitorException {
         //System.out.println("-AnonymousFunctionCall");
 
-        node.getFunctionDef().accept(this);
+        Value function = node.getFunctionDef().accept(this);
 
-        Value arguments = node.getNormCall().accept(this);
+        Value returnValue = node.getLvalueCall().accept(this);
         
-        return null;
+        return returnValue;
     }
 
     @Override

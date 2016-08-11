@@ -5,11 +5,11 @@ import symbols.value.Value;
 public class AnonymousFunctionCall extends Call {
 
     private FunctionDef _FunctionDef;
-    private NormCall _normCall;
+    private LvalueCall _lvalueCall;
 
     public AnonymousFunctionCall(FunctionDef functionDef, NormCall normCall) {
         _FunctionDef = functionDef;
-        _normCall = normCall;
+        _lvalueCall = new LvalueCall(new IdentifierExpression(functionDef.getFuncName(), true), normCall);
     }
 
     public FunctionDef getFunctionDef() {
@@ -20,12 +20,12 @@ public class AnonymousFunctionCall extends Call {
         this._FunctionDef = _FunctionDef;
     }
 
-    public NormCall getNormCall() {
-        return _normCall;
+    public LvalueCall getLvalueCall() {
+        return _lvalueCall;
     }
 
-    public void setNormCall(NormCall normCall) {
-        this._normCall = normCall;
+    public void setLvalueCall(LvalueCall _lvalueCall) {
+        this._lvalueCall = _lvalueCall;
     }
 
     @Override
