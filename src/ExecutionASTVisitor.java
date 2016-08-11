@@ -273,10 +273,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
             if (op.equals(Operator.MINUS)) {
                 if (value.isInteger()) {
                     returnVal = new StaticVal(value.getType(), -(int) value.getData());
-
                 } else if (value.isReal()) {
                     returnVal = new StaticVal(value.getType(), -(double) value.getData());
-
                 } else {
                     String msg = "Symbol '" + ((DynamicVal) value).getErrorInfo()
                             + "' should be numeric type for operation '" + op.toString() + "'.";
@@ -368,7 +366,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         } else if ((node.getLvalue() != null) && (node.getExpression() != null)) { // lvalue (exp)
             lvalue = node.getLvalue().accept(this);
             if (!lvalue.isObject() && !lvalue.isTable()) {
-                String msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' it's not Object or Array type to get member '" + id + "'.";
+                String msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' is not Object or Array type to get member '" + id + "'.";
                 ASTUtils.error(node, msg);
             }
 
@@ -379,7 +377,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
             if (!lvalue.isObject()) {
                 //Cast error Think about this add all other cases of downcasts of the ExecutionASTVisitor. what to do?
                 //String msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' it's not Object type to get member '" + id + "'.";
-                String msg = "Return value it's not Object type to get member '" + id + "'.";
+                String msg = "Return value is not Object type to get member '" + id + "'.";
                 ASTUtils.error(node, msg);
             }
 
@@ -390,7 +388,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
             if (!lvalue.isObject() && !lvalue.isTable()) {
                 //Cast error Think about this add all other cases of downcasts of the ExecutionASTVisitor. what to do?
                 //String msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' it's not Object or Array type to get member '" + id + "'.";
-                String msg = "Return value it's not Object or Array type to get member '" + id + "'.";
+                String msg = "Return value is not Object or Array type to get member '" + id + "'.";
                 ASTUtils.error(node, msg);
             }
 
