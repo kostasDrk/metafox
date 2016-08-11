@@ -361,7 +361,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 ASTUtils.error(node, msg);
             }
 
-            key = new StaticVal(Value_t.STRING, id);
+            key = _envStack.lookupAll(node.getIdentifier());
 
         } else if ((node.getLvalue() != null) && (node.getExpression() != null)) { // lvalue (exp)
             lvalue = node.getLvalue().accept(this);
@@ -381,7 +381,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 ASTUtils.error(node, msg);
             }
 
-            key = new StaticVal(Value_t.STRING, id);
+            key = _envStack.lookupAll(node.getIdentifier());
 
         } else if ((node.getCall() != null) && (node.getExpression() != null)) { // call (expr)
             lvalue = node.getCall().accept(this);
@@ -394,7 +394,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
             key = node.getExpression().accept(this);
 
-        }else{
+        } else {
             //fatal error Think how to manage this errors.
         }
 
