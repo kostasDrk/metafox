@@ -6,7 +6,7 @@ import symbols.value.DynamicVal;
 
 public class Environment {
 
-    private final ArrayDeque<EnvironmentScope> _environment;
+    private final ArrayDeque<EnvironmentScope> _environment; 
 
     public Environment() {
         _environment = new ArrayDeque();
@@ -51,6 +51,10 @@ public class Environment {
         return _environment.pop();
     }
 
+    public int topScope(){
+        return _environment.peek().getScope();
+    }
+    
     public int totalActuals() {
         return _environment.peekFirst().size();
     }

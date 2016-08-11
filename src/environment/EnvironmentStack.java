@@ -92,6 +92,10 @@ public class EnvironmentStack {
         System.out.println(toString());
     }
 
+    public int topEnvScope() {
+        return _environmentStack.peek().topScope();
+    }
+
     public void setValue(DynamicVal dest, Value src) {
         dest.setType(src.getType());
         dest.setData(src.getData());
