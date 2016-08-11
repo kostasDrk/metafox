@@ -510,14 +510,11 @@ member ::= lvalue:lval DOT ID:id
 
 
 
-call   ::= call:cl LEFT_PARENTHESIS elist:el RIGHT_PARENTHESIS
+call   ::= call:cl normcall:normcl
 			{:
-				if(el == null)
-					RESULT = new ExtendedCall(cl);
-				else
-					RESULT = new ExtendedCall(cl, el);
-				RESULT.setLine(elleft);
-				RESULT.setColumn(elright);
+                                RESULT = new ExtendedCall(cl, normcl);
+				RESULT.setLine(normclleft);
+				RESULT.setColumn(normclright);
 			:}
 			|lvalue:lval callsuffix:clsuffix
 			{:
@@ -525,12 +522,9 @@ call   ::= call:cl LEFT_PARENTHESIS elist:el RIGHT_PARENTHESIS
 				RESULT.setLine(lvalleft);
 				RESULT.setColumn(lvalright);
 			:}
-			|LEFT_PARENTHESIS funcdef:fdef RIGHT_PARENTHESIS LEFT_PARENTHESIS elist:el RIGHT_PARENTHESIS
+			|LEFT_PARENTHESIS funcdef:fdef RIGHT_PARENTHESIS normcall:normcl
 			{:
-				if(el == null)
-					RESULT = new AnonymousFunctionCall(fdef);
-				else
-					RESULT = new AnonymousFunctionCall(fdef, el);
+                                RESULT = new AnonymousFunctionCall(fdef, normcl);
 				RESULT.setLine(fdefleft);
 				RESULT.setColumn(fdefright);
 			:}
@@ -562,12 +556,9 @@ normcall ::= LEFT_PARENTHESIS elist:el RIGHT_PARENTHESIS
 			;
 
 
-methodcall ::=  DOUBLE_DOT ID:id LEFT_PARENTHESIS elist:el RIGHT_PARENTHESIS
+methodcall ::=  DOUBLE_DOT ID:id normcall:normcl
 			{:
-				if(el == null)
-					RESULT = new MethodCall(id);
-				else
-					RESULT = new MethodCall(id, el);
+                                RESULT = new MethodCall(id, normcl);
 				RESULT.setLine(idleft);
 				RESULT.setColumn(idright);
 			:}

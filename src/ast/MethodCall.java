@@ -1,40 +1,35 @@
 package ast;
-import java.util.ArrayList;
+
 import symbols.value.Value;
 
 public class MethodCall extends CallSuffix {
 
-	private String _identifier;
-	private ArrayList<Expression> _expressionList;
+    private String _identifier;
+    private NormCall _normCall;
 
-	public MethodCall(String identifier, ArrayList<Expression> expressionList){
-		this._identifier = identifier;
-		this._expressionList = expressionList;
-	}
-	
-	public MethodCall(String identifier){
-		this._identifier = identifier;
-		this._expressionList = new ArrayList<Expression>();
-	}
+    public MethodCall(String identifier, NormCall normCall) {
+        _identifier = identifier;
+        _normCall = normCall;
+    }
 
-	public String getIdentifier(){
-		return this._identifier;
-	}
+    public String getIdentifier() {
+        return this._identifier;
+    }
 
-	public void setIdentifier(String identifier){
-		this._identifier = identifier;
-	}
+    public void setIdentifier(String identifier) {
+        this._identifier = identifier;
+    }
 
-	public ArrayList<Expression> getExpressionList(){
-		return this._expressionList;
-	}
+    public NormCall getNormCall() {
+        return _normCall;
+    }
 
-	public void setExpressionList(ArrayList<Expression> expressionList){
-		this._expressionList = expressionList;
-	}
+    public void setNormCall(NormCall _normCall) {
+        this._normCall = _normCall;
+    }
 
-	@Override
-	public Value accept(ASTVisitor visitor) throws ASTVisitorException {
-		return visitor.visit(this);
-	}
+    @Override
+    public Value accept(ASTVisitor visitor) throws ASTVisitorException {
+        return visitor.visit(this);
+    }
 }

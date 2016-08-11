@@ -1,40 +1,35 @@
 package ast;
-import java.util.ArrayList;
+
 import symbols.value.Value;
 
 public class ExtendedCall extends Call {
 
-	private Call _call;
-	private ArrayList<Expression> _expressionList;
+    private Call _call;
+    private NormCall _normCall;
 
-	public ExtendedCall(Call call){
-		this._call = call;
-		this._expressionList = new ArrayList<Expression>();
-	}
+    public ExtendedCall(Call call, NormCall normCall) {
+        _call = call;
+        _normCall = normCall;
+    }
 
-	public ExtendedCall(Call call, ArrayList<Expression> expressionList){
-		this._call = call;
-		this._expressionList = expressionList;
-	}
+    public Call getCall() {
+        return this._call;
+    }
 
-	public Call getCall(){
-		return this._call;
-	}
+    public void setCall(Call call) {
+        this._call = call;
+    }
 
-	public void setCall(Call call){
-		this._call = call;
-	}
+    public NormCall getNormCall() {
+        return _normCall;
+    }
 
-	public ArrayList<Expression> getExpressionList(){
-		return this._expressionList;
-	}
+    public void setNormCall(NormCall _normCall) {
+        this._normCall = _normCall;
+    }
 
-	public void setExpressionList(ArrayList<Expression> expressionList){
-		this._expressionList = expressionList;
-	}
-
-	@Override
-	public Value accept(ASTVisitor visitor) throws ASTVisitorException {
-		return visitor.visit(this);
-	}
+    @Override
+    public Value accept(ASTVisitor visitor) throws ASTVisitorException {
+        return visitor.visit(this);
+    }
 }

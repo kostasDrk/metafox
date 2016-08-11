@@ -369,8 +369,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 ASTUtils.error(node, msg);
             }
 
-             key = node.getExpression().accept(this);
-             
+            key = node.getExpression().accept(this);
+
         } else if ((id != null) && (node.getCall() != null)) { // call.id
             lvalue = node.getCall().accept(this);
             if (!lvalue.isObject()) {
@@ -423,10 +423,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         node.getCall().accept(this);
 
-        node.getExpressionList();
-        for (Expression expression : node.getExpressionList()) {
-            expression.accept(this);
-        }
+        Value arguments = node.getNormCall().accept(this);
         return null;
     }
 
@@ -565,9 +562,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         node.getFunctionDef().accept(this);
 
-        for (Expression expression : node.getExpressionList()) {
-            expression.accept(this);
-        }
+        Value arguments = node.getNormCall().accept(this);
+        
         return null;
     }
 
@@ -590,17 +586,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(MethodCall node) throws ASTVisitorException {
         //System.out.println("-MethodCall");
-        HashMap<Integer, Value> arguments = new HashMap<>();
-        int count = 0;
-        for (Expression expression : node.getExpressionList()) {
-            Value argValue = expression.accept(this);
-            arguments.put(count, argValue);
-            //System.out.println(argValue);
-            count++;
-        }
-
-        //Change to fox Table.
-        return new StaticVal(Value_t.UNDEFINED, arguments);
+        Value arguments = node.getNormCall().accept(this);
+        return arguments;
     }
 
     @Override
