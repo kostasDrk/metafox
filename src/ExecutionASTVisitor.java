@@ -408,7 +408,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 retVal = new DynamicVal(errorInfo);
                 objectData.put(key, retVal);
             } else {
-                retVal = new StaticVal(Value_t.NULL, null);
+                retVal = NULL;
             }
 
         } else {
@@ -754,7 +754,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(NullLiteral node) throws ASTVisitorException {
         //System.out.println("-NullLiteral");
-        return new StaticVal(Value_t.NULL, null);
+        return NULL;
     }
 
     @Override
