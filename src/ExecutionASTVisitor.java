@@ -59,6 +59,7 @@ import static utils.Constants.BREAK;
 import static utils.Constants.CONTINUE;
 import static utils.Constants.ENTER_FUNCTION_ENV_INIT_SCOPE;
 import static utils.Constants.LIBRARY_FUNC_ARG;
+import static utils.Constants.NULL;
 
 public class ExecutionASTVisitor implements ASTVisitor {
 
@@ -420,7 +421,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(ExtendedCall node) throws ASTVisitorException {
         //System.out.println("-ExtendedCall");
-        Value retVal = new StaticVal(Value_t.NULL, null);
+        Value retVal = NULL;
         Value function = node.getCall().accept(this);
 
         if (function.isUserFunction()) {
