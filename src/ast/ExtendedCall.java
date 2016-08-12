@@ -6,10 +6,12 @@ public class ExtendedCall extends Call {
 
     private Call _call;
     private NormCall _normCall;
+    private LvalueCall _lvalueCall;
 
     public ExtendedCall(Call call, NormCall normCall) {
         _call = call;
         _normCall = normCall;
+        _lvalueCall = null;
     }
 
     public Call getCall() {
@@ -26,6 +28,14 @@ public class ExtendedCall extends Call {
 
     public void setNormCall(NormCall _normCall) {
         this._normCall = _normCall;
+    }
+
+    public LvalueCall getLvalueCall() {
+        return _lvalueCall;
+    }
+
+    public void setLvalueCall(String lvalue, NormCall normCall) {
+        _lvalueCall = new LvalueCall(new IdentifierExpression(lvalue, true), normCall);
     }
 
     @Override

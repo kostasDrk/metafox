@@ -420,11 +420,20 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(ExtendedCall node) throws ASTVisitorException {
         //System.out.println("-ExtendedCall");
+        Value retVal = new StaticVal(Value_t.NULL, null);
+        Value function = node.getCall().accept(this);
 
-        node.getCall().accept(this);
+        if (function.isUserFunction()) {
+            String functionName = ((FunctionDef) function.getData()).getFuncName();
+            node.setLvalueCall(functionName, node.getNormCall());
 
-        Value arguments = node.getNormCall().accept(this);
-        return null;
+            retVal = node.getLvalueCall().accept(this);
+        } else {
+            String errorCode = "ExtendedCall";
+            ASTUtils.fatalError(node, errorCode);
+        }
+
+        return retVal;
     }
 
     @Override
@@ -563,7 +572,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         Value function = node.getFunctionDef().accept(this);
 
         Value returnValue = node.getLvalueCall().accept(this);
-        
+
         return returnValue;
     }
 
