@@ -70,6 +70,22 @@ public abstract class Value<T> implements Serializable {
         return _type.equals(Value_t.UNDEFINED);
     }
 
+    public boolean isConvertedToInteger() {
+        if (!isString()) {
+            return false;
+        }
+
+        try {
+            Integer.parseInt((String) _data);
+        } catch (NumberFormatException | NullPointerException e) {
+            return false;
+        }
+
+        // only got here if we didn't return false
+        return true;
+
+    }
+
     public boolean isConvertedToNumeric() {
         if (!isString()) {
             return false;
