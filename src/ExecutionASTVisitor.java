@@ -361,9 +361,10 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 ASTUtils.error(node, msg);
             }
 
-            key = _envStack.lookupAll(node.getIdentifier());
+            // key = _envStack.lookupAll(node.getIdentifier());
+            key = new StaticVal(Value_t.STRING, node.getIdentifier());
 
-        } else if ((node.getLvalue() != null) && (node.getExpression() != null)) { // lvalue (exp)
+        } else if ((node.getLvalue() != null) && (node.getExpression() != null)) { // lvalue [exp]
             lvalue = node.getLvalue().accept(this);
             if (!lvalue.isObject() && !lvalue.isTable()) {
                 String msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' is not Object or Array type to get member '" + id + "'.";
@@ -371,7 +372,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
             }
 
             key = node.getExpression().accept(this);
-
+            if(key.getData() != null)
+                key = new StaticVal(Value_t.STRING, node.getExpression().accept(this).getData().toString());
         } else if ((id != null) && (node.getCall() != null)) { // call.id
             lvalue = node.getCall().accept(this);
             if (!lvalue.isObject()) {
@@ -615,9 +617,15 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
                 String errorInfo = "Object.(" + data.get(0) + ")";
                 Value value = new DynamicVal(data.get(1), errorInfo);
-                objectData.put(data.get(0), value);
+                Value name = new StaticVal(Value_t.STRING, data.get(0).getData().toString());
+                objectData.put(name, value);
+                // objectData.put(data.get(0), value);
             }
         }
+
+        System.out.println("************");
+        System.out.println(objectData);
+        System.out.println("************");
 
         return new StaticVal(Value_t.OBJECT, objectData);
     }
@@ -626,7 +634,10 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(IndexedElement node) throws ASTVisitorException {
         //System.out.println("-IndexedElement");
         ArrayList<Value> objectData = new ArrayList<>();
-        objectData.add(node.getExpression1().accept(this));
+        if(node.getExpression1() instanceof IdentifierExpression)
+            objectData.add(new StaticVal(Value_t.STRING, ((IdentifierExpression)node.getExpression1()).getIdentifier()));
+        else
+            objectData.add(node.getExpression1().accept(this));
         objectData.add(node.getExpression2().accept(this));
         return new StaticVal(Value_t.UNDEFINED, objectData);
     }
