@@ -6,14 +6,21 @@
 package dataStructures;
 
 import java.util.HashMap;
+import java.util.Set;
+import java.util.Arrays;
+import java.util.ArrayList;
 import symbols.value.Value;
 
-public class Object {
+public class FoxObject {
 
     HashMap<Value, Value> _data;
 
-    public Object() {
+    public FoxObject() {
         _data = new HashMap<>();
+    }
+
+    public FoxObject(HashMap<Value, Value> data) {
+        _data = data;
     }
 
     public void put(Value key, Value value) {
@@ -32,25 +39,21 @@ public class Object {
         return _data.size();
     }
 
-    public Array keysArray() {
-        Array keys = new Array();
-        _data.keySet().stream().forEach((key) -> {
-            keys.add(key);
-        });
+    public ArrayList keysArrayList() {
+        Set<Value> setKeys =  _data.keySet();
+        Value[] arrayKey = setKeys.toArray(new Value[setKeys.size()]);
+        ArrayList<Value> keys = new ArrayList<Value>(Arrays.asList(arrayKey));
 
         return keys;
     }
 
-    public Array valuesArray() {
-        Array values = new Array();
-        _data.values().stream().forEach((value) -> {
-            values.add(value);
-        });
+    public ArrayList valuesArrayList() {
+        ArrayList<Value> values = new ArrayList<Value>(_data.values());
 
         return values;
     }
 
-    @Override
+   /*@Override
     public String toString() {
         String msg = String.format("%-48s %s", "Keys:", "Values:") + "\n";
         msg = _data.entrySet().stream().map((entry)
@@ -58,5 +61,5 @@ public class Object {
                 .reduce(msg, String::concat);
         return msg;
 
-    }
+    }*/
 }

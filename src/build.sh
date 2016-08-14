@@ -19,8 +19,11 @@ javac symbols/value/*.java
 echo "[+] Compiling AST package"
 javac ast/*.java
 
-echo "[+] Compiling LIbraryFunctions"
+echo "[+] Compiling LibraryFunctions"
 javac libraryFunctions/*.java
+
+echo "[+] Compiling DataStructures"
+javac dataStructures/*.java
 
 echo "[+] Compiling Utils"
 javac utils/*.java
@@ -30,6 +33,7 @@ javac environment/*.java
 
 echo "[+] Compiling ASTVisitor"
 javac PrintASTVisitor.java
+javac ExecutionASTVisitor.java
 
 echo "[+] Compilerception"
 javac MetafoxCompiler.java

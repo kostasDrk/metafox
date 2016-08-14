@@ -35,7 +35,6 @@ public class LibraryFunctions {
     }
 
     public static void sqrt(Environment env) {
-
         Double data = getArgument(env);
         if (data == null) {
             return;

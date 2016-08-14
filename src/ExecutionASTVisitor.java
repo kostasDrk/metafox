@@ -47,6 +47,9 @@ import symbols.value.Value_t;
 import symbols.value.StaticVal;
 import symbols.value.DynamicVal;
 
+import dataStructures.FoxObject;
+import dataStructures.FoxArray;
+
 import libraryFunctions.LibraryFunction_t;
 
 import java.util.ArrayList;
@@ -363,7 +366,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
             // key = _envStack.lookupAll(node.getIdentifier());
             key = new StaticVal(Value_t.STRING, node.getIdentifier());
-
         } else if ((node.getLvalue() != null) && (node.getExpression() != null)) { // lvalue [exp]
             lvalue = node.getLvalue().accept(this);
             if (!lvalue.isObject() && !lvalue.isTable()) {
@@ -372,8 +374,10 @@ public class ExecutionASTVisitor implements ASTVisitor {
             }
 
             key = node.getExpression().accept(this);
-            if(key.getData() != null)
+            if(key.getData() != null && lvalue.isObject())
                 key = new StaticVal(Value_t.STRING, node.getExpression().accept(this).getData().toString());
+            else
+                key = node.getExpression().accept(this);
         } else if ((id != null) && (node.getCall() != null)) { // call.id
             lvalue = node.getCall().accept(this);
             if (!lvalue.isObject()) {
@@ -400,15 +404,18 @@ public class ExecutionASTVisitor implements ASTVisitor {
             //fatal error Think how to manage this errors.
         }
 
-        HashMap<Value, Value> objectData = (HashMap<Value, Value>) lvalue.getData();
-        Value value = objectData.get(key);
+        Value value = (lvalue.isObject()) ? ((FoxObject)lvalue.getData()).get(key) : ((FoxArray)lvalue.getData()).get(key);
 
         if (value == null) {
             if (node.isLValue()) {
                 String errorInfo = "Object." + "id.";
 
                 retVal = new DynamicVal(errorInfo);
-                objectData.put(key, retVal);
+                if(lvalue.isObject())
+                    ((FoxObject)lvalue.getData()).put(key, retVal);
+                else
+                    ((FoxArray)lvalue.getData()).put(key, retVal);
+                // lvalue.put(key, retVal);
             } else {
                 retVal = NULL;
             }
@@ -514,11 +521,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
             }
         } else if (lvalue.isObject()) {
             //Get lvalue
-            HashMap<Value, Value> objectData = (HashMap<Value, Value>) lvalue.getData();
+            FoxObject fobject = (FoxObject)lvalue.getData();
             //Get ..id
             String id = ((MethodCall) node.getCallSuffix()).getIdentifier();
             Value key = new StaticVal(Value_t.STRING, id);
-            Value function = objectData.get(key);
+            // Value function = objectData.get(key);
+            Value function = fobject.get(key);
 
             if (!function.isUserFunction() && !function.isLibraryFunction()) {
                 String msg = "Function call using lvalue..id(elist):  Symbmol- 'lvalue." + id
@@ -606,10 +614,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(ObjectDefinition node) throws ASTVisitorException {
         //System.out.println("-ObjectDefinition");
         HashMap<Value, Value> objectData = new HashMap<>();
-        int fieldsNum = node.getIndexedElementList().size();
-        Value sizeVal = new StaticVal(Value_t.STRING, "#size");
-        Value sizeVal1 = new DynamicVal(Value_t.INTEGER, fieldsNum, "#size");
-        objectData.put(sizeVal, sizeVal1);
 
         if (!node.getIndexedElementList().isEmpty()) {
             for (IndexedElement indexed : node.getIndexedElementList()) {
@@ -623,11 +627,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
             }
         }
 
-        System.out.println("************");
-        System.out.println(objectData);
-        System.out.println("************");
-
-        return new StaticVal(Value_t.OBJECT, objectData);
+        FoxObject fobject = new FoxObject(objectData);
+        return new StaticVal(Value_t.OBJECT, fobject);
     }
 
     @Override
@@ -659,7 +660,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 count++;
             }
         }
-        return new StaticVal(Value_t.TABLE, arrayData);
+        
+        FoxArray farray = new FoxArray(arrayData);
+        return new StaticVal(Value_t.TABLE, farray);
     }
 
     @Override

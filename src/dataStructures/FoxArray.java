@@ -13,15 +13,22 @@ import symbols.value.Value_t;
 
 import static utils.Constants.UNDEFINED;
 
-public class Array {
+public class FoxArray {
 
     HashMap<Value, Value> _numberIndexedData;
     HashMap<Value, Value> _otherTypeIndexedData;
 
     int _numberIndexedDataMaxIndex;
 
-    public Array() {
+    public FoxArray() {
         _numberIndexedData = new HashMap<>();
+        _otherTypeIndexedData = new HashMap<>();
+
+        _numberIndexedDataMaxIndex = 0;
+    }
+
+    public FoxArray(HashMap<Value, Value> numberIndexedData) {
+        _numberIndexedData = numberIndexedData;
         _otherTypeIndexedData = new HashMap<>();
 
         _numberIndexedDataMaxIndex = 0;
@@ -90,7 +97,7 @@ public class Array {
         return _numberIndexedDataMaxIndex;
     }
 
-    @Override
+    /*@Override
     public String toString() {
         String msg = String.format("%-48s %s", "Keys:", "Values:") + "\n";
         msg = _numberIndexedData.entrySet().stream().map((entry)
@@ -98,6 +105,6 @@ public class Array {
                 .reduce(msg, String::concat);
         return msg;
 
-    }
+    }*/
 
 }
