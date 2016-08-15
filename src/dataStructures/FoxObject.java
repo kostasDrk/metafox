@@ -7,11 +7,15 @@ package dataStructures;
 
 import java.util.HashMap;
 import java.util.Set;
+import java.util.Collection;
 import java.util.Arrays;
 import java.util.ArrayList;
-import symbols.value.Value;
 
-public class FoxObject {
+import symbols.value.Value;
+import symbols.value.Value_t;
+import symbols.value.StaticVal;
+
+public class FoxObject extends FoxDataStructure{
 
     HashMap<Value, Value> _data;
 
@@ -23,32 +27,52 @@ public class FoxObject {
         _data = data;
     }
 
+    @Override
     public void put(Value key, Value value) {
         _data.put(key, value);
     }
 
+    @Override
     public Value get(Value key) {
         return _data.get(key);
     }
 
+    @Override
     public void remove(Value key) {
         _data.remove(key);
     }
 
+    @Override
     public int size() {
         return _data.size();
     }
 
-    public ArrayList keysArrayList() {
+    public HashMap<Value, Value> keys() {
         Set<Value> setKeys =  _data.keySet();
-        Value[] arrayKey = setKeys.toArray(new Value[setKeys.size()]);
-        ArrayList<Value> keys = new ArrayList<Value>(Arrays.asList(arrayKey));
+        HashMap<Value, Value> keys = new HashMap<Value, Value>();
+        int count = 0;
+        
+        for(Value value : setKeys){
+            StaticVal key = new StaticVal(Value_t.INTEGER, count);
+            StaticVal val = new StaticVal(value);
+            keys.put(key, val);
+            count++;
+        }
 
         return keys;
     }
 
-    public ArrayList valuesArrayList() {
-        ArrayList<Value> values = new ArrayList<Value>(_data.values());
+    public HashMap<Value, Value> values() {
+        Collection<Value> valuesCollection = _data.values();
+        HashMap<Value, Value> values = new HashMap<Value, Value>();
+        int count = 0;
+
+        for(Value value: valuesCollection){
+            StaticVal key = new StaticVal(Value_t.INTEGER, count);
+            StaticVal val = new StaticVal(value);
+            values.put(key, val);
+            count++;
+        }
 
         return values;
     }

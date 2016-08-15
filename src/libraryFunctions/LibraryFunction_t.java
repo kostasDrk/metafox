@@ -6,7 +6,10 @@ public enum LibraryFunction_t {
     PRINT_LN("println"),
     SQRT("sqrt"),
     COS("cos"),
-    SIN("sin");
+    SIN("sin"),
+    LEN("len"),
+    KEYS("keys"),
+    VALUES("values");
 
     private final String _name;
 
@@ -23,7 +26,10 @@ public enum LibraryFunction_t {
         return name.equals(LibraryFunction_t.PRINT.toString())
                 || name.equals(LibraryFunction_t.SQRT.toString())
                 || name.equals(LibraryFunction_t.COS.toString())
-                || name.equals(LibraryFunction_t.SIN.toString());
+                || name.equals(LibraryFunction_t.SIN.toString())
+                || name.equals(LibraryFunction_t.LEN.toString())
+                || name.equals(LibraryFunction_t.KEYS.toString())
+                || name.equals(LibraryFunction_t.VALUES.toString());
 
     }
 

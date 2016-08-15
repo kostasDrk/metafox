@@ -5,7 +5,9 @@
  */
 package dataStructures;
 
+import java.util.Map;
 import java.util.HashMap;
+import java.util.Collection;
 
 import symbols.value.StaticVal;
 import symbols.value.Value;
@@ -13,7 +15,7 @@ import symbols.value.Value_t;
 
 import static utils.Constants.UNDEFINED;
 
-public class FoxArray {
+public class FoxArray extends FoxDataStructure{
 
     HashMap<Value, Value> _numberIndexedData;
     HashMap<Value, Value> _otherTypeIndexedData;
@@ -31,9 +33,10 @@ public class FoxArray {
         _numberIndexedData = numberIndexedData;
         _otherTypeIndexedData = new HashMap<>();
 
-        _numberIndexedDataMaxIndex = 0;
+        _numberIndexedDataMaxIndex = numberIndexedData.size();
     }
 
+    @Override
     public void put(Value key, Value value) {
 
         if (key.isInteger() || key.isConvertedToInteger()) {
@@ -56,6 +59,7 @@ public class FoxArray {
         return get(new StaticVal(Value_t.INTEGER, value));
     }
 
+    @Override
     public Value get(Value key) {
         Value value = _numberIndexedData.get(key);
         if (value != null) {
@@ -77,6 +81,7 @@ public class FoxArray {
         _numberIndexedData.put(key, value);
     }
 
+    @Override
     public void remove(Value key) {
         if (_numberIndexedData.containsKey(key)) {
 
@@ -97,14 +102,30 @@ public class FoxArray {
         return _numberIndexedDataMaxIndex;
     }
 
+    public HashMap<Value, Value> values() {
+        Collection<Value> valuesCollection = _numberIndexedData.values();
+        HashMap<Value, Value> values = new HashMap<Value, Value>();
+        int count = 0;
+
+        for(Value value: valuesCollection){
+            StaticVal key = new StaticVal(Value_t.INTEGER, count);
+            StaticVal val = new StaticVal(value);
+            values.put(key, val);
+            count++;
+        }
+
+        return values;
+    }
+    
     /*@Override
     public String toString() {
         String msg = String.format("%-48s %s", "Keys:", "Values:") + "\n";
-        msg = _numberIndexedData.entrySet().stream().map((entry)
-                -> String.format("%-20s %s", entry.getKey(), entry.getValue()) + "\n")
-                .reduce(msg, String::concat);
+        Iterator it = _numberIndexedData.entrySet().iterator();
+        while(it.hasNext()){
+            Map.Entry pair = (Map.Entry)it.next();
+            msg += "KEY: "+pair.getKey()+"\tVALUE: "+pair.getValue();
+        }
         return msg;
-
     }*/
 
 }
