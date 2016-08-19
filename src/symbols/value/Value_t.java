@@ -11,7 +11,8 @@ public enum Value_t {
     LIBRARY_FUNCTION("LIBRARY_FUNCTION"),
     NULL("NULL"),
     OBJECT("OBJECT"),
-    ERROR("ERROR"),
+    AST("AST"),
+    ERROR("ERROR"),     
     UNDEFINED("UNDEFINED");
 
     private final String _type;

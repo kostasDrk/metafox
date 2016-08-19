@@ -42,6 +42,9 @@ import ast.FunctionDef;
 import ast.FunctionDefExpression;
 import ast.ObjectDefinition;
 import ast.IndexedElement;
+import ast.MetaSyntax;
+import ast.MetaEscape;
+import ast.MetaExecute;
 import symbols.value.StaticVal;
 import symbols.value.Value_t;
 
@@ -331,6 +334,34 @@ public class PrintASTVisitor implements ASTVisitor {
             node.getExpression().accept(this);
         }
         System.out.println(";");
+        return null;
+    }
+
+    @Override
+    public Value visit(MetaSyntax node) throws ASTVisitorException {
+        System.out.println("<.");
+        if (node.getExpression() != null) {
+            node.getExpression().accept(this);
+        }
+        System.out.println(">.");
+        return null;
+    }
+
+    @Override
+    public Value visit(MetaEscape node) throws ASTVisitorException {
+        System.out.println(".~");
+        if (node.getExpression() != null) {
+            node.getExpression().accept(this);
+        }
+        return null;
+    }
+
+    @Override
+    public Value visit(MetaExecute node) throws ASTVisitorException {
+        System.out.println(".!");
+        if (node.getExpression() != null) {
+            node.getExpression().accept(this);
+        }
         return null;
     }
 

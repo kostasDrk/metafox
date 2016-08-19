@@ -70,6 +70,10 @@ public abstract class Value<T> implements Serializable {
         return _type.equals(Value_t.UNDEFINED);
     }
 
+    public boolean isAST(){
+        return _type.equals(Value_t.AST);
+    }
+
     public boolean isConvertedToInteger() {
         if (!isString()) {
             return false;

@@ -41,6 +41,9 @@ import ast.FunctionDef;
 import ast.FunctionDefExpression;
 import ast.ObjectDefinition;
 import ast.IndexedElement;
+import ast.MetaSyntax;
+import ast.MetaExecute;
+import ast.MetaEscape;
 
 
 parser code
@@ -146,7 +149,7 @@ precedence nonassoc  CMP_EQUAL, NOT_EQUAL;
 precedence nonassoc  GREATER, GREATER_OR_EQUAL, LESS, LESS_OR_EQUAL;
 precedence left PLUS, MINUS;
 precedence left MUL, DIV, MOD;
-precedence right NOT,PLUS_PLUS, MINUS_MINUS, UMINUS;
+precedence right NOT,PLUS_PLUS, MINUS_MINUS, UMINUS, QUASI_EXEC, QUASI_ESC;
 precedence left  DOT, DOUBLE_DOT;
 precedence left LEFT_BRACKET, RIGHT_BRACKET;
 precedence left  LEFT_PARENTHESIS, RIGHT_PARENTHESIS;
@@ -317,64 +320,6 @@ expr ::=	assignexpr:assignex
 			;
 
 
-/*op ::=       PLUS
-			{:
-				RESULT = Operator.PLUS;
-			:}
-            |MINUS
-            {:
-				RESULT = Operator.MINUS;
-			:}
-            |MUL
-            {:
-				RESULT = Operator.MUL;
-			:}
-            |DIV
-            {:
-				RESULT = Operator.DIV;
-			:}
-            |MOD
-            {:
-				RESULT = Operator.MOD;
-			:}
-            |GREATER
-            {:
-				RESULT = Operator.GREATER;
-			:}
-            |GREATER_OR_EQUAL
-            {:
-				RESULT = Operator.GREATER_OR_EQUAL;
-			:}
-            |LESS
-            {:
-				RESULT = Operator.LESS;
-			:}
-            |LESS_OR_EQUAL
-            {:
-				RESULT = Operator.LESS_OR_EQUAL;
-			:}
-            |CMP_EQUAL
-            {:
-				RESULT = Operator.CMP_EQUAL;
-			:}
-            |NOT_EQUAL
-            {:
-				RESULT = Operator.NOT_EQUAL;
-			:}
-            |LOGIC_AND
-            {:
-				RESULT = Operator.LOGIC_AND;
-			:}
-            |LOGIC_OR
-            {:
-				RESULT = Operator.LOGIC_OR;
-			:}
-            | NOT
-            {:
-				RESULT = Operator.LOGIC_NOT;
-			:}
-            ;
-*/
 term ::=	 LEFT_PARENTHESIS expr:ex RIGHT_PARENTHESIS
 			{:
 				//RESULT = ex;
@@ -419,9 +364,24 @@ term ::=	 LEFT_PARENTHESIS expr:ex RIGHT_PARENTHESIS
 				RESULT.setLine(lvalleft);
 				RESULT.setColumn(lvalright);
 			:}
-			|QUASI_OPEN expr QUASI_CLOSE
-			|QUASI_ESC expr
-			|QUASI_EXEC expr
+			|QUASI_OPEN expr:ex QUASI_CLOSE
+			{:
+				RESULT = new MetaSyntax(ex);
+				RESULT.setLine(exleft);
+				RESULT.setColumn(exright);
+			:}
+			|QUASI_ESC expr:ex
+			{:
+				RESULT = new MetaEscape(ex);
+				RESULT.setLine(exleft);
+				RESULT.setColumn(exright);
+			:}
+			|QUASI_EXEC expr:ex
+			{:
+				RESULT = new MetaExecute(ex);
+				RESULT.setLine(exleft);
+				RESULT.setColumn(exright);
+			:}
 			|primary:prim
 			{:
 				RESULT = prim;
@@ -512,7 +472,7 @@ member ::= lvalue:lval DOT ID:id
 
 call   ::= call:cl normcall:normcl
 			{:
-                                RESULT = new ExtendedCall(cl, normcl);
+                RESULT = new ExtendedCall(cl, normcl);
 				RESULT.setLine(normclleft);
 				RESULT.setColumn(normclright);
 			:}
@@ -524,7 +484,7 @@ call   ::= call:cl normcall:normcl
 			:}
 			|LEFT_PARENTHESIS funcdef:fdef RIGHT_PARENTHESIS normcall:normcl
 			{:
-                                RESULT = new AnonymousFunctionCall(fdef, normcl);
+                RESULT = new AnonymousFunctionCall(fdef, normcl);
 				RESULT.setLine(fdefleft);
 				RESULT.setColumn(fdefright);
 			:}
@@ -558,7 +518,7 @@ normcall ::= LEFT_PARENTHESIS elist:el RIGHT_PARENTHESIS
 
 methodcall ::=  DOUBLE_DOT ID:id normcall:normcl
 			{:
-                                RESULT = new MethodCall(id, normcl);
+                RESULT = new MethodCall(id, normcl);
 				RESULT.setLine(idleft);
 				RESULT.setColumn(idright);
 			:}

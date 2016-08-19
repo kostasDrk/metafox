@@ -36,6 +36,9 @@ import ast.TermExpressionStmt;
 import ast.TrueLiteral;
 import ast.UnaryExpression;
 import ast.WhileStatement;
+import ast.MetaSyntax;
+import ast.MetaEscape;
+import ast.MetaExecute;
 import ast.utils.ASTUtils;
 
 import environment.EnvironmentStack;
@@ -70,6 +73,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     private int _scope;
     private int _inFunction;
     private int _inLoop;
+    private boolean _inMeta;
 
     private void enterScopeSpace() {
         //System.out.println("EnterScopeSpace");
@@ -114,6 +118,14 @@ public class ExecutionASTVisitor implements ASTVisitor {
         _inLoop--;
     }
 
+    private void enterMetaSpace(){
+        _inMeta = true;
+    }
+
+    private void exitMetaSpace(){
+        _inMeta = false;
+    }
+
     private void setNodeIsLValueIfMember(ASTNode node) {
         //System.out.print("SetNodeIsLValueIfMember: ");
         if (node instanceof Member) {
@@ -129,7 +141,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         _scope = 0;
         _inFunction = 0;
         _inLoop = 0;
-
+        _inMeta = false;
     }
 
     @Override
@@ -162,7 +174,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         Value right = node.getExpression().accept(this);
 
         _envStack.setValue((DynamicVal) left, right);
-        //System.out.println(_envStack.toString());
+        // System.out.println(_envStack.toString());
         return left;
     }
 
@@ -173,6 +185,19 @@ public class ExecutionASTVisitor implements ASTVisitor {
         Value left = node.getExpression1().accept(this);
         Value right = node.getExpression2().accept(this);
         Operator op = node.getOperator();
+
+        // Handle possible meta operands
+        if(left.isAST() || right.isAST()){
+            BinaryExpression binAST = null;
+            if(left.isAST() && !right.isAST())
+                binAST = new BinaryExpression(op, ((Expression) left.getData()), node.getExpression2());
+            else if(!left.isAST() && right.isAST())
+                binAST = new BinaryExpression(op, node.getExpression1(), (Expression) right.getData());
+            else
+                binAST = new BinaryExpression(op, (Expression) left.getData(), (Expression) right.getData());
+            result = new StaticVal<ASTNode>(Value_t.AST, binAST);
+            return result;
+        }
 
         String leftInfo = (left instanceof DynamicVal) ? ((DynamicVal) left).getErrorInfo() + "(" + left.getType() + ")" : left.getData() + "(" + left.getType() + ")";
         leftInfo = "'" + left.getData() + "' (" + left.getType() + ")";
@@ -235,7 +260,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
                             : new StaticVal<>(Value_t.INTEGER, (Integer) ((Double) (leftVal % rightVal)).intValue());
                 }
             }
-        } else {
+        } else{
             // Boolean values
             Boolean leftVal = (Boolean) left.getData();
             Boolean rightVal = (Boolean) right.getData();
@@ -572,7 +597,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
             String msg = "Error during Function Execution @'" + ((DynamicVal) lvalue).getErrorInfo() + "'  - " + ret.getData();
             ASTUtils.error(node, msg);
         }
-
+        //System.out.println(_envStack.toString());
         return ret;
     }
 
@@ -895,6 +920,40 @@ public class ExecutionASTVisitor implements ASTVisitor {
             ret = node.getExpression().accept(this);
             _envStack.setReturnValue(ret);
         }
+        return ret;
+    }
+
+    @Override
+    public Value visit(MetaSyntax node) throws ASTVisitorException{
+        if(_inMeta)
+            return node.getExpression().accept(this);
+        return new StaticVal<ASTNode>(Value_t.AST, node.getExpression());
+    }
+
+    @Override
+    public Value visit(MetaEscape node) throws ASTVisitorException{
+        Value exprVal = node.getExpression().accept(this);
+        if(!exprVal.isAST()){
+            String msg = "'.~' requires an AST: "+exprVal.getType()+" found";
+            ASTUtils.error(node, msg);
+        }
+        Expression astExpr = (Expression) exprVal.getData();
+        return astExpr.accept(this);
+        // return exprVal;
+        //return null;
+    }
+
+    @Override
+    public Value visit(MetaExecute node) throws ASTVisitorException{
+        Value exprVal = node.getExpression().accept(this);
+        enterMetaSpace();
+        if(!exprVal.isAST()){
+            String msg = "'.!' requires an AST: "+exprVal.getType()+" found";
+            ASTUtils.error(node, msg);
+        }
+        Expression astExpr = (Expression) exprVal.getData();
+        Value ret = astExpr.accept(this);
+        exitMetaSpace();
         return ret;
     }
 }

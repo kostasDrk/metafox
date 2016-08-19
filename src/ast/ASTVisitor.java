@@ -38,4 +38,8 @@ public interface ASTVisitor {
 	Value visit(ReturnStatement node) throws ASTVisitorException;
 	Value visit(ObjectDefinition node) throws ASTVisitorException;
 	Value visit(IndexedElement node) throws ASTVisitorException;
+
+	Value visit(MetaSyntax node) throws ASTVisitorException;
+	Value visit(MetaEscape node) throws ASTVisitorException;
+	Value visit(MetaExecute node) throws ASTVisitorException;
 }

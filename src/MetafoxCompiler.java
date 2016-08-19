@@ -14,13 +14,13 @@ public class MetafoxCompiler {
 
                 ASTNode program = (ASTNode) p.parse().value;
 
-                ASTVisitor printVisitor = new PrintASTVisitor();
+                /*ASTVisitor printVisitor = new PrintASTVisitor();
                 program.accept(printVisitor);
-                System.out.println("\n\n**Parse ok**\n\n");
+                System.out.println("\n\n**Parse ok**\n\n");*/
 
                 ASTVisitor executionASTVisitor = new ExecutionASTVisitor();
                 program.accept(executionASTVisitor);
-                System.out.println("\n\n**Execution ok**\n\n");
+                // System.out.println("\n\n**Execution ok**\n\n");
             } catch (Exception e) {
                 System.out.println(e.getMessage());
                 e.printStackTrace();
