@@ -27,6 +27,10 @@ public class Block extends Statement {
 		this._statementList.add(0, stmt);
 	}
 
+	public void addStatement(Statement stmt, int pos){
+		this._statementList.add(pos, stmt);
+	}
+
 	public void appendStatement(Statement stmt){
 		this._statementList.add(stmt);
 	}

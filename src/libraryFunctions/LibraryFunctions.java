@@ -6,14 +6,17 @@ import java.util.ArrayList;
 import environment.Environment;
 import environment.FunctionEnv;
 
-import ast.FunctionDef;
-import ast.Block;
+import ast.Statement;
 import ast.ExpressionStatement;
+import ast.Block;
+import ast.ReturnStatement;
 import ast.Expression;
+import ast.FunctionDef;
 import ast.NormCall;
 import ast.LvalueCall;
 import ast.IdentifierExpression;
 import ast.StringLiteral;
+
 
 import dataStructures.FoxObject;
 import dataStructures.FoxArray;
@@ -90,6 +93,8 @@ public class LibraryFunctions {
         String onExit = (onExitValue.isUndefined() || onExitValue.isNull()) ? "" : onExitValue.getData().toString();
         
         Block funcBody = funcdef.getBody();
+        ArrayList<Statement> stmtlist = funcBody.getStatementList();
+        int size = stmtlist.size();
 
         // Prepare new statements to add to function body
         IdentifierExpression printid = new IdentifierExpression(LibraryFunction_t.PRINT_LN.toString(), false);
@@ -105,7 +110,16 @@ public class LibraryFunctions {
         normcall = new NormCall(elist);
         lcall = new LvalueCall(printid, normcall);
         exstmt = new ExpressionStatement(lcall);
-        funcBody.appendStatement(exstmt);
+        if(stmtlist.get(size) instanceof ReturnStatement)
+            funcBody.addStatement(exstmt, size);
+        else
+            funcBody.appendStatement(exstmt);
+    }
+
+    public static void str(Environment env){
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG+0);
+        Value ret = new StaticVal<String>(Value_t.STRING, val.getData().toString());
+        ((FunctionEnv) env).setReturnVal(ret);
     }
 
     public static void sqrt(Environment env) {

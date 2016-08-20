@@ -63,6 +63,7 @@ import java.util.logging.Logger;
 
 import static utils.Constants.BREAK;
 import static utils.Constants.CONTINUE;
+import static utils.Constants.RETURN;
 import static utils.Constants.ENTER_FUNCTION_ENV_INIT_SCOPE;
 import static utils.Constants.LIBRARY_FUNC_ARG;
 import static utils.Constants.NULL;
@@ -699,7 +700,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         for (Statement stmt : node.getStatementList()) {
             ret = stmt.accept(this);
             if (ret != null) {
-                if (ret.getData().equals(BREAK) || ret.getData().equals(CONTINUE)) {
+                if (ret.getData().equals(BREAK) || ret.getData().equals(CONTINUE) || ret.getData().equals(RETURN)) {
                     return ret;
                 }
             }
@@ -920,7 +921,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
             ret = node.getExpression().accept(this);
             _envStack.setReturnValue(ret);
         }
-        return ret;
+        return new StaticVal(Value_t.STRING, RETURN);
     }
 
     @Override

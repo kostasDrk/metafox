@@ -10,7 +10,8 @@ public enum LibraryFunction_t {
     LEN("len"),
     KEYS("keys"),
     VALUES("values"),
-    DIAGNOSE("diagnose");
+    DIAGNOSE("diagnose"),
+    STR("str");
 
     private final String _name;
 
@@ -31,7 +32,8 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.LEN.toString())
                 || name.equals(LibraryFunction_t.KEYS.toString())
                 || name.equals(LibraryFunction_t.VALUES.toString())
-                || name.equals(LibraryFunction_t.DIAGNOSE.toString());
+                || name.equals(LibraryFunction_t.DIAGNOSE.toString())
+                || name.equals(LibraryFunction_t.STR.toString());
 
     }
 
