@@ -88,32 +88,23 @@ public class LibraryFunctions {
         FunctionDef funcdef = getFunctionArgument(env);
         if(funcdef == null) return;
         Value onEnterValue = env.getActualArgument(LIBRARY_FUNC_ARG+1);
-        String onEnter = (onEnterValue.isUndefined() || onEnterValue.isNull()) ? "" : onEnterValue.getData().toString();
         Value onExitValue = env.getActualArgument(LIBRARY_FUNC_ARG+2);
-        String onExit = (onExitValue.isUndefined() || onExitValue.isNull()) ? "" : onExitValue.getData().toString();
+        if((!onEnterValue.isAST() || !onExitValue.isAST())){
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "Arguments must be AST type.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+
         
         Block funcBody = funcdef.getBody();
         ArrayList<Statement> stmtlist = funcBody.getStatementList();
         int size = stmtlist.size();
 
-        // Prepare new statements to add to function body
-        IdentifierExpression printid = new IdentifierExpression(LibraryFunction_t.PRINT_LN.toString(), false);
-        ArrayList<Expression> elist = new ArrayList<Expression>();
-        elist.add(new StringLiteral(onEnter));
-        NormCall normcall = new NormCall(elist);
-        LvalueCall lcall = new LvalueCall(printid, normcall);
-        ExpressionStatement exstmt = new ExpressionStatement(lcall);
-        funcBody.prependStatement(exstmt);
+        ExpressionStatement exstmtEnter = new ExpressionStatement((Expression)onEnterValue.getData());
+        ExpressionStatement exstmtExit = new ExpressionStatement((Expression)onExitValue.getData());
 
-        elist = new ArrayList<Expression>();
-        elist.add(new StringLiteral(onExit));
-        normcall = new NormCall(elist);
-        lcall = new LvalueCall(printid, normcall);
-        exstmt = new ExpressionStatement(lcall);
-        if(stmtlist.get(size) instanceof ReturnStatement)
-            funcBody.addStatement(exstmt, size);
-        else
-            funcBody.appendStatement(exstmt);
+        funcBody.prependStatement(exstmtEnter);
+        funcBody.appendStatement(exstmtExit);
     }
 
     public static void str(Environment env){
