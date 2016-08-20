@@ -9,7 +9,8 @@ public enum LibraryFunction_t {
     SIN("sin"),
     LEN("len"),
     KEYS("keys"),
-    VALUES("values");
+    VALUES("values"),
+    DIAGNOSE("diagnose");
 
     private final String _name;
 
@@ -29,7 +30,8 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.SIN.toString())
                 || name.equals(LibraryFunction_t.LEN.toString())
                 || name.equals(LibraryFunction_t.KEYS.toString())
-                || name.equals(LibraryFunction_t.VALUES.toString());
+                || name.equals(LibraryFunction_t.VALUES.toString())
+                || name.equals(LibraryFunction_t.DIAGNOSE.toString());
 
     }
 

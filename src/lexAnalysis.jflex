@@ -148,12 +148,12 @@ whiteSpace     = {LineTerminator} | [ \t\f] | " "
 	
   {LineTerminator}  { 
                       yybegin(YYINITIAL); 
-                      System.out.println("@MyLexer: Line comment in line: " + (yyline + 1)+".");
+                      // System.out.println("@MyLexer: Line comment in line: " + (yyline + 1)+".");
   }
 
   <<EOF>>           { 
                       yybegin(YYINITIAL); 
-                      System.out.println("@MyLexer: Line comment in line: " + (yyline + 1)+".");
+                      // System.out.println("@MyLexer: Line comment in line: " + (yyline + 1)+".");
   }
 
   . 				        { }

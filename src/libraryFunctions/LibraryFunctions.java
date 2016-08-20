@@ -1,7 +1,19 @@
 package libraryFunctions;
 
+
+import java.util.ArrayList;
+
 import environment.Environment;
 import environment.FunctionEnv;
+
+import ast.FunctionDef;
+import ast.Block;
+import ast.ExpressionStatement;
+import ast.Expression;
+import ast.NormCall;
+import ast.LvalueCall;
+import ast.IdentifierExpression;
+import ast.StringLiteral;
 
 import dataStructures.FoxObject;
 import dataStructures.FoxArray;
@@ -69,8 +81,35 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
+    public static void diagnose(Environment env){
+        FunctionDef funcdef = getFunctionArgument(env);
+        if(funcdef == null) return;
+        Value onEnterValue = env.getActualArgument(LIBRARY_FUNC_ARG+1);
+        String onEnter = (onEnterValue.isUndefined() || onEnterValue.isNull()) ? "" : onEnterValue.getData().toString();
+        Value onExitValue = env.getActualArgument(LIBRARY_FUNC_ARG+2);
+        String onExit = (onExitValue.isUndefined() || onExitValue.isNull()) ? "" : onExitValue.getData().toString();
+        
+        Block funcBody = funcdef.getBody();
+
+        // Prepare new statements to add to function body
+        IdentifierExpression printid = new IdentifierExpression(LibraryFunction_t.PRINT_LN.toString(), false);
+        ArrayList<Expression> elist = new ArrayList<Expression>();
+        elist.add(new StringLiteral(onEnter));
+        NormCall normcall = new NormCall(elist);
+        LvalueCall lcall = new LvalueCall(printid, normcall);
+        ExpressionStatement exstmt = new ExpressionStatement(lcall);
+        funcBody.prependStatement(exstmt);
+
+        elist = new ArrayList<Expression>();
+        elist.add(new StringLiteral(onExit));
+        normcall = new NormCall(elist);
+        lcall = new LvalueCall(printid, normcall);
+        exstmt = new ExpressionStatement(lcall);
+        funcBody.appendStatement(exstmt);
+    }
+
     public static void sqrt(Environment env) {
-        Double data = getArgument(env);
+        Double data = getDoubleArgument(env);
         if (data == null) {
             return;
         }
@@ -90,7 +129,7 @@ public class LibraryFunctions {
 
     public static void cos(Environment env) {
 
-        Double data = getArgument(env);
+        Double data = getDoubleArgument(env);
         if (data == null) {
             return;
         }
@@ -104,7 +143,7 @@ public class LibraryFunctions {
 
     public static void sin(Environment env) {
 
-        Double data = getArgument(env);
+        Double data = getDoubleArgument(env);
         if (data == null) {
             return;
         }
@@ -115,7 +154,7 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    private static Double getArgument(Environment env) {
+    private static Double getDoubleArgument(Environment env) {
         double data;
         Value value = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
         if (value.isReal()) {
@@ -147,5 +186,16 @@ public class LibraryFunctions {
         }
         FoxDataStructure fdataStructure = (FoxDataStructure)value.getData();
         return fdataStructure;
+    }
+
+    private static FunctionDef getFunctionArgument(Environment env){
+        Value value = env.getActualArgument(LIBRARY_FUNC_ARG+0);
+        if(!value.isUserFunction()){
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument must be a user function.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return null;
+        }
+        FunctionDef funcdef = (FunctionDef) value.getData();
+        return funcdef;
     }
 }

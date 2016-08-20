@@ -23,6 +23,14 @@ public class Block extends Statement {
 		this._statementList = statementList;
 	}
 
+	public void prependStatement(Statement stmt){
+		this._statementList.add(0, stmt);
+	}
+
+	public void appendStatement(Statement stmt){
+		this._statementList.add(stmt);
+	}
+
 	@Override
 	public Value accept(ASTVisitor visitor) throws ASTVisitorException {
 		return visitor.visit(this);
