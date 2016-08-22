@@ -1,17 +1,26 @@
-x = .<a + b>.;
-a = 7;
-b = 9;
 
-y = .<.~x + 1>.;
-z = .!.<.~x - .~y - 2>.;
-
-//println(z);
-
-
-function func(){
-    println("yeah!");
+function func(a){
+    println("yeah");
+    for(i = 0; i < 4; i++){
+	println("for"+i);
+	if(i == 3){
+	    s = 0;
+	    while(s < 5){
+		println("s = "+s);
+		if(s >= 3){
+		    return 8;
+		}
+		s++;
+	    }
+	    return 5;
+	}
+    }
 }
 
-func();
-diagnose(func, "Entering func", "Exiting func");
-func();
+enter = .<println("Entering")>.;
+exit = .<println("Exiting")>.;
+
+//diagnose(func, enter, exit);
+addOnExitPoints(func, exit);
+s = func(11);
+println(s);

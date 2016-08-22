@@ -526,11 +526,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
             HashMap<Integer, Value> actualArguments = (HashMap<Integer, Value>) parameters.getData();
 
             enterFunctionSpace();
-            if (actualArguments.size() < 1) {
+            /*if (actualArguments.size() < 1) {
                 String msg = "Call to '" + ((DynamicVal) lvalue).getErrorInfo() + "' requires at least ONE argument"
                         + ": " + actualArguments.size() + " found.";
                 ASTUtils.error(node, msg);
-            }
+            }*/
 
             for (int i = 0; i < actualArguments.size(); i++) {
                 String errorInfo = LIBRARY_FUNC_ARG + i;
@@ -590,7 +590,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
             }
 
-            ((FunctionDef) function.getData()).getBody().accept(this);
+            Value bodyRet = ((FunctionDef) function.getData()).getBody().accept(this);
+
         }
 
         Value ret = exitFunctionSpace();
@@ -816,10 +817,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
         Value val = node.getExpression().accept(this);
         Value ret = null;
 
+        if(!val.isBoolean())
+            ASTUtils.error(node, "If expression must be boolean: "+val.getType()+" given");
         if ((Boolean) val.getData()) {
             ret = node.getStatement().accept(this);
             if (ret != null) {
-                if (ret.getData().equals(BREAK) || ret.getData().equals(CONTINUE)) {
+                if (ret.getData().equals(BREAK) || ret.getData().equals(CONTINUE) || ret.getData().equals(RETURN)) {
                     return ret;
                 }
             }
@@ -827,7 +830,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
             if (node.getElseStatement() != null) {
                 ret = node.getElseStatement().accept(this);
                 if (ret != null) {
-                    if (ret.getData().equals(BREAK) || ret.getData().equals(CONTINUE)) {
+                    if (ret.getData().equals(BREAK) || ret.getData().equals(CONTINUE) || ret.getData().equals(RETURN)) {
                         return ret;
                     }
                 }
@@ -843,6 +846,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
         Value val = node.getExpression().accept(this);
         Value ret;
 
+        if(!val.isBoolean())
+            ASTUtils.error(node, "While expression must be boolean: "+val.getType()+" given");
+
         enterLoopSpace();
         while ((Boolean) ((Value) node.getExpression().accept(this)).getData()) {
             ret = node.getStatement().accept(this);
@@ -851,6 +857,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
                     break;
                 } else if (ret.getData().equals(CONTINUE)) {
                     continue;
+                }else if(ret.getData().equals(RETURN)){
+                    exitLoopSpace();
+                    return ret;
                 }
             }
         }
@@ -861,13 +870,17 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(ForStatement node) throws ASTVisitorException {
         //System.out.println("-ForStatement");
-
         Value ret;
 
         enterLoopSpace();
         for (Expression expression : node.getExpressionList1()) {
             expression.accept(this);
         }
+
+        Value val = node.getExpression().accept(this);
+        if(!val.isBoolean())
+            ASTUtils.error(node, "For expression must be boolean: "+val.getType()+" given");
+
 
         while ((Boolean) ((Value) node.getExpression().accept(this)).getData()) {
             ret = node.getStatement().accept(this);
@@ -880,6 +893,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
                         expression.accept(this);
                     }
                     continue;
+                }else if(ret.getData().equals(RETURN)){
+                    return ret;
                 }
             }
             for (Expression expression : node.getExpressionList2()) {
@@ -928,30 +943,46 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(MetaSyntax node) throws ASTVisitorException{
         if(_inMeta)
             return node.getExpression().accept(this);
-        return new StaticVal<ASTNode>(Value_t.AST, node.getExpression());
+        if(node.getExpression() != null)
+            return new StaticVal<ASTNode>(Value_t.AST, node.getExpression());
+        return new StaticVal<ArrayList<Statement>>(Value_t.AST, node.getStatementList());
     }
 
     @Override
     public Value visit(MetaEscape node) throws ASTVisitorException{
+        Value ret = new StaticVal();
         Value exprVal = node.getExpression().accept(this);
         if(!exprVal.isAST()){
             String msg = "'.~' requires an AST: "+exprVal.getType()+" found";
             ASTUtils.error(node, msg);
         }
-        Expression astExpr = (Expression) exprVal.getData();
-        return astExpr.accept(this);
+        if(exprVal.getData() instanceof Expression){
+            Expression astExpr = (Expression) exprVal.getData();
+            ret = astExpr.accept(this);
+        }else{
+            for(Statement stmt : (ArrayList<Statement>) exprVal.getData())
+                stmt.accept(this);
+        }
+        return ret;
     }
 
     @Override
     public Value visit(MetaExecute node) throws ASTVisitorException{
+        Value ret = new StaticVal();
         Value exprVal = node.getExpression().accept(this);
         enterMetaSpace();
         if(!exprVal.isAST()){
             String msg = "'.!' requires an AST: "+exprVal.getType()+" found";
             ASTUtils.error(node, msg);
         }
-        Expression astExpr = (Expression) exprVal.getData();
-        Value ret = astExpr.accept(this);
+        if(exprVal.getData() instanceof Expression){
+            Expression astExpr = (Expression) exprVal.getData();
+            ret = astExpr.accept(this);
+        }else{
+            for(Statement stmt : (ArrayList<Statement>) exprVal.getData())
+                stmt.accept(this);
+        }
+        
         exitMetaSpace();
         return ret;
     }

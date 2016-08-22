@@ -22,9 +22,10 @@ import dataStructures.FoxObject;
 import dataStructures.FoxArray;
 import dataStructures.FoxDataStructure;
 
-import symbols.value.StaticVal;
 import symbols.value.Value;
 import symbols.value.Value_t;
+import symbols.value.DynamicVal;
+import symbols.value.StaticVal;
 
 import static utils.Constants.LIBRARY_FUNC_ARG;
 
@@ -53,6 +54,7 @@ public class LibraryFunctions {
         System.out.println("");
     }
     public static void len(Environment env){
+        if(!checkArgumentNum(env, 1)) return;
         FoxDataStructure fdataStructure = getObjectArgument(env);
         if(fdataStructure == null){
             return;
@@ -62,6 +64,7 @@ public class LibraryFunctions {
     }
 
     public static void keys(Environment env){
+        if(!checkArgumentNum(env, 1)) return;
         FoxDataStructure fobject = getObjectArgument(env);
         if(!(fobject instanceof FoxObject)){
             StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument must be of type Object.");
@@ -75,6 +78,7 @@ public class LibraryFunctions {
     }
 
     public static void values(Environment env){
+        if(!checkArgumentNum(env, 1)) return;
         FoxDataStructure fdataStructure = getObjectArgument(env);
         if(fdataStructure == null){
             return;
@@ -85,29 +89,155 @@ public class LibraryFunctions {
     }
 
     public static void diagnose(Environment env){
+        if(!checkArgumentNum(env, 3)) return;
+        DynamicVal tempArg = env.popArgument(LIBRARY_FUNC_ARG+2);
+        addFirst(env);
+        env.insert(LIBRARY_FUNC_ARG+1, tempArg);
+        //addLast(env);
+        addOnExitPoints(env);
+    }
+
+    public static void addFirst(Environment env){
+        if(!checkArgumentNum(env, 2)) return;
         FunctionDef funcdef = getFunctionArgument(env);
         if(funcdef == null) return;
         Value onEnterValue = env.getActualArgument(LIBRARY_FUNC_ARG+1);
-        Value onExitValue = env.getActualArgument(LIBRARY_FUNC_ARG+2);
-        if((!onEnterValue.isAST() || !onExitValue.isAST())){
-            StaticVal retVal = new StaticVal(Value_t.ERROR, "Arguments must be AST type.");
-            ((FunctionEnv) env).setReturnVal(retVal);
-            return;
-        }
-
-        
         Block funcBody = funcdef.getBody();
-        ArrayList<Statement> stmtlist = funcBody.getStatementList();
-        int size = stmtlist.size();
 
-        ExpressionStatement exstmtEnter = new ExpressionStatement((Expression)onEnterValue.getData());
-        ExpressionStatement exstmtExit = new ExpressionStatement((Expression)onExitValue.getData());
+        if(onEnterValue.getData() instanceof Expression){
+            ExpressionStatement exstmtEnter = new ExpressionStatement((Expression)onEnterValue.getData());
+            funcBody.prependStatement(exstmtEnter);
+        }else if (onEnterValue.getData() instanceof ArrayList<?>){
+            funcBody.prependStatements((ArrayList<Statement>) onEnterValue.getData());
+        }else{
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument must be either an expression or a statement list.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+        }
+    }
 
-        funcBody.prependStatement(exstmtEnter);
-        funcBody.appendStatement(exstmtExit);
+    public static void addLast(Environment env){
+        if(!checkArgumentNum(env, 2)) return;
+        FunctionDef funcdef = getFunctionArgument(env);
+        if(funcdef == null) return;
+        Value onExitValue = env.getActualArgument(LIBRARY_FUNC_ARG+1);
+        Block funcBody = funcdef.getBody();
+
+        if(onExitValue.getData() instanceof Expression){
+            ExpressionStatement exstmtExit = new ExpressionStatement((Expression) onExitValue.getData());
+            funcBody.appendStatement(exstmtExit);
+        }else if (onExitValue.getData() instanceof ArrayList<?>){
+            funcBody.appendStatements((ArrayList<Statement>) onExitValue.getData());
+        }else{
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument must be either an expression or a statement list.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+        }
+    }
+
+    public static void addOnExitPoints(Environment env){
+        if(!checkArgumentNum(env, 2)) return;
+        FunctionDef funcdef = getFunctionArgument(env);
+        if(funcdef == null) return;
+        Value onExitValue = env.getActualArgument(LIBRARY_FUNC_ARG+1);
+        Block funcBody = funcdef.getBody();
+
+        if(onExitValue.getData() instanceof Expression){
+            ExpressionStatement exstmtExit = new ExpressionStatement((Expression) onExitValue.getData());
+            funcBody.addStatementOnExit(exstmtExit);
+        }else if (onExitValue.getData() instanceof ArrayList<?>){
+            funcBody.appendStatements((ArrayList<Statement>) onExitValue.getData());
+        }else{
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument must be either an expression or a statement list.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+        }
+    }
+
+    private static Value isType(Value val, Value_t type){
+        if(val.getType().equals(type)){
+            return new StaticVal<Boolean>(Value_t.BOOLEAN, true);
+        }else{
+            return new StaticVal<Boolean>(Value_t.BOOLEAN, false);
+        }
+    }
+
+    public static void isNull(Environment env){
+        if(!checkArgumentNum(env, 1)) return;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG+0);
+        Value ret = isType(val, Value_t.NULL);
+        ((FunctionEnv) env).setReturnVal(ret);
+    }
+
+    public static void isUndefined(Environment env){
+        if(!checkArgumentNum(env, 1)) return;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG+0);
+        Value ret = isType(val, Value_t.UNDEFINED);
+        ((FunctionEnv) env).setReturnVal(ret);
+    }
+
+    public static void isInteger(Environment env){
+        if(!checkArgumentNum(env, 1)) return;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG+0);
+        Value ret = isType(val, Value_t.INTEGER);
+        ((FunctionEnv) env).setReturnVal(ret);
+    }
+
+    public static void isReal(Environment env){
+        if(!checkArgumentNum(env, 1)) return;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG+0);
+        Value ret = isType(val, Value_t.REAL);
+        ((FunctionEnv) env).setReturnVal(ret);
+    }
+
+    public static void isString(Environment env){
+        if(!checkArgumentNum(env, 1)) return;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG+0);
+        Value ret = isType(val, Value_t.STRING);
+        ((FunctionEnv) env).setReturnVal(ret);
+    }
+
+    public static void isBoolean(Environment env){
+        if(!checkArgumentNum(env, 1)) return;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG+0);
+        Value ret = isType(val, Value_t.BOOLEAN);
+        ((FunctionEnv) env).setReturnVal(ret);
+    }
+
+    public static void isTable(Environment env){
+        if(!checkArgumentNum(env, 1)) return;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG+0);
+        Value ret = isType(val, Value_t.TABLE);
+        ((FunctionEnv) env).setReturnVal(ret);
+    }
+
+    public static void isFunc(Environment env){
+        if(!checkArgumentNum(env, 1)) return;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG+0);
+        Value ret = isType(val, Value_t.USER_FUNCTION);
+        ((FunctionEnv) env).setReturnVal(ret);
+    }
+
+    public static void isLibFunc(Environment env){
+        if(!checkArgumentNum(env, 1)) return;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG+0);
+        Value ret = isType(val, Value_t.LIBRARY_FUNCTION);
+        ((FunctionEnv) env).setReturnVal(ret);
+    }
+
+    public static void isObject(Environment env){
+        if(!checkArgumentNum(env, 1)) return;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG+0);
+        Value ret = isType(val, Value_t.OBJECT);
+        ((FunctionEnv) env).setReturnVal(ret);
+    }
+
+    public static void isAST(Environment env){
+        if(!checkArgumentNum(env, 1)) return;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG+0);
+        Value ret = isType(val, Value_t.AST);
+        ((FunctionEnv) env).setReturnVal(ret);
     }
 
     public static void str(Environment env){
+        if(!checkArgumentNum(env, 1)) return;
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG+0);
         Value ret = new StaticVal<String>(Value_t.STRING, val.getData().toString());
         ((FunctionEnv) env).setReturnVal(ret);
@@ -157,6 +287,15 @@ public class LibraryFunctions {
 
         StaticVal retVal = new StaticVal(Value_t.REAL, data);
         ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    private static boolean checkArgumentNum(Environment env, int args){
+        if(env.totalActuals() != args){
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "Call to lib function requires "+args+" arguments: "+env.totalActuals()+" found");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return false;
+        }
+        return true;
     }
 
     private static Double getDoubleArgument(Environment env) {

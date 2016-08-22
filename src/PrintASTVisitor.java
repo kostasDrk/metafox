@@ -282,6 +282,7 @@ public class PrintASTVisitor implements ASTVisitor {
         System.out.println(")");
         node.getStatement().accept(this);
         if (node.getElseStatement() != null) {
+            System.out.print("else");
             node.getElseStatement().accept(this);
         }
         return null;

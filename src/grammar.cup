@@ -370,6 +370,12 @@ term ::=	 LEFT_PARENTHESIS expr:ex RIGHT_PARENTHESIS
 				RESULT.setLine(exleft);
 				RESULT.setColumn(exright);
 			:}
+			|QUASI_OPEN stmtlist:stlist QUASI_CLOSE
+			{:
+				RESULT = new MetaSyntax(stlist);
+				RESULT.setLine(stlistleft);
+				RESULT.setColumn(stlistright);
+			:}
 			|QUASI_ESC expr:ex
 			{:
 				RESULT = new MetaEscape(ex);

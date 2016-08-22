@@ -3,6 +3,7 @@ package environment;
 import java.util.HashMap;
 import java.util.Map;
 
+import symbols.value.Value;
 import symbols.value.DynamicVal;
 
 class EnvironmentScope {
@@ -24,14 +25,20 @@ class EnvironmentScope {
     }
 
     void insert(String name) {
-        System.out.println(", scope " + _scope);
+        // System.out.println(", scope " + _scope);
         DynamicVal value = new DynamicVal(name);
         _env.put(name, value);
     }
 
     void insert(String name, DynamicVal dynamicVal) {
-        System.out.println(", scope " + _scope);
+        // System.out.println(", scope " + _scope);
         _env.put(name, dynamicVal);
+    }
+
+    DynamicVal popArgument(String name){
+        DynamicVal ret = lookup(name);
+        _env.remove(name);
+        return ret;
     }
 
     int size() {

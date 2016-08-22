@@ -2,6 +2,7 @@ package environment;
 
 import java.util.ArrayDeque;
 
+import symbols.value.Value;
 import symbols.value.DynamicVal;
 
 public class Environment {
@@ -35,12 +36,16 @@ public class Environment {
         return _environment.peekLast().lookup(name);
     }
 
-    void insert(String name) {
+    public void insert(String name) {
         _environment.peek().insert(name);
     }
 
-    void insert(String name, DynamicVal value) {
+    public void insert(String name, DynamicVal value) {
         _environment.peek().insert(name, value);
+    }
+
+    public DynamicVal popArgument(String name){
+        return _environment.peek().popArgument(name);
     }
 
     final void push(EnvironmentScope envScope) {
