@@ -125,8 +125,9 @@ public class LibraryFunctions {
         if(onExitValue.getData() instanceof Expression){
             ExpressionStatement exstmtExit = new ExpressionStatement((Expression) onExitValue.getData());
             funcBody.addStatementOnExit(exstmtExit);
+            funcBody.appendStatement(exstmtExit);
         }else if (onExitValue.getData() instanceof ArrayList<?>){
-            funcBody.appendStatements((ArrayList<Statement>) onExitValue.getData());
+            funcBody.addStatementsOnExit((ArrayList<Statement>) onExitValue.getData());
         }else{
             StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument must be either an expression or a statement list.");
             ((FunctionEnv) env).setReturnVal(retVal);
