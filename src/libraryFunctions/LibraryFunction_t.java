@@ -24,7 +24,6 @@ public enum LibraryFunction_t {
     ISAST("isAST"),
     DIAGNOSE("diagnose"),
     ADDFIRST("addFirst"),
-    ADDLAST("addLast"),
     ADDONEXITPOINTS("addOnExitPoints");
 
     private final String _name;
@@ -60,7 +59,6 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.ISOBJECT.toString())
                 || name.equals(LibraryFunction_t.ISAST.toString())
                 || name.equals(LibraryFunction_t.ADDFIRST.toString())
-                || name.equals(LibraryFunction_t.ADDLAST.toString())
                 || name.equals(LibraryFunction_t.ADDONEXITPOINTS.toString());
 
     }

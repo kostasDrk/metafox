@@ -115,24 +115,6 @@ public class LibraryFunctions {
         }
     }
 
-    public static void addLast(Environment env){
-        if(!checkArgumentNum(env, 2)) return;
-        FunctionDef funcdef = getFunctionArgument(env);
-        if(funcdef == null) return;
-        Value onExitValue = env.getActualArgument(LIBRARY_FUNC_ARG+1);
-        Block funcBody = funcdef.getBody();
-
-        if(onExitValue.getData() instanceof Expression){
-            ExpressionStatement exstmtExit = new ExpressionStatement((Expression) onExitValue.getData());
-            funcBody.appendStatement(exstmtExit);
-        }else if (onExitValue.getData() instanceof ArrayList<?>){
-            funcBody.appendStatements((ArrayList<Statement>) onExitValue.getData());
-        }else{
-            StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument must be either an expression or a statement list.");
-            ((FunctionEnv) env).setReturnVal(retVal);
-        }
-    }
-
     public static void addOnExitPoints(Environment env){
         if(!checkArgumentNum(env, 2)) return;
         FunctionDef funcdef = getFunctionArgument(env);
