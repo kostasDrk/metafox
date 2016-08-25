@@ -8,8 +8,6 @@ package dataStructures;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.Collection;
-import java.util.Arrays;
-import java.util.ArrayList;
 
 import symbols.value.Value;
 import symbols.value.Value_t;
