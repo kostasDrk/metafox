@@ -1,11 +1,12 @@
 package libraryFunctions;
 
-
+import java.util.HashMap;
 import java.util.ArrayList;
 
 import environment.Environment;
 import environment.FunctionEnv;
 
+import ast.ASTNode;
 import ast.Statement;
 import ast.ExpressionStatement;
 import ast.Block;
@@ -16,6 +17,8 @@ import ast.NormCall;
 import ast.LvalueCall;
 import ast.IdentifierExpression;
 import ast.StringLiteral;
+import ast.IndexedElement;
+import ast.ObjectDefinition;
 
 
 import dataStructures.FoxObject;
@@ -128,6 +131,7 @@ public class LibraryFunctions {
             funcBody.appendStatement(exstmtExit);
         }else if (onExitValue.getData() instanceof ArrayList<?>){
             funcBody.addStatementsOnExit((ArrayList<Statement>) onExitValue.getData());
+            funcBody.appendStatements((ArrayList<Statement>) onExitValue.getData());
         }else{
             StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument must be either an expression or a statement list.");
             ((FunctionEnv) env).setReturnVal(retVal);

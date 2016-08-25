@@ -24,7 +24,9 @@ public enum LibraryFunction_t {
     ISAST("isAST"),
     DIAGNOSE("diagnose"),
     ADDFIRST("addFirst"),
-    ADDONEXITPOINTS("addOnExitPoints");
+    ADDONEXITPOINTS("addOnExitPoints"),
+    FACTORY("factory"),
+    COPY("copy");
 
     private final String _name;
 

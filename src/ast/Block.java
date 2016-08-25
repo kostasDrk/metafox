@@ -50,10 +50,7 @@ public class Block extends Statement {
 
 	public void appendStatements(ArrayList<Statement> statementList){
 		int pos = this.getStatementList().size() - 1;
-		if(this.getStatementList().get(pos) instanceof ReturnStatement)
-			addStatements(statementList, pos);
-		else
-			addStatements(statementList, pos+1);
+		addStatements(statementList, pos+1);
 	}
 
 	public void addStatementOnExit(Statement stmt){

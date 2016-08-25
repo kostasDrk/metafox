@@ -941,11 +941,22 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(MetaSyntax node) throws ASTVisitorException{
+        if(node.getExpression() != null){
+            if(_inMeta)
+                return node.getExpression().accept(this);
+            else
+                return new StaticVal<ASTNode>(Value_t.AST, node.getExpression());
+        }
         if(_inMeta)
+            for(Statement stmt : node.getStatementList())
+                stmt.accept(this);
+        return new StaticVal<ArrayList<Statement>>(Value_t.AST, node.getStatementList());
+        /*if(_inMeta)
             return node.getExpression().accept(this);
         if(node.getExpression() != null)
             return new StaticVal<ASTNode>(Value_t.AST, node.getExpression());
-        return new StaticVal<ArrayList<Statement>>(Value_t.AST, node.getStatementList());
+        else
+            return new StaticVal<ArrayList<Statement>>(Value_t.AST, node.getStatementList());*/
     }
 
     @Override
