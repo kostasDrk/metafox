@@ -13,9 +13,9 @@ import symbols.value.Value;
 import symbols.value.Value_t;
 import symbols.value.StaticVal;
 
-public class FoxObject extends FoxDataStructure{
+public class FoxObject extends AFoxDataStructure{
 
-    HashMap<Value, Value> _data;
+    private final HashMap<Value, Value> _data;
 
     public FoxObject() {
         _data = new HashMap<>();
@@ -47,7 +47,7 @@ public class FoxObject extends FoxDataStructure{
 
     public HashMap<Value, Value> keys() {
         Set<Value> setKeys =  _data.keySet();
-        HashMap<Value, Value> keys = new HashMap<Value, Value>();
+        HashMap<Value, Value> keys = new HashMap<>();
         int count = 0;
         
         for(Value value : setKeys){
@@ -60,9 +60,10 @@ public class FoxObject extends FoxDataStructure{
         return keys;
     }
 
+    @Override
     public HashMap<Value, Value> values() {
         Collection<Value> valuesCollection = _data.values();
-        HashMap<Value, Value> values = new HashMap<Value, Value>();
+        HashMap<Value, Value> values = new HashMap<>();
         int count = 0;
 
         for(Value value: valuesCollection){

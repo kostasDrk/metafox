@@ -14,12 +14,12 @@ import symbols.value.Value_t;
 
 import static utils.Constants.UNDEFINED;
 
-public class FoxArray extends FoxDataStructure{
+public class FoxArray extends AFoxDataStructure{
 
-    HashMap<Value, Value> _numberIndexedData;
-    HashMap<Value, Value> _otherTypeIndexedData;
+    private final HashMap<Value, Value> _numberIndexedData;
+    private final HashMap<Value, Value> _otherTypeIndexedData;
 
-    int _numberIndexedDataMaxIndex;
+    private int _numberIndexedDataMaxIndex;
 
     public FoxArray() {
         _numberIndexedData = new HashMap<>();
@@ -97,13 +97,15 @@ public class FoxArray extends FoxDataStructure{
         }
     }
 
+    @Override
     public int size() {
         return _numberIndexedDataMaxIndex;
     }
 
+    @Override
     public HashMap<Value, Value> values() {
         Collection<Value> valuesCollection = _numberIndexedData.values();
-        HashMap<Value, Value> values = new HashMap<Value, Value>();
+        HashMap<Value, Value> values = new HashMap<>();
         int count = 0;
 
         for(Value value: valuesCollection){
