@@ -47,6 +47,7 @@ public class LibraryFunctions {
         print(env);
         System.out.println("");
     }
+    
     public static void len(Environment env){
         if(!checkArgumentNum(env, 1)) return;
         AFoxDataStructure fdataStructure = getObjectArgument(env);
@@ -131,9 +132,9 @@ public class LibraryFunctions {
 
     private static Value isType(Value val, Value_t type){
         if(val.getType().equals(type)){
-            return new StaticVal<Boolean>(Value_t.BOOLEAN, true);
+            return new StaticVal<>(Value_t.BOOLEAN, true);
         }else{
-            return new StaticVal<Boolean>(Value_t.BOOLEAN, false);
+            return new StaticVal<>(Value_t.BOOLEAN, false);
         }
     }
 
@@ -217,7 +218,7 @@ public class LibraryFunctions {
     public static void str(Environment env){
         if(!checkArgumentNum(env, 1)) return;
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG+0);
-        Value ret = new StaticVal<String>(Value_t.STRING, val.getData().toString());
+        Value ret = new StaticVal<>(Value_t.STRING, val.getData().toString());
         ((FunctionEnv) env).setReturnVal(ret);
     }
 
