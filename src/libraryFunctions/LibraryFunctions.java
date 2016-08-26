@@ -18,7 +18,6 @@ import dataStructures.AFoxDataStructure;
 
 import symbols.value.Value;
 import symbols.value.Value_t;
-import symbols.value.DynamicVal;
 import symbols.value.StaticVal;
 
 import static utils.Constants.LIBRARY_FUNC_ARG;
@@ -85,13 +84,25 @@ public class LibraryFunctions {
 
     public static void diagnose(Environment env){
         if(!checkArgumentNum(env, 3)) return;
-        DynamicVal tempArg = env.popArgument(LIBRARY_FUNC_ARG+2);
-        addFirst(env);
-        env.insert(LIBRARY_FUNC_ARG+1, tempArg);
-        //addLast(env);
-        addOnExitPoints(env);
+        
+        //Prepare environment for Library function call: addFirst
+        FunctionEnv tmpEnv = new FunctionEnv();
+        tmpEnv.insert(LIBRARY_FUNC_ARG+0, env.getActualArgument(LIBRARY_FUNC_ARG+0));
+        tmpEnv.insert(LIBRARY_FUNC_ARG+1, env.getActualArgument(LIBRARY_FUNC_ARG+1));
+        addFirst(tmpEnv);
+        ((FunctionEnv) env).setReturnVal(tmpEnv.getReturnVal());
+        if(tmpEnv.getReturnVal().getType().equals(Value_t.ERROR)){
+            return;
+        }
+   
+        //Prepare environment for Library function call: addOnExitPoints
+        tmpEnv = new FunctionEnv();
+        tmpEnv.insert(LIBRARY_FUNC_ARG+0, env.getActualArgument(LIBRARY_FUNC_ARG+0));
+        tmpEnv.insert(LIBRARY_FUNC_ARG+1, env.getActualArgument(LIBRARY_FUNC_ARG+2));
+        addOnExitPoints(tmpEnv);
+        ((FunctionEnv) env).setReturnVal(tmpEnv.getReturnVal());
     }
-
+   
     public static void addFirst(Environment env){
         if(!checkArgumentNum(env, 2)) return;
         FunctionDef funcdef = getFunctionArgument(env);

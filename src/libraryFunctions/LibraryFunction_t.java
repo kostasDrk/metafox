@@ -22,11 +22,11 @@ public enum LibraryFunction_t {
     ISLIBFUNC("isLibFunc"),
     ISOBJECT("isObject"),
     ISAST("isAST"),
+    //FACTORY("factory"),
+    //COPY("copy"),
     DIAGNOSE("diagnose"),
     ADDFIRST("addFirst"),
-    ADDONEXITPOINTS("addOnExitPoints"),
-    FACTORY("factory"),
-    COPY("copy");
+    ADDONEXITPOINTS("addOnExitPoints");
 
     private final String _name;
 
