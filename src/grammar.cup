@@ -560,6 +560,12 @@ indexedelem ::= expr:ex1 COLON expr:ex2
 				RESULT = new IndexedElement(ex1, ex2);
 				RESULT.setLine(ex1left);
 				RESULT.setColumn(ex1right);
+			:}
+                        |expr:ex1 COLON funcdef:fdef
+			{:
+				RESULT = new IndexedElement(ex1, fdef);
+				RESULT.setLine(ex1left);
+				RESULT.setColumn(ex1right);
 			:};
 
 indexedelemlist ::=
