@@ -714,9 +714,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(FunctionDefExpression node) throws ASTVisitorException {
         //System.out.println("-FunctionDefExpression");
-
-        node.getFunctionDef().accept(this);
-        return null;
+        Value retVal = node.getFunctionDef().accept(this);
+        return retVal;
     }
 
     @Override
