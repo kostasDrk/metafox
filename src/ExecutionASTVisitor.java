@@ -666,7 +666,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
             objectData.add(new StaticVal(Value_t.STRING, ((IdentifierExpression)node.getExpression1()).getIdentifier()));
         else
             objectData.add(node.getExpression1().accept(this));
-        objectData.add(node.getExpression2().accept(this));
+        
+        Value value = node.isValueExpression() 
+                ? node.getExpression2().accept(this) 
+                : node.getFunctionDef().accept(this);
+        objectData.add(value);
+        
         return new StaticVal(Value_t.UNDEFINED, objectData);
     }
 
