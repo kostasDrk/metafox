@@ -813,7 +813,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(IfStatement node) throws ASTVisitorException {
         //System.out.println("-IfStatement");
-
+        
         Value val = node.getExpression().accept(this);
         Value ret = null;
 
@@ -946,42 +946,32 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 return node.getExpression().accept(this);
             else
                 return new StaticVal<ASTNode>(Value_t.AST, node.getExpression());
+        }else{
+            if(_inMeta)
+                for(Statement stmt : node.getStatementList())
+                    stmt.accept(this);
+            else
+                return new StaticVal<ArrayList<Statement>>(Value_t.AST, node.getStatementList());
         }
-        if(_inMeta)
-            for(Statement stmt : node.getStatementList())
-                stmt.accept(this);
-        return new StaticVal<ArrayList<Statement>>(Value_t.AST, node.getStatementList());
-        /*if(_inMeta)
-            return node.getExpression().accept(this);
-        if(node.getExpression() != null)
-            return new StaticVal<ASTNode>(Value_t.AST, node.getExpression());
-        else
-            return new StaticVal<ArrayList<Statement>>(Value_t.AST, node.getStatementList());*/
+        return new StaticVal();
     }
 
     @Override
     public Value visit(MetaEscape node) throws ASTVisitorException{
-        Value ret = new StaticVal();
         Value exprVal = node.getExpression().accept(this);
         if(!exprVal.isAST()){
-            String msg = "'.~' requires an AST: "+exprVal.getType()+" found";
+            String msg = ".~ requires an identifier holding an AST: "+exprVal.getType()+" found";
             ASTUtils.error(node, msg);
         }
-        if(exprVal.getData() instanceof Expression){
-            Expression astExpr = (Expression) exprVal.getData();
-            ret = astExpr.accept(this);
-        }else{
-            for(Statement stmt : (ArrayList<Statement>) exprVal.getData())
-                stmt.accept(this);
-        }
-        return ret;
+        return exprVal;
     }
 
     @Override
     public Value visit(MetaExecute node) throws ASTVisitorException{
         Value ret = new StaticVal();
-        Value exprVal = node.getExpression().accept(this);
+        
         enterMetaSpace();
+        Value exprVal = node.getExpression().accept(this);
         if(!exprVal.isAST()){
             String msg = "'.!' requires an AST: "+exprVal.getType()+" found";
             ASTUtils.error(node, msg);
@@ -989,11 +979,14 @@ public class ExecutionASTVisitor implements ASTVisitor {
         if(exprVal.getData() instanceof Expression){
             Expression astExpr = (Expression) exprVal.getData();
             ret = astExpr.accept(this);
+            while(ret.isAST()){
+                ret = ((Expression) ret.getData()).accept(this);
+            }
         }else{
             for(Statement stmt : (ArrayList<Statement>) exprVal.getData())
                 stmt.accept(this);
         }
-        
+
         exitMetaSpace();
         return ret;
     }

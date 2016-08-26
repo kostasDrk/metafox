@@ -36,11 +36,11 @@ public class Environment {
         return _environment.peekLast().lookup(name);
     }
 
-    public void insert(String name) {
+    void insert(String name) {
         _environment.peek().insert(name);
     }
 
-    public void insert(String name, DynamicVal value) {
+    void insert(String name, DynamicVal value) {
         _environment.peek().insert(name, value);
     }
 

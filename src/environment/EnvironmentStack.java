@@ -22,13 +22,13 @@ public class EnvironmentStack {
     }
 
     public void enterFunction() {
-        System.out.println("##enterFunction");
+        // System.out.println("##enterFunction");
         _environmentStack.push(new FunctionEnv());
         topEnv().push(new EnvironmentScope(ENTER_FUNCTION_ENV_INIT_SCOPE));
     }
 
     public Value exitFunction() {
-        System.out.println("##exitFunction");
+        // System.out.println("##exitFunction");
         FunctionEnv functionEnv = (FunctionEnv) _environmentStack.pop();
         return functionEnv.getReturnVal();
     }
@@ -38,18 +38,18 @@ public class EnvironmentStack {
     }
 
     public void setReturnValue(Value value) {
-        System.out.println("##settingRetValue");
+        // System.out.println("##settingRetValue");
         FunctionEnv functionEnv = (FunctionEnv) topEnv();
         functionEnv.setReturnVal(value);
     }
 
     public void enterBlock(int scope) {
-        System.out.println("##enterBlock: " + scope);
+        // System.out.println("##enterBlock: " + scope);
         topEnv().push(new EnvironmentScope(scope));
     }
 
     public void exitBlock() {
-        System.out.println("##exitBlock");
+        // System.out.println("##exitBlock");
         topEnv().pop();
     }
 
@@ -81,13 +81,13 @@ public class EnvironmentStack {
     }
 
     public void insertSymbol(String name, DynamicVal value) {
-        System.out.print("##insertSymbol: " + name + ", " + value.getType());
+        // System.out.print("##insertSymbol: " + name + ", " + value.getType());
         topEnv().insert(name, value);
         // System.out.println(toString());
     }
 
     public void insertSymbol(String name) {
-        System.out.print("##insertSymbol: " + name);
+        // System.out.print("##insertSymbol: " + name);
         topEnv().insert(name);
         // System.out.println(toString());
     }

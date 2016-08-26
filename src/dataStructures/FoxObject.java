@@ -24,7 +24,7 @@ public class FoxObject extends FoxDataStructure{
     }
 
     public FoxObject(HashMap<Value, Value> data) {
-        _data = data;
+        _data = new HashMap<Value, Value>(data);
     }
 
     @Override
@@ -45,6 +45,14 @@ public class FoxObject extends FoxDataStructure{
     @Override
     public int size() {
         return _data.size();
+    }
+
+    public HashMap<Value, Value> getData(){
+        return _data;
+    }
+
+    public void setData(HashMap<Value, Value> data){
+        this._data = data;
     }
 
     public HashMap<Value, Value> keys() {

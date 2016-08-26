@@ -21,7 +21,7 @@ public class GlobalEnv extends Environment {
 
             try {
                 String name = libraryFunction.toString();
-                System.out.println(name);
+                // System.out.println(name);
                 Method method = LibraryFunctions.class.getMethod(name, Environment.class);
                 DynamicVal<String> varInfo = new DynamicVal(Value_t.LIBRARY_FUNCTION, method, libraryFunction.toString());
                 super.insert(name, varInfo);

@@ -36,6 +36,13 @@ public class FoxArray extends FoxDataStructure{
         _numberIndexedDataMaxIndex = numberIndexedData.size();
     }
 
+    public FoxArray(HashMap<Value, Value> numberIndexedData, HashMap<Value, Value> otherTypeIndexedData){
+        _numberIndexedData = numberIndexedData;
+        _otherTypeIndexedData = otherTypeIndexedData;
+
+        _numberIndexedDataMaxIndex = numberIndexedData.size();
+    }
+
     @Override
     public void put(Value key, Value value) {
 
@@ -100,6 +107,22 @@ public class FoxArray extends FoxDataStructure{
 
     public int size() {
         return _numberIndexedDataMaxIndex;
+    }
+
+    public HashMap<Value, Value> getNumberIndexedData(){
+        return this._numberIndexedData;
+    }
+
+    public void setNumberIndexedData(HashMap<Value, Value> numberIndexedData){
+        this._numberIndexedData = numberIndexedData;
+    }
+
+    public HashMap<Value, Value> getOtherTypeIndexedData(){
+        return this._otherTypeIndexedData;
+    }
+
+    public void setOtherTypeIndexedData(HashMap<Value, Value> otherTypeIndexedData){
+        this._otherTypeIndexedData = otherTypeIndexedData;
     }
 
     public HashMap<Value, Value> values() {
