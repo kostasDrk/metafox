@@ -1,33 +1,23 @@
 package libraryFunctions;
 
-import java.util.HashMap;
 import java.util.ArrayList;
 
 import environment.Environment;
 import environment.FunctionEnv;
 
-import ast.ASTNode;
 import ast.Statement;
 import ast.ExpressionStatement;
 import ast.Block;
-import ast.ReturnStatement;
 import ast.Expression;
 import ast.FunctionDef;
-import ast.NormCall;
-import ast.LvalueCall;
-import ast.IdentifierExpression;
-import ast.StringLiteral;
-import ast.IndexedElement;
-import ast.ObjectDefinition;
 
 
 import dataStructures.FoxObject;
 import dataStructures.FoxArray;
-import dataStructures.FoxDataStructure;
+import dataStructures.AFoxDataStructure;
 
 import symbols.value.Value;
 import symbols.value.Value_t;
-import symbols.value.DynamicVal;
 import symbols.value.StaticVal;
 
 import static utils.Constants.LIBRARY_FUNC_ARG;
@@ -56,9 +46,10 @@ public class LibraryFunctions {
         print(env);
         System.out.println("");
     }
+    
     public static void len(Environment env){
         if(!checkArgumentNum(env, 1)) return;
-        FoxDataStructure fdataStructure = getObjectArgument(env);
+        AFoxDataStructure fdataStructure = getObjectArgument(env);
         if(fdataStructure == null){
             return;
         }
@@ -68,7 +59,7 @@ public class LibraryFunctions {
 
     public static void keys(Environment env){
         if(!checkArgumentNum(env, 1)) return;
-        FoxDataStructure fobject = getObjectArgument(env);
+        AFoxDataStructure fobject = getObjectArgument(env);
         if(!(fobject instanceof FoxObject)){
             StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument must be of type Object.");
             ((FunctionEnv) env).setReturnVal(retVal);
@@ -82,7 +73,7 @@ public class LibraryFunctions {
 
     public static void values(Environment env){
         if(!checkArgumentNum(env, 1)) return;
-        FoxDataStructure fdataStructure = getObjectArgument(env);
+        AFoxDataStructure fdataStructure = getObjectArgument(env);
         if(fdataStructure == null){
             return;
         }
@@ -93,13 +84,25 @@ public class LibraryFunctions {
 
     public static void diagnose(Environment env){
         if(!checkArgumentNum(env, 3)) return;
-        DynamicVal tempArg = env.popArgument(LIBRARY_FUNC_ARG+2);
-        addFirst(env);
-        env.insert(LIBRARY_FUNC_ARG+1, tempArg);
-        //addLast(env);
-        addOnExitPoints(env);
+        
+        //Prepare environment for Library function call: addFirst
+        FunctionEnv tmpEnv = new FunctionEnv();
+        tmpEnv.insert(LIBRARY_FUNC_ARG+0, env.getActualArgument(LIBRARY_FUNC_ARG+0));
+        tmpEnv.insert(LIBRARY_FUNC_ARG+1, env.getActualArgument(LIBRARY_FUNC_ARG+1));
+        addFirst(tmpEnv);
+        ((FunctionEnv) env).setReturnVal(tmpEnv.getReturnVal());
+        if(tmpEnv.getReturnVal().getType().equals(Value_t.ERROR)){
+            return;
+        }
+   
+        //Prepare environment for Library function call: addOnExitPoints
+        tmpEnv = new FunctionEnv();
+        tmpEnv.insert(LIBRARY_FUNC_ARG+0, env.getActualArgument(LIBRARY_FUNC_ARG+0));
+        tmpEnv.insert(LIBRARY_FUNC_ARG+1, env.getActualArgument(LIBRARY_FUNC_ARG+2));
+        addOnExitPoints(tmpEnv);
+        ((FunctionEnv) env).setReturnVal(tmpEnv.getReturnVal());
     }
-
+   
     public static void addFirst(Environment env){
         if(!checkArgumentNum(env, 2)) return;
         FunctionDef funcdef = getFunctionArgument(env);
@@ -140,9 +143,9 @@ public class LibraryFunctions {
 
     private static Value isType(Value val, Value_t type){
         if(val.getType().equals(type)){
-            return new StaticVal<Boolean>(Value_t.BOOLEAN, true);
+            return new StaticVal<>(Value_t.BOOLEAN, true);
         }else{
-            return new StaticVal<Boolean>(Value_t.BOOLEAN, false);
+            return new StaticVal<>(Value_t.BOOLEAN, false);
         }
     }
 
@@ -226,7 +229,7 @@ public class LibraryFunctions {
     public static void str(Environment env){
         if(!checkArgumentNum(env, 1)) return;
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG+0);
-        Value ret = new StaticVal<String>(Value_t.STRING, val.getData().toString());
+        Value ret = new StaticVal<>(Value_t.STRING, val.getData().toString());
         ((FunctionEnv) env).setReturnVal(ret);
     }
 
@@ -308,14 +311,14 @@ public class LibraryFunctions {
         return data;
     }
 
-    private static FoxDataStructure getObjectArgument(Environment env){
+    private static AFoxDataStructure getObjectArgument(Environment env){
         Value value = env.getActualArgument(LIBRARY_FUNC_ARG+0);
         if(!value.isObject() && !value.isTable()){
             StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument must be of type Array or Object.");
             ((FunctionEnv) env).setReturnVal(retVal);
             return null;
         }
-        FoxDataStructure fdataStructure = (FoxDataStructure)value.getData();
+        AFoxDataStructure fdataStructure = (AFoxDataStructure)value.getData();
         return fdataStructure;
     }
 

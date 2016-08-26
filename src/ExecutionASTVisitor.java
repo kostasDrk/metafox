@@ -64,7 +64,7 @@ import java.util.logging.Logger;
 import static utils.Constants.BREAK;
 import static utils.Constants.CONTINUE;
 import static utils.Constants.RETURN;
-import static utils.Constants.ENTER_FUNCTION_ENV_INIT_SCOPE;
+import static utils.Constants.FUNCTION_ENV_INIT_SCOPE;
 import static utils.Constants.LIBRARY_FUNC_ARG;
 import static utils.Constants.NULL;
 
@@ -92,7 +92,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     private void enterFunctionSpace() {
         //System.out.println("EnterFunctionSpace");
 
-        _scope = ENTER_FUNCTION_ENV_INIT_SCOPE;
+        _scope = FUNCTION_ENV_INIT_SCOPE;
         _inFunction++;
         _envStack.enterFunction();
 

@@ -17,6 +17,6 @@ rm utils/*class
 
 rm environment/*class
 
-rm symbols/value/*class
+rm symbols/value/*.class
 
-rm  dataStructures/*class
+rm dataStructures/*.class
