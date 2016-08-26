@@ -2,16 +2,11 @@ package environment;
 
 import java.util.ArrayDeque;
 
-import symbols.value.Value;
 import symbols.value.DynamicVal;
 
 public class Environment {
 
-    private final ArrayDeque<EnvironmentScope> _environment; 
-
-//    public Environment() {
-//        _environment = new ArrayDeque();
-//    }
+    private final ArrayDeque<EnvironmentScope> _environment;
 
     public Environment(int scope) {
         _environment = new ArrayDeque<>();
@@ -44,10 +39,6 @@ public class Environment {
         _environment.peek().insert(name, value);
     }
 
-    public DynamicVal popArgument(String name){
-        return _environment.peek().popArgument(name);
-    }
-
     final void push(EnvironmentScope envScope) {
         _environment.push(envScope);
     }
@@ -56,10 +47,10 @@ public class Environment {
         return _environment.pop();
     }
 
-    public int topScope(){
+    public int topScope() {
         return _environment.peek().getScope();
     }
-    
+
     public int totalActuals() {
         return _environment.peekFirst().size();
     }
