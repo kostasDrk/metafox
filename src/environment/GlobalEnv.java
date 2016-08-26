@@ -9,12 +9,12 @@ import libraryFunctions.LibraryFunctions;
 import symbols.value.Value_t;
 import symbols.value.DynamicVal;
 
-import static utils.Constants.GLOBAL_SCOPE;
+import static utils.Constants.GLOBAL_ENV_SCOPE;
 
 public class GlobalEnv extends Environment {
 
     public GlobalEnv() {
-        super(GLOBAL_SCOPE);
+        super(GLOBAL_ENV_SCOPE);
 
         //Insert the library functions in global environment.
         for (LibraryFunction_t libraryFunction : LibraryFunction_t.values()) {

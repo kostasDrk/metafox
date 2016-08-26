@@ -9,9 +9,9 @@ public class Environment {
 
     private final ArrayDeque<EnvironmentScope> _environment; 
 
-    public Environment() {
-        _environment = new ArrayDeque();
-    }
+//    public Environment() {
+//        _environment = new ArrayDeque();
+//    }
 
     public Environment(int scope) {
         _environment = new ArrayDeque<>();

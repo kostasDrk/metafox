@@ -4,7 +4,8 @@ import java.util.ArrayDeque;
 
 import symbols.value.Value;
 import symbols.value.DynamicVal;
-import static utils.Constants.ENTER_FUNCTION_ENV_INIT_SCOPE;
+
+import static utils.Constants.FUNCTION_ENV_INIT_SCOPE;
 
 public class EnvironmentStack {
 
@@ -24,7 +25,7 @@ public class EnvironmentStack {
     public void enterFunction() {
         System.out.println("##enterFunction");
         _environmentStack.push(new FunctionEnv());
-        topEnv().push(new EnvironmentScope(ENTER_FUNCTION_ENV_INIT_SCOPE));
+        //topEnv().push(new EnvironmentScope(FUNCTION_ENV_INIT_SCOPE));
     }
 
     public Value exitFunction() {
@@ -34,6 +35,8 @@ public class EnvironmentStack {
     }
 
     public Environment getFunctionEnv() {
+        //Check that it is not the Global env but it is a function env >0 
+        //if it is global env then fatal error!
         return topEnv();
     }
 
@@ -81,13 +84,13 @@ public class EnvironmentStack {
     }
 
     public void insertSymbol(String name, DynamicVal value) {
-        System.out.print("##insertSymbol: " + name + ", " + value.getType());
+        //System.out.print("##insertSymbol: " + name + ", " + value.getType());
         topEnv().insert(name, value);
         // System.out.println(toString());
     }
 
     public void insertSymbol(String name) {
-        System.out.print("##insertSymbol: " + name);
+        //System.out.print("##insertSymbol: " + name);
         topEnv().insert(name);
         // System.out.println(toString());
     }
