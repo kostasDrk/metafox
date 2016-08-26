@@ -725,11 +725,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         String name = node.getFuncName();
         /*Function Name*/
-        DynamicVal symbolInfo = _envStack.lookupCurrentScope(name);
+        DynamicVal funcInfo = _envStack.lookupCurrentScope(name);
         boolean isLibraryFunction = LibraryFunction_t.isLibraryFunction(name);
 
-        if (symbolInfo != null) {
-            boolean isUserFunction = symbolInfo.getType() == Value_t.USER_FUNCTION;
+        if (funcInfo != null) {
+            boolean isUserFunction = funcInfo.getType() == Value_t.USER_FUNCTION;
             String msg;
             if (isUserFunction) {
                 msg = "Redeclaration of User-Function: " + name + ".";
@@ -748,16 +748,16 @@ public class ExecutionASTVisitor implements ASTVisitor {
         }
 
         String errorInfo = name;
-        symbolInfo = new DynamicVal(Value_t.USER_FUNCTION, node, errorInfo);
-        _envStack.insertSymbol(name, symbolInfo);
+        funcInfo = new DynamicVal(Value_t.USER_FUNCTION, node, errorInfo);
+        _envStack.insertSymbol(name, funcInfo);
 
         /*Function ONLY Check Arguments*/
         enterScopeSpace();
         for (IdentifierExpression argument : node.getArguments()) {
             name = argument.getIdentifier();
-            symbolInfo = _envStack.lookupCurrentScope(name);
+            Value argInfo = _envStack.lookupCurrentScope(name);
 
-            if (symbolInfo != null) {
+            if (argInfo != null) {
                 String msg = "Redeclaration of Formal-Argument: " + name + ".";
                 ASTUtils.error(node, msg);
             }
@@ -770,8 +770,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         }
         exitScopeSpace();
-
-        return symbolInfo;
+        return funcInfo;
     }
 
     @Override
