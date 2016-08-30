@@ -24,8 +24,11 @@ import static utils.Constants.LIBRARY_FUNC_ARG;
 public class LibraryFunctions {
 
     public static void print(Environment env) {
-        int totalActuals = env.totalActuals();
+        if (!checkArgumentsNum(LibraryFunction_t.PRINT, env)) {
+            return;
+        }
 
+        int totalActuals = env.totalActuals();
         for (int i = 0; i < totalActuals; i++) {
             String data;
 
@@ -42,14 +45,19 @@ public class LibraryFunctions {
     }
 
     public static void println(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.PRINT_LN, env)) {
+            return;
+        }
+
         print(env);
         System.out.println("");
     }
 
     public static void len(Environment env) {
-        if (!checkArgumentNum(env, 1)) {
+        if (!checkArgumentsNum(LibraryFunction_t.LEN, env)) {
             return;
         }
+
         AFoxDataStructure fdataStructure = getObjectArgument(env);
         if (fdataStructure == null) {
             return;
@@ -59,9 +67,10 @@ public class LibraryFunctions {
     }
 
     public static void keys(Environment env) {
-        if (!checkArgumentNum(env, 1)) {
+        if (!checkArgumentsNum(LibraryFunction_t.KEYS, env)) {
             return;
         }
+
         AFoxDataStructure fobject = getObjectArgument(env);
         if (!(fobject instanceof FoxObject)) {
             StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument must be of type Object.");
@@ -75,20 +84,22 @@ public class LibraryFunctions {
     }
 
     public static void values(Environment env) {
-        if (!checkArgumentNum(env, 1)) {
+        if (!checkArgumentsNum(LibraryFunction_t.VALUES, env)) {
             return;
         }
+
         AFoxDataStructure fdataStructure = getObjectArgument(env);
         if (fdataStructure == null) {
             return;
         }
         FoxArray farray = new FoxArray(fdataStructure.values());
+
         StaticVal retVal = new StaticVal(Value_t.TABLE, farray);
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
     public static void diagnose(Environment env) {
-        if (!checkArgumentNum(env, 3)) {
+        if (!checkArgumentsNum(LibraryFunction_t.DIAGNOSE, env)) {
             return;
         }
 
@@ -107,13 +118,15 @@ public class LibraryFunctions {
         tmpEnv.insert(LIBRARY_FUNC_ARG + 0, env.getActualArgument(LIBRARY_FUNC_ARG + 0));
         tmpEnv.insert(LIBRARY_FUNC_ARG + 1, env.getActualArgument(LIBRARY_FUNC_ARG + 2));
         addOnExitPoints(tmpEnv);
+
         ((FunctionEnv) env).setReturnVal(tmpEnv.getReturnVal());
     }
 
     public static void addFirst(Environment env) {
-        if (!checkArgumentNum(env, 2)) {
+        if (!checkArgumentsNum(LibraryFunction_t.ADDFIRST, env)) {
             return;
         }
+
         FunctionDef funcdef = getFunctionArgument(env);
         if (funcdef == null) {
             return;
@@ -133,9 +146,10 @@ public class LibraryFunctions {
     }
 
     public static void addOnExitPoints(Environment env) {
-        if (!checkArgumentNum(env, 2)) {
+        if (!checkArgumentsNum(LibraryFunction_t.ADDONEXITPOINTS, env)) {
             return;
         }
+
         FunctionDef funcdef = getFunctionArgument(env);
         if (funcdef == null) {
             return;
@@ -165,7 +179,7 @@ public class LibraryFunctions {
     }
 
     public static void isNull(Environment env) {
-        if (!checkArgumentNum(env, 1)) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISNULL, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -174,7 +188,7 @@ public class LibraryFunctions {
     }
 
     public static void isUndefined(Environment env) {
-        if (!checkArgumentNum(env, 1)) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISUNDEFINED, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -183,7 +197,7 @@ public class LibraryFunctions {
     }
 
     public static void isInteger(Environment env) {
-        if (!checkArgumentNum(env, 1)) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISINTEGER, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -192,7 +206,7 @@ public class LibraryFunctions {
     }
 
     public static void isReal(Environment env) {
-        if (!checkArgumentNum(env, 1)) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISREAL, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -201,7 +215,7 @@ public class LibraryFunctions {
     }
 
     public static void isString(Environment env) {
-        if (!checkArgumentNum(env, 1)) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISSTRING, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -210,7 +224,7 @@ public class LibraryFunctions {
     }
 
     public static void isBoolean(Environment env) {
-        if (!checkArgumentNum(env, 1)) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISBOOLEAN, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -219,7 +233,7 @@ public class LibraryFunctions {
     }
 
     public static void isTable(Environment env) {
-        if (!checkArgumentNum(env, 1)) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISTABLE, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -228,7 +242,7 @@ public class LibraryFunctions {
     }
 
     public static void isFunc(Environment env) {
-        if (!checkArgumentNum(env, 1)) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISFUNC, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -237,7 +251,7 @@ public class LibraryFunctions {
     }
 
     public static void isLibFunc(Environment env) {
-        if (!checkArgumentNum(env, 1)) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISLIBFUNC, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -246,7 +260,7 @@ public class LibraryFunctions {
     }
 
     public static void isObject(Environment env) {
-        if (!checkArgumentNum(env, 1)) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISOBJECT, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -255,7 +269,7 @@ public class LibraryFunctions {
     }
 
     public static void isAST(Environment env) {
-        if (!checkArgumentNum(env, 1)) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISAST, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -264,7 +278,7 @@ public class LibraryFunctions {
     }
 
     public static void str(Environment env) {
-        if (!checkArgumentNum(env, 1)) {
+        if (!checkArgumentsNum(LibraryFunction_t.STR, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -273,6 +287,10 @@ public class LibraryFunctions {
     }
 
     public static void sqrt(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.SQRT, env)) {
+            return;
+        }
+
         Double data = getDoubleArgument(env);
         if (data == null) {
             return;
@@ -292,6 +310,9 @@ public class LibraryFunctions {
     }
 
     public static void cos(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.COS, env)) {
+            return;
+        }
 
         Double data = getDoubleArgument(env);
         if (data == null) {
@@ -306,6 +327,9 @@ public class LibraryFunctions {
     }
 
     public static void sin(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.SIN, env)) {
+            return;
+        }
 
         Double data = getDoubleArgument(env);
         if (data == null) {
@@ -318,13 +342,21 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    private static boolean checkArgumentNum(Environment env, int args) {
-        if (env.totalActuals() != args) {
-            StaticVal retVal = new StaticVal(Value_t.ERROR, "Call to lib function requires " + args + " arguments: " + env.totalActuals() + " found");
-            ((FunctionEnv) env).setReturnVal(retVal);
-            return false;
+    private static boolean checkArgumentsNum(LibraryFunction_t func, Environment env) {
+        if (func.equals(LibraryFunction_t.PRINT) || func.equals(LibraryFunction_t.PRINT_LN)) {
+            return true;
+        } else {
+            if (env.totalActuals() != func.totalArgs()) {
+                String msg = "Call to this lib function "
+                        + "requires (" + func.totalArgs() + ") arguments BUT ("
+                        + env.totalActuals() + ") found.";
+                StaticVal retVal = new StaticVal(Value_t.ERROR, msg);
+                ((FunctionEnv) env).setReturnVal(retVal);
+                return false;
+            } else {
+                return true;
+            }
         }
-        return true;
     }
 
     private static Double getDoubleArgument(Environment env) {
@@ -338,14 +370,17 @@ public class LibraryFunctions {
 
         } else if (value.isString() && value.isConvertedToNumeric()) {
             data = Double.parseDouble((String) value.getData());
+            
         } else if (value.isUndefined()) {
             StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument is UNDEFINED.");
             ((FunctionEnv) env).setReturnVal(retVal);
             return null;
+        
         } else {
             StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument can not cast to Double.");
             ((FunctionEnv) env).setReturnVal(retVal);
             return null;
+        
         }
         return data;
     }

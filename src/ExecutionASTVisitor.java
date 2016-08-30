@@ -483,8 +483,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
         //System.out.println(lvalue);
         if (node.getCallSuffix() instanceof NormCall) {
             if (!lvalue.isUserFunction() && !lvalue.isLibraryFunction()) {
-                String msg = "Function call: Symbol-" + ((DynamicVal) lvalue).getErrorInfo()
-                        + " is not Type-Function, but Type-" + lvalue.getType() + ".";
+                String msg = "Function call: Symbol '" + ((DynamicVal) lvalue).getErrorInfo()
+                        + "' is not Type-Function, BUT Type-" + lvalue.getType() + ".";
                 ASTUtils.error(node, msg);
 
             }

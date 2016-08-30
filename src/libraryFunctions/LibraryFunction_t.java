@@ -2,41 +2,47 @@ package libraryFunctions;
 
 public enum LibraryFunction_t {
 
-    PRINT("print"),
-    PRINT_LN("println"),
-    SQRT("sqrt"),
-    COS("cos"),
-    SIN("sin"),
-    LEN("len"),
-    KEYS("keys"),
-    VALUES("values"),
-    STR("str"),
-    ISNULL("isNull"),
-    ISUNDEFINED("isUndefined"),
-    ISINTEGER("isInteger"),
-    ISREAL("isReal"),
-    ISSTRING("isString"),
-    ISBOOLEAN("isBoolean"),
-    ISTABLE("isTable"),
-    ISFUNC("isFunc"),
-    ISLIBFUNC("isLibFunc"),
-    ISOBJECT("isObject"),
-    ISAST("isAST"),
-    //FACTORY("factory"),
-    //COPY("copy"),
-    DIAGNOSE("diagnose"),
-    ADDFIRST("addFirst"),
-    ADDONEXITPOINTS("addOnExitPoints");
+    PRINT("print", -1),
+    PRINT_LN("println", -1),
+    SQRT("sqrt", 1),
+    COS("cos", 1),
+    SIN("sin", 1),
+    LEN("len", 1),
+    KEYS("keys", 1),
+    VALUES("values", 1),
+    STR("str", 1),
+    ISNULL("isNull", 1),
+    ISUNDEFINED("isUndefined", 1),
+    ISINTEGER("isInteger", 1),
+    ISREAL("isReal", 1),
+    ISSTRING("isString", 1),
+    ISBOOLEAN("isBoolean", 1),
+    ISTABLE("isTable", 1),
+    ISFUNC("isFunc", 1),
+    ISLIBFUNC("isLibFunc", 1),
+    ISOBJECT("isObject", 1),
+    ISAST("isAST", 1),
+    //FACTORY("factory", -1),
+    //COPY("copy", 1),
+    DIAGNOSE("diagnose", 3),
+    ADDFIRST("addFirst", 2),
+    ADDONEXITPOINTS("addOnExitPoints", 2);
 
     private final String _name;
+    private final int _totalArgs;
 
-    private LibraryFunction_t(String name) {
+    private LibraryFunction_t(String name, int totalArgs) {
         _name = name;
+        _totalArgs = totalArgs;
     }
 
     @Override
     public String toString() {
         return _name;
+    }
+
+    public int totalArgs() {
+        return _totalArgs;
     }
 
     public static boolean isLibraryFunction(String name) {
