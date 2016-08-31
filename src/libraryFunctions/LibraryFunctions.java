@@ -32,12 +32,44 @@ public class LibraryFunctions {
         for (int i = 0; i < totalActuals; i++) {
             String data;
 
-            if (env.getActualArgument(LIBRARY_FUNC_ARG + i).isUndefined()) {
+            Value argument = env.getActualArgument(LIBRARY_FUNC_ARG + i);
+            if (argument.isUndefined()) {
                 data = "UNDEFINED";
-            } else if (env.getActualArgument(LIBRARY_FUNC_ARG + i).isNull()) {
+
+            } else if (argument.isNull()) {
                 data = "NULL";
+
+            } else if (argument.isUserFunction() || argument.isAST()) {
+                data = "UserFunctions." + argument.getData().toString();
+
+            } else if (argument.isLibraryFunction()) {
+                //Get Library Function Name
+                String func = argument.getData().toString()
+                        .replace("public static void libraryFunctions.LibraryFunctions.", "")
+                        .replace("(environment.Environment)", "");
+
+                //Get Total Arguments
+                int totalArgs = LibraryFunction_t.totalArgs(func);
+
+                //Library Function toString
+                StringBuilder msg = new StringBuilder();
+                msg.append("LibraryFunctions.").append(func).append("( ");
+                if (totalArgs == -1) {
+                    msg.append("arg0, arg1, arg2, ...");
+                } else if (totalArgs == -2) {
+                    msg.append("arg0key, arg0value, arg1key, arg1value, ...");
+                } else {
+                    for (int j = 0; i < totalArgs; i++) {
+                        msg.append("arg, ");
+                    }
+                    msg.setCharAt(msg.length() - 1, ')');
+                    msg.setCharAt(msg.length() - 2, ' ');
+                }
+
+                data = msg.toString();
+
             } else {
-                data = env.getActualArgument(LIBRARY_FUNC_ARG + i).getData().toString();
+                data = argument.getData().toString();
             }
 
             System.out.print(data);
@@ -370,17 +402,17 @@ public class LibraryFunctions {
 
         } else if (value.isString() && value.isConvertedToNumeric()) {
             data = Double.parseDouble((String) value.getData());
-            
+
         } else if (value.isUndefined()) {
             StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument is UNDEFINED.");
             ((FunctionEnv) env).setReturnVal(retVal);
             return null;
-        
+
         } else {
             StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument can not cast to Double.");
             ((FunctionEnv) env).setReturnVal(retVal);
             return null;
-        
+
         }
         return data;
     }
