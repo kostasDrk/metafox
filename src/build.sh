@@ -31,9 +31,5 @@ javac utils/*.java
 echo "[+] Compiling Environment"
 javac environment/*.java
 
-echo "[+] Compiling ASTVisitor"
-javac PrintASTVisitor.java
-javac ExecutionASTVisitor.java
-
 echo "[+] Compilerception"
 javac MetafoxCompiler.java
