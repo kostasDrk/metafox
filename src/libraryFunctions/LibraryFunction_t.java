@@ -22,7 +22,7 @@ public enum LibraryFunction_t {
     ISLIBFUNC("isLibFunc", 1),
     ISOBJECT("isObject", 1),
     ISAST("isAST", 1),
-    //FACTORY("factory", -1),
+    //FACTORY("factory", -2),
     //COPY("copy", 1),
     DIAGNOSE("diagnose", 3),
     ADDFIRST("addFirst", 2),
@@ -43,6 +43,93 @@ public enum LibraryFunction_t {
 
     public int totalArgs() {
         return _totalArgs;
+    }
+
+    public static int totalArgs(String func) {
+        int totalArgs = 0;
+
+        switch (func) {
+            case "print":
+                totalArgs = -1;
+                break;
+            case "println":
+                totalArgs = -1;
+                break;
+            case "sqrt":
+                totalArgs = 1;
+                break;
+            case "cos":
+                totalArgs = 1;
+                break;
+            case "sin":
+                totalArgs = 1;
+                break;
+            case "len":
+                totalArgs = 1;
+                break;
+            case "keys":
+                totalArgs = 1;
+                break;
+            case "values":
+                totalArgs = 1;
+                break;
+            case "str":
+                totalArgs = 1;
+                break;
+            case "isNull":
+                totalArgs = 1;
+                break;
+            case "isUndefined":
+                totalArgs = 1;
+                break;
+            case "isInteger":
+                totalArgs = 1;
+                break;
+            case "isReal":
+                totalArgs = 1;
+                break;
+            case "isString":
+                totalArgs = 1;
+                break;
+            case "isBoolean":
+                totalArgs = 1;
+                break;
+            case "isTable":
+                totalArgs = 1;
+                break;
+            case "isFunc":
+                totalArgs = 1;
+                break;
+            case "isLibFunc":
+                totalArgs = 1;
+                break;
+            case "isObject":
+                totalArgs = 1;
+                break;
+            case "isAST":
+                totalArgs = 1;
+                break;
+//            case "factory":
+//                totalArgs = -2;
+//                break;
+//            case "copy":
+//                totalArgs = 1;
+//                break;
+            case "diagnose":
+                totalArgs = 3;
+                break;
+            case "addFirst":
+                totalArgs = 2;
+                break;
+            case "addOnExitPoints":
+                totalArgs = 2;
+                break;
+            default:
+                //fatal error
+                break;
+        }
+
+        return totalArgs;
     }
 
     public static boolean isLibraryFunction(String name) {
