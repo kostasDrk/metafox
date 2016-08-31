@@ -80,13 +80,20 @@ public class FoxObject extends AFoxDataStructure{
         return values;
     }
 
-   /*@Override
+   @Override
     public String toString() {
-        String msg = String.format("%-48s %s", "Keys:", "Values:") + "\n";
-        msg = _data.entrySet().stream().map((entry)
-                -> String.format("%-20s %s", entry.getKey(), entry.getValue()) + "\n")
-                .reduce(msg, String::concat);
-        return msg;
+        StringBuilder msg = new StringBuilder();
+        
+        msg.append("{ ");
+        _data.entrySet().stream().forEach((pair) -> {
+            msg.append(pair.getKey().getData()).append(":");
+            msg.append(pair.getValue().getData()).append(", ");
+        });
+        msg.setCharAt(msg.length()-1, '}');
+        msg.setCharAt(msg.length()-2, ' ');
+        
+        return msg.toString();
 
-    }*/
+    }
+    
 }
