@@ -1,5 +1,8 @@
 package libraryFunctions;
 
+import ast.ASTNode;
+import ast.ASTVisitor;
+import ast.ASTVisitorException;
 import java.util.ArrayList;
 
 import environment.Environment;
@@ -10,6 +13,7 @@ import ast.ExpressionStatement;
 import ast.Block;
 import ast.Expression;
 import ast.FunctionDef;
+import ast.visitors.ToStringASTVisitor;
 
 import dataStructures.FoxObject;
 import dataStructures.FoxArray;
@@ -23,7 +27,7 @@ import static utils.Constants.LIBRARY_FUNC_ARG;
 
 public class LibraryFunctions {
 
-    public static void print(Environment env) {
+    public static void print(Environment env) throws ASTVisitorException {
         if (!checkArgumentsNum(LibraryFunction_t.PRINT, env)) {
             return;
         }
@@ -40,7 +44,11 @@ public class LibraryFunctions {
                 data = "NULL";
 
             } else if (argument.isUserFunction() || argument.isAST()) {
-                data = "UserFunctions." + argument.getData().toString();
+                ASTNode program = (ASTNode) argument.getData();
+                ASTVisitor astVisitor = new ToStringASTVisitor();
+                program.accept(astVisitor);
+
+                data = astVisitor.toString();
 
             } else if (argument.isLibraryFunction()) {
                 //Get Library Function Name
@@ -76,7 +84,7 @@ public class LibraryFunctions {
         }
     }
 
-    public static void println(Environment env) {
+    public static void println(Environment env) throws ASTVisitorException {
         if (!checkArgumentsNum(LibraryFunction_t.PRINT_LN, env)) {
             return;
         }
