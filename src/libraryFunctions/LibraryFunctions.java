@@ -54,7 +54,8 @@ public class LibraryFunctions {
                 //Get Library Function Name
                 String func = argument.getData().toString()
                         .replace("public static void libraryFunctions.LibraryFunctions.", "")
-                        .replace("(environment.Environment)", "");
+                        .replace("(environment.Environment)", "")
+                        .replace(" throws ast.ASTVisitorException", "");
 
                 //Get Total Arguments
                 int totalArgs = LibraryFunction_t.totalArgs(func);
@@ -63,9 +64,9 @@ public class LibraryFunctions {
                 StringBuilder msg = new StringBuilder();
                 msg.append("LibraryFunctions.").append(func).append("( ");
                 if (totalArgs == -1) {
-                    msg.append("arg0, arg1, arg2, ...");
+                    msg.append("arg0, arg1, arg2, ... )");
                 } else if (totalArgs == -2) {
-                    msg.append("arg0key, arg0value, arg1key, arg1value, ...");
+                    msg.append("arg0key, arg0value, arg1key, arg1value, ... )");
                 } else {
                     for (int j = 0; i < totalArgs; i++) {
                         msg.append("arg, ");
