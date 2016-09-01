@@ -88,6 +88,9 @@ whiteSpace     = {LineTerminator} | [ \t\f] | " "
   ">."  { return symbol(sym.QUASI_CLOSE);}
   ".!"  { return symbol(sym.QUASI_EXEC);}
   ".~"  { return symbol(sym.QUASI_ESC);}
+  ".@"  { return symbol(sym.QUASI_RUN);}
+  ".eval" { return symbol(sym.QUASI_EVAL);}
+  ".#"  { return symbol(sym.QUASI_TO_TEXT);}
 
   /*Punctuation*/
   "{"   { return symbol(sym.OPEN_BLOCK);}

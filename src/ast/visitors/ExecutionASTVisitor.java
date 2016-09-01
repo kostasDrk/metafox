@@ -1,3 +1,7 @@
+package ast.visitors;
+
+
+
 
 import ast.ASTNode;
 import ast.ASTVisitor;
@@ -38,7 +42,10 @@ import ast.UnaryExpression;
 import ast.WhileStatement;
 import ast.MetaSyntax;
 import ast.MetaEscape;
+import ast.MetaEval;
 import ast.MetaExecute;
+import ast.MetaRun;
+import ast.MetaToText;
 import ast.utils.ASTUtils;
 
 import environment.EnvironmentStack;
@@ -483,8 +490,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
         //System.out.println(lvalue);
         if (node.getCallSuffix() instanceof NormCall) {
             if (!lvalue.isUserFunction() && !lvalue.isLibraryFunction()) {
-                String msg = "Function call: Symbol-" + ((DynamicVal) lvalue).getErrorInfo()
-                        + " is not Type-Function, but Type-" + lvalue.getType() + ".";
+                String msg = "Function call: Symbol '" + ((DynamicVal) lvalue).getErrorInfo()
+                        + "' is not Type-Function, BUT Type-" + lvalue.getType() + ".";
                 ASTUtils.error(node, msg);
 
             }
@@ -1007,5 +1014,32 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         exitMetaSpace();
         return ret;
+    }
+
+    @Override
+    public Value visit(MetaRun node) throws ASTVisitorException {
+        if (node.getExpression() != null) {
+            node.getExpression().accept(this);
+        }
+        
+        return null;
+    }
+
+    @Override
+    public Value visit(MetaEval node) throws ASTVisitorException {
+        if (node.getExpression() != null) {
+            node.getExpression().accept(this);
+        }
+
+        return null;
+    }
+
+    @Override
+    public Value visit(MetaToText node) throws ASTVisitorException {
+        if (node.getExpression() != null) {
+            node.getExpression().accept(this);
+        }
+        
+        return null;
     }
 }

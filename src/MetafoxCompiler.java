@@ -1,7 +1,10 @@
 
 import java.io.FileReader;
+
 import ast.ASTNode;
 import ast.ASTVisitor;
+import ast.visitors.ExecutionASTVisitor;
+import ast.visitors.ToStringASTVisitor;
 
 public class MetafoxCompiler {
 
@@ -14,10 +17,11 @@ public class MetafoxCompiler {
 
                 ASTNode program = (ASTNode) p.parse().value;
 
-                /*ASTVisitor printVisitor = new PrintASTVisitor();
-                program.accept(printVisitor);
-                System.out.println("\n\n**Parse ok**\n\n");*/
-
+                //ASTVisitor printVisitor = new ToStringASTVisitor();
+                //program.accept(printVisitor);
+                //System.out.println(printVisitor.toString());
+                //System.out.println("\n\n**Parse ok**\n\n");
+                
                 ASTVisitor executionASTVisitor = new ExecutionASTVisitor();
                 program.accept(executionASTVisitor);
                 // System.out.println("\n\n**Execution ok**\n\n");

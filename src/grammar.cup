@@ -44,6 +44,9 @@ import ast.IndexedElement;
 import ast.MetaSyntax;
 import ast.MetaExecute;
 import ast.MetaEscape;
+import ast.MetaRun;
+import ast.MetaEval;
+import ast.MetaToText;
 
 
 parser code
@@ -105,7 +108,7 @@ terminal MUL, DIV, MOD;
 terminal PLUS, MINUS, UMINUS, PLUS_PLUS, MINUS_MINUS;
 terminal GREATER, LESS, NOT_EQUAL, LESS_OR_EQUAL, GREATER_OR_EQUAL, CMP_EQUAL;
 terminal LOGIC_AND, LOGIC_OR, NOT;
-terminal QUASI_ESC, QUASI_EXEC, QUASI_OPEN, QUASI_CLOSE;
+terminal QUASI_ESC, QUASI_EXEC, QUASI_OPEN, QUASI_CLOSE, QUASI_RUN, QUASI_EVAL, QUASI_TO_TEXT;
 
 terminal java.lang.String ID;
 terminal java.lang.Integer INTEGER_LITERAL;
@@ -149,7 +152,7 @@ precedence nonassoc  CMP_EQUAL, NOT_EQUAL;
 precedence nonassoc  GREATER, GREATER_OR_EQUAL, LESS, LESS_OR_EQUAL;
 precedence left PLUS, MINUS;
 precedence left MUL, DIV, MOD;
-precedence right NOT,PLUS_PLUS, MINUS_MINUS, UMINUS, QUASI_EXEC, QUASI_ESC;
+precedence right NOT,PLUS_PLUS, MINUS_MINUS, UMINUS, QUASI_EXEC, QUASI_ESC, QUASI_RUN, QUASI_TO_TEXT;
 precedence left  DOT, DOUBLE_DOT;
 precedence left LEFT_BRACKET, RIGHT_BRACKET;
 precedence left  LEFT_PARENTHESIS, RIGHT_PARENTHESIS;
@@ -385,6 +388,24 @@ term ::=	 LEFT_PARENTHESIS expr:ex RIGHT_PARENTHESIS
 			|QUASI_EXEC expr:ex
 			{:
 				RESULT = new MetaExecute(ex);
+				RESULT.setLine(exleft);
+				RESULT.setColumn(exright);
+			:}
+			|QUASI_RUN expr:ex
+			{:
+				RESULT = new MetaRun(ex);
+				RESULT.setLine(exleft);
+				RESULT.setColumn(exright);
+			:}
+			|QUASI_EVAL LEFT_PARENTHESIS expr:ex RIGHT_PARENTHESIS
+			{:
+				RESULT = new MetaEval(ex);
+				RESULT.setLine(exleft);
+				RESULT.setColumn(exright);
+			:}
+			|QUASI_TO_TEXT expr:ex
+			{:
+				RESULT = new MetaToText(ex);
 				RESULT.setLine(exleft);
 				RESULT.setColumn(exright);
 			:}

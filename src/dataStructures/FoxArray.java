@@ -135,15 +135,19 @@ public class FoxArray extends AFoxDataStructure{
         return values;
     }
     
-    /*@Override
+    @Override
     public String toString() {
-        String msg = String.format("%-48s %s", "Keys:", "Values:") + "\n";
-        Iterator it = _numberIndexedData.entrySet().iterator();
-        while(it.hasNext()){
-            Map.Entry pair = (Map.Entry)it.next();
-            msg += "KEY: "+pair.getKey()+"\tVALUE: "+pair.getValue();
+        StringBuilder msg = new StringBuilder();
+        
+        msg.append("[ ");
+        for(int i = 0; i<_numberIndexedData.size(); i++){
+            StaticVal key = new StaticVal(Value_t.INTEGER, i);
+            msg.append(_numberIndexedData.get(key).getData()).append(", ");
         }
-        return msg;
-    }*/
+        msg.setCharAt(msg.length()-1, ']');
+        msg.setCharAt(msg.length()-2, ' ');
+        
+        return msg.toString();
+    }
 
 }
