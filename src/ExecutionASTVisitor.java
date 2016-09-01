@@ -623,7 +623,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
         HashMap<Integer, Value> arguments = new HashMap<>();
         int count = 0;
         for (Expression expression : node.getExpressionList()) {
-            Value argValue = expression.accept(this);
+            Value argValue = null;
+            if(expression instanceof MetaSyntax){
+                argValue = new StaticVal<ASTNode>(Value_t.AST, expression);
+            }else{
+                argValue = expression.accept(this);
+            }
             arguments.put(count, argValue);
             //System.out.println(argValue);
             count++;
