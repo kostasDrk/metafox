@@ -42,4 +42,7 @@ public interface ASTVisitor {
 	Value visit(MetaSyntax node) throws ASTVisitorException;
 	Value visit(MetaEscape node) throws ASTVisitorException;
 	Value visit(MetaExecute node) throws ASTVisitorException;
+        Value visit(MetaRun node) throws ASTVisitorException;
+        Value visit(MetaEval node) throws ASTVisitorException;
+        Value visit(MetaToText node) throws ASTVisitorException;
 }

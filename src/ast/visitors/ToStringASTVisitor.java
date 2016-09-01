@@ -45,7 +45,10 @@ import ast.ObjectDefinition;
 import ast.IndexedElement;
 import ast.MetaSyntax;
 import ast.MetaEscape;
+import ast.MetaEval;
 import ast.MetaExecute;
+import ast.MetaRun;
+import ast.MetaToText;
 import symbols.value.StaticVal;
 import symbols.value.Value_t;
 
@@ -171,12 +174,14 @@ public class ToStringASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(NormCall node) throws ASTVisitorException {
-        _programm.append("(");
+        _programm.append("( ");
         for (Expression expression : node.getExpressionList()) {
             expression.accept(this);
             _programm.append(",");
         }
+        _programm.setCharAt(_programm.length() - 1, ' ');
         _programm.append(")");
+
         return null;
     }
 
@@ -190,12 +195,15 @@ public class ToStringASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(ObjectDefinition node) throws ASTVisitorException {
-        _programm.append("{");
+        _programm.append("{ ");
         if (!node.getIndexedElementList().isEmpty()) {
             for (IndexedElement indexed : node.getIndexedElementList()) {
                 indexed.accept(this);
                 _programm.append(",\n\t");
             }
+            _programm.setCharAt(_programm.length() - 1, ' ');
+            _programm.setCharAt(_programm.length() - 2, ' ');
+            _programm.setCharAt(_programm.length() - 3, ' ');
         }
         _programm.append("}");
         return null;
@@ -211,12 +219,13 @@ public class ToStringASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(ArrayDef node) throws ASTVisitorException {
-        _programm.append("[");
+        _programm.append("[ ");
         if (node.getExpressionList() != null) {
             for (Expression expression : node.getExpressionList()) {
                 expression.accept(this);
                 _programm.append(",");
             }
+            _programm.setCharAt(_programm.length() - 1, ' ');
         }
         _programm.append("]");
         return null;
@@ -242,11 +251,13 @@ public class ToStringASTVisitor implements ASTVisitor {
     public Value visit(FunctionDef node) throws ASTVisitorException {
         _programm.append("function ");
         _programm.append(node.getFuncName());
-        _programm.append("(");
+        _programm.append("( ");
         node.getArguments().stream().forEach((id) -> {
             _programm.append(id.getIdentifier()).append(", ");
         });
-        _programm.append(")");
+        _programm.setCharAt(_programm.length() - 1, ')');
+        _programm.setCharAt(_programm.length() - 2, ' ');
+
         node.getBody().accept(this);
         return null;
     }
@@ -311,19 +322,24 @@ public class ToStringASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(ForStatement node) throws ASTVisitorException {
-        _programm.append("for(");
+        _programm.append("for( ");
         for (Expression expression : node.getExpressionList1()) {
             expression.accept(this);
             _programm.append(",");
         }
+        _programm.setCharAt(_programm.length() - 1, ' ');
         _programm.append("; ");
+
         node.getExpression().accept(this);
         _programm.append("; ");
+
         for (Expression expression : node.getExpressionList2()) {
             expression.accept(this);
             _programm.append(",");
         }
+        _programm.setCharAt(_programm.length() - 1, ' ');
         _programm.append(")");
+
         node.getStatement().accept(this);
         return null;
     }
@@ -362,7 +378,7 @@ public class ToStringASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(MetaEscape node) throws ASTVisitorException {
-        _programm.append(".~").append("\n");
+        _programm.append(".~");
         if (node.getExpression() != null) {
             node.getExpression().accept(this);
         }
@@ -371,7 +387,35 @@ public class ToStringASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(MetaExecute node) throws ASTVisitorException {
-        _programm.append(".!").append("\n");
+        _programm.append(".!");
+        if (node.getExpression() != null) {
+            node.getExpression().accept(this);
+        }
+        return null;
+    }
+
+    @Override
+    public Value visit(MetaRun node) throws ASTVisitorException {
+        _programm.append(".@");
+        if (node.getExpression() != null) {
+            node.getExpression().accept(this);
+        }
+        return null;
+    }
+
+    @Override
+    public Value visit(MetaEval node) throws ASTVisitorException {
+        _programm.append(".eval(");
+        if (node.getExpression() != null) {
+            node.getExpression().accept(this);
+        }
+        _programm.append(")");
+        return null;
+    }
+
+    @Override
+    public Value visit(MetaToText node) throws ASTVisitorException {
+        _programm.append(".#");
         if (node.getExpression() != null) {
             node.getExpression().accept(this);
         }
