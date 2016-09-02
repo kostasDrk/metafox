@@ -231,7 +231,10 @@ stmt ::=	 expr:ex SEMICOLON
 			{:
 				RESULT = fdef;
 			:}
-			|SEMICOLON
+			|SEMICOLON			
+                        {:
+				RESULT = new ExpressionStatement(null);
+			:}
 			;
 
 expr ::=	assignexpr:assignex
