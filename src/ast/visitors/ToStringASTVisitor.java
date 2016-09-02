@@ -81,8 +81,11 @@ public class ToStringASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(ExpressionStatement node) throws ASTVisitorException {
-        node.getExpression().accept(this);
+        if (node.getExpression() != null) {
+            node.getExpression().accept(this);
+        }
         semicolon();
+        
         return null;
     }
 

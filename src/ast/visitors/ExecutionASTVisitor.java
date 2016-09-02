@@ -164,9 +164,14 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(ExpressionStatement node) throws ASTVisitorException {
         //System.out.println("-ExpressionStatement");
-        Value val = null;
-        val = node.getExpression().accept(this);
-        return null;
+        Value retVal = NULL;
+
+        //It is 'null' when we have semicolon with out expression
+        if (node.getExpression() != null) {
+            retVal = node.getExpression().accept(this);
+        }
+
+        return retVal;
     }
 
     @Override
@@ -214,7 +219,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         String typeError = "Incompatible operand types for '" + node.getOperator()
                 + "': " + leftInfo + " and " + rightInfo;
         if (left.isUndefined() || right.isUndefined()) {
-                ASTUtils.error(node, typeError);
+            ASTUtils.error(node, typeError);
 
         } else if (left.isNull() || right.isNull()) {
             if (!Objects.equals(left, right)) {
@@ -301,11 +306,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
             } else {
                 ASTUtils.error(node, typeError);
             }
-            
-        }else{
+
+        } else {
             //fatal error.
         }
-        
+
         // //System.out.println("RESULT: "+result.getData());
         return result;
     }
@@ -737,20 +742,23 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(Block node) throws ASTVisitorException {
         //System.out.println("-Block");
-        Value ret = null;
+        Value retVal = NULL;
 
         enterScopeSpace();
         for (Statement stmt : node.getStatementList()) {
-            ret = stmt.accept(this);
-            if (ret != null) {
-                if (ret.getData().equals(BREAK) || ret.getData().equals(CONTINUE) || ret.getData().equals(RETURN)) {
-                    return ret;
+            retVal = stmt.accept(this);
+            if (retVal != NULL) {
+                if (retVal.getData().equals(BREAK)
+                        || retVal.getData().equals(CONTINUE)
+                        || retVal.getData().equals(RETURN)) {
+
+                    return retVal;
                 }
             }
         }
         exitScopeSpace();
 
-        return ret;
+        return retVal;
     }
 
     @Override
