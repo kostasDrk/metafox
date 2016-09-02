@@ -37,13 +37,7 @@ public class LibraryFunctions {
             String data;
 
             Value argument = env.getActualArgument(LIBRARY_FUNC_ARG + i);
-            if (argument.isUndefined()) {
-                data = "UNDEFINED";
-
-            } else if (argument.isNull()) {
-                data = "NULL";
-
-            } else if (argument.isUserFunction() || argument.isAST()) {
+            if (argument.isUserFunction() || argument.isAST()) {
                 ASTNode program = (ASTNode) argument.getData();
                 ASTVisitor astVisitor = new ToStringASTVisitor();
                 program.accept(astVisitor);

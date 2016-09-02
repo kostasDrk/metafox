@@ -15,6 +15,6 @@ public class Constants {
     public static final String CONTINUE = "CONTINUE";
     public static final String RETURN = "RETURN";
 
-    public static final Value NULL = new StaticVal(Value_t.NULL, null);
-    public static final Value UNDEFINED = new StaticVal(Value_t.UNDEFINED, null);
+    public static final Value NULL = new StaticVal(Value_t.NULL, Value_t.NULL.toString());
+    public static final Value UNDEFINED = new StaticVal(Value_t.UNDEFINED, Value_t.UNDEFINED.toString());
 }

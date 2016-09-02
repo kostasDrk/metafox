@@ -10,7 +10,7 @@ public abstract class Value<T> implements Serializable {
 
     public Value() {
         _type = Value_t.UNDEFINED;
-        _data = null;
+        _data = (T) Value_t.UNDEFINED.toString();
     }
 
     public Value(Value_t type, T data) {
