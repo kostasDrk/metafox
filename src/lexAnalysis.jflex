@@ -68,7 +68,7 @@ whiteSpace     = {LineTerminator} | [ \t\f] | " "
   "or"        { return symbol(sym.LOGIC_OR);}
   "true"      { return symbol(sym.TRUE);}
   "false"     { return symbol(sym.FALSE);}
-  "nil"       { return symbol(sym.NIL);}
+  "null"       { return symbol(sym.NULL);}
   "if"        { return symbol(sym.IF);}
   "else"      { return symbol(sym.ELSE);}
   "while"     { return symbol(sym.WHILE);}
