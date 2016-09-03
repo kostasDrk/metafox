@@ -1,8 +1,5 @@
 package ast.visitors;
 
-
-
-
 import ast.ASTNode;
 import ast.ASTVisitor;
 import ast.ASTVisitorException;
@@ -167,9 +164,14 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(ExpressionStatement node) throws ASTVisitorException {
         //System.out.println("-ExpressionStatement");
-        Value val = null;
-        val = node.getExpression().accept(this);
-        return null;
+        Value retVal = NULL;
+
+        //It is 'null' when we have semicolon with out expression
+        if (node.getExpression() != null) {
+            retVal = node.getExpression().accept(this);
+        }
+
+        return retVal;
     }
 
     @Override
@@ -195,7 +197,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         Operator op = node.getOperator();
 
         // Handle possible meta operands
-        if (left.isAST() || right.isAST()) {
+        if (left.isAST() && right.isAST()) {
             BinaryExpression binAST = null;
             if (left.isAST() && !right.isAST()) {
                 binAST = new BinaryExpression(op, ((Expression) left.getData()), node.getExpression2());
@@ -213,21 +215,42 @@ public class ExecutionASTVisitor implements ASTVisitor {
         String rightInfo = (right instanceof DynamicVal) ? ((DynamicVal) right).getErrorInfo() + "(" + right.getType() + ")" : right.getData() + "(" + right.getType() + ")";
         rightInfo = "'" + right.getData() + "' (" + right.getType() + ")";
 
-        // String typeError = "Incompatible operand types for '" + node.getOperator() + "': " + left.getType() + " and " + right.getType();
-        String typeError = "Incompatible operand types for '" + node.getOperator() + "': " + leftInfo + " and " + rightInfo;
-        if (left.isUndefined() || left.isNull() || right.isUndefined() || right.isNull()) {
-            ASTUtils.error(node, typeError);
-        }
-        if ((!left.isNumeric() || !right.isNumeric()) && (!left.isBoolean() || !right.isBoolean())) {
-            if ((left.isString() || right.isString()) && op.equals(Operator.PLUS)) {
-                result = new StaticVal(Value_t.STRING, (String) left.getData().toString() + (String) right.getData().toString());
-                // //System.out.println("RESULT: "+result.getData());
+        if(op.isLogical() && !left.getType().toString().equals(right.getType().toString())){
+            result = new StaticVal<>(Value_t.BOOLEAN, Boolean.FALSE);
+            if(op.equals(Operator.NOT_EQUAL))
+                result = new StaticVal<>(Value_t.BOOLEAN, Boolean.TRUE);
+            if(!left.isNumeric() && !right.isNumeric())
                 return result;
-            } else {
+        }
+
+        //Handle error cases.
+        String typeError = "Incompatible operand types for '" + node.getOperator()
+                + "': " + leftInfo + " and " + rightInfo;
+        if (left.isUndefined() || right.isUndefined()) {
+            ASTUtils.error(node, typeError);
+
+        } else if (left.isNull() || right.isNull()) {
+            if (!Objects.equals(left, right)) {
+                ASTUtils.error(node, typeError);
+            }
+
+        } else if ((!left.isNumeric() || !right.isNumeric()) && (!left.isBoolean() || !right.isBoolean())) {
+            if ((left.isString() || right.isString())) {
+                if(op.equals(Operator.PLUS))
+                    result = new StaticVal(Value_t.STRING, (String) left.getData().toString() + (String) right.getData().toString());
+                else if(op.equals(Operator.CMP_EQUAL))
+                    result = new StaticVal(Value_t.BOOLEAN, left.getData().toString().equals(right.getData().toString()));
+                else if(op.equals(Operator.NOT_EQUAL))
+                    result = new StaticVal(Value_t.BOOLEAN, !left.getData().toString().equals(right.getData().toString()));
+                else
+                    ASTUtils.error(node, typeError);
+                return result;
+            }else {
                 ASTUtils.error(node, typeError);
             }
         }
 
+        //Compute operation result
         if (left.isNumeric()) {
             Double leftVal = (left.isReal()) ? (Double) left.getData() : ((Integer) left.getData()).doubleValue();
             Double rightVal = (right.isReal()) ? (Double) right.getData() : ((Integer) right.getData()).doubleValue();
@@ -269,7 +292,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
                             : new StaticVal<>(Value_t.INTEGER, (Integer) ((Double) (leftVal % rightVal)).intValue());
                 }
             }
-        } else {
+        } else if (left.isBoolean()) {
             // Boolean values
             Boolean leftVal = (Boolean) left.getData();
             Boolean rightVal = (Boolean) right.getData();
@@ -284,7 +307,24 @@ public class ExecutionASTVisitor implements ASTVisitor {
             } else {
                 ASTUtils.error(node, typeError);
             }
+        } else if (left.isNull()) {
+
+            if (op.equals(Operator.LOGIC_AND)) {
+                result = new StaticVal<>(Value_t.BOOLEAN, Boolean.TRUE);
+            } else if (op.equals(Operator.LOGIC_OR)) {
+                result = new StaticVal<>(Value_t.BOOLEAN, Boolean.TRUE);
+            } else if (op.equals(Operator.CMP_EQUAL)) {
+                result = new StaticVal<>(Value_t.BOOLEAN, (Objects.equals(left, right)));
+            } else if (op.equals(Operator.NOT_EQUAL)) {
+                result = new StaticVal<>(Value_t.BOOLEAN, (!Objects.equals(left, right)));
+            } else {
+                ASTUtils.error(node, typeError);
+            }
+
+        } else {
+            //fatal error.
         }
+
         // //System.out.println("RESULT: "+result.getData());
         return result;
     }
@@ -388,7 +428,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         Value lvalue = null;
         Value key = null;
-        Value retVal;
+        Value retVal = NULL;
 
         String id = node.getIdentifier();
         if ((node.getLvalue() != null) && (id != null)) { // lvalue.id 
@@ -608,6 +648,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
         if (ret.getType().equals(Value_t.ERROR)) {
             String msg = "Error during Function Execution @'" + ((DynamicVal) lvalue).getErrorInfo() + "'  - " + ret.getData();
             ASTUtils.error(node, msg);
+        }else if(ret == null){
+            ret = NULL;
         }
         //System.out.println(_envStack.toString());
         return ret;
@@ -633,7 +675,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
             Value argValue = null;
             if(expression instanceof MetaSyntax && _inMeta){
                 argValue = new StaticVal<ASTNode>(Value_t.AST, expression);
-            }else{
+            } else {
                 argValue = expression.accept(this);
             }
             arguments.put(count, argValue);
@@ -716,20 +758,23 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(Block node) throws ASTVisitorException {
         //System.out.println("-Block");
-        Value ret = null;
+        Value retVal = NULL;
 
         enterScopeSpace();
         for (Statement stmt : node.getStatementList()) {
-            ret = stmt.accept(this);
-            if (ret != null) {
-                if (ret.getData().equals(BREAK) || ret.getData().equals(CONTINUE) || ret.getData().equals(RETURN)) {
-                    return ret;
+            retVal = stmt.accept(this);
+            if (retVal != NULL && retVal != null) {
+                if (retVal.getData().equals(BREAK)
+                        || retVal.getData().equals(CONTINUE)
+                        || retVal.getData().equals(RETURN)) {
+
+                    return retVal;
                 }
             }
         }
         exitScopeSpace();
 
-        return ret;
+        return retVal;
     }
 
     @Override
@@ -834,12 +879,22 @@ public class ExecutionASTVisitor implements ASTVisitor {
         //System.out.println("-IfStatement");
 
         Value val = node.getExpression().accept(this);
-        Value ret = null;
+        Value ret = NULL;
+        Boolean enter;
 
-        if (!val.isBoolean()) {
-            ASTUtils.error(node, "If expression must be boolean: " + val.getType() + " given");
+        if (val.isNull() || val.isUndefined()) {
+            // ASTUtils.error(node, "If expression must be boolean: " + val.getType() + " given");
+            enter = false;
+        }else if(val.isNumeric()){
+            int s = (val.getData() instanceof Double) ? ((Double) val.getData()).intValue() : (Integer) val.getData();
+            if(s == 0) enter = false;
+            else enter = true;
+        }else if(val.isBoolean()){
+            enter = (Boolean)val.getData();
+        }else{
+            enter = true;
         }
-        if ((Boolean) val.getData()) {
+        if (enter) {
             ret = node.getStatement().accept(this);
             if (ret != null) {
                 if (ret.getData().equals(BREAK) || ret.getData().equals(CONTINUE) || ret.getData().equals(RETURN)) {
@@ -1021,7 +1076,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         if (node.getExpression() != null) {
             node.getExpression().accept(this);
         }
-        
+
         return null;
     }
 
@@ -1039,7 +1094,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         if (node.getExpression() != null) {
             node.getExpression().accept(this);
         }
-        
+
         return null;
     }
 }

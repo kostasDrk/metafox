@@ -100,7 +100,7 @@ parser code
 :};
 
 
-terminal WHILE, FOR, IF, ELSE, RETURN, BREAK, CONTINUE, FUNCTION, TRUE, FALSE, NIL;
+terminal WHILE, FOR, IF, ELSE, RETURN, BREAK, CONTINUE, FUNCTION, TRUE, FALSE, NULL;
 terminal LEFT_PARENTHESIS, RIGHT_PARENTHESIS, SEMICOLON, COLON, LEFT_BRACKET, RIGHT_BRACKET, OPEN_BLOCK, CLOSE_BLOCK, DOT, DOUBLE_DOT, COMMA;
 terminal DOUBLE_COLON;
 terminal ASSIGN;
@@ -231,7 +231,10 @@ stmt ::=	 expr:ex SEMICOLON
 			{:
 				RESULT = fdef;
 			:}
-			|SEMICOLON
+			|SEMICOLON			
+                        {:
+				RESULT = new ExpressionStatement(null);
+			:}
 			;
 
 expr ::=	assignexpr:assignex
@@ -661,7 +664,7 @@ const ::= INTEGER_LITERAL:literal
 				RESULT.setLine(literalleft);
 				RESULT.setColumn(literalright);
 			:}
-			|NIL:literal
+			|NULL:literal
 			{:
 				RESULT = new NullLiteral();
 				RESULT.setLine(literalleft);

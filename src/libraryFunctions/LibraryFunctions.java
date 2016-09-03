@@ -47,13 +47,7 @@ public class LibraryFunctions {
             String data;
 
             Value argument = env.getActualArgument(LIBRARY_FUNC_ARG + i);
-            if (argument.isUndefined()) {
-                data = "UNDEFINED";
-
-            } else if (argument.isNull()) {
-                data = "NULL";
-
-            } else if (argument.isUserFunction() || argument.isAST()) {
+            if (argument.isUserFunction() || argument.isAST()) {
                 ASTNode program = (ASTNode) argument.getData();
                 ASTVisitor astVisitor = new ToStringASTVisitor();
                 program.accept(astVisitor);
@@ -255,36 +249,132 @@ public class LibraryFunctions {
           ((FunctionEnv) env).setReturnVal(result);
     }
 
-    public static void getStatements(Environment env){
-         if (!checkArgumentsNum(LibraryFunction_t.GETSTATEMENTS, env)) {
+    public static void getAsObject(Environment env){
+         if (!checkArgumentsNum(LibraryFunction_t.GETASOBJECT, env)) {
             return;
         }
+        HashMap<Value, Value> objectData = new HashMap<Value, Value>();
         Value retVal = null;
         Statement body;
 
         Statement stmt = getStatementArgument(env);
 
+        Value typeVal = null;
+        // Create "type" field for object and get corresponding statement body
+        Value typeName = new StaticVal(Value_t.STRING, "type");
         if(stmt instanceof IfStatement){
             body = ((IfStatement)stmt).getStatement();
+            typeVal = new DynamicVal(new StaticVal(Value_t.STRING, "if"), "Object.(type)");
+
+            // Set "expression" field for if statement object
+            Value expressionName = new StaticVal(Value_t.STRING, "expression");
+            Value staticExprVal = new StaticVal<ASTNode>(Value_t.AST, ((IfStatement)stmt).getExpression());
+            Value expressionVal = new DynamicVal(staticExprVal, "expression");
+            objectData.put(expressionName, expressionVal);
         }
         else if(stmt instanceof WhileStatement){
             body = ((WhileStatement)stmt).getStatement();
+            typeVal = new DynamicVal(new StaticVal(Value_t.STRING, "while"), "Object.(type)");
+
+            // Set "expression" field for while statement object
+            Value expressionName = new StaticVal(Value_t.STRING, "expression");
+            Value staticExprVal = new StaticVal<ASTNode>(Value_t.AST, ((WhileStatement)stmt).getExpression());
+            Value expressionVal = new DynamicVal(staticExprVal, "expression");
+            objectData.put(expressionName, expressionVal);
         }
         else if(stmt instanceof ForStatement){
             body = ((ForStatement)stmt).getStatement();
+            typeVal = new DynamicVal(new StaticVal(Value_t.STRING, "for"), "Object.(type)");
+
+            // Set "expression" field for for statement object
+            Value expressionName = new StaticVal(Value_t.STRING, "expression");
+            Value staticExprVal = new StaticVal<ASTNode>(Value_t.AST, ((ForStatement)stmt).getExpression());
+            Value expressionVal = new DynamicVal(staticExprVal, "expression");
+            objectData.put(expressionName, expressionVal);
+
+            // Create "expressionlist1" field for function object
+            ArrayList<Expression> expressions1 = ((ForStatement)stmt).getExpressionList1();
+            HashMap<Value, Value> expressionData = new HashMap<Value, Value>();
+            int count = 0;
+            Value index;
+            Value exprVal;
+            Value expressionListName = new StaticVal(Value_t.STRING, "expressionlist1");
+            for(Expression expr : expressions1){
+                index = new StaticVal(Value_t.INTEGER, count);
+                String errorInfo = "Object.("+count+")";
+                staticExprVal = new StaticVal<ASTNode>(Value_t.AST, expr);
+                exprVal = new DynamicVal(staticExprVal, errorInfo);
+                expressionData.put(index, exprVal);
+                count++;
+            }
+            FoxArray expressionArray = new FoxArray(expressionData);
+            Value arrayVal = new StaticVal(Value_t.TABLE, expressionArray);
+
+            Value indexedVal = new DynamicVal(arrayVal, "Object.(expressionlist1)");
+            objectData.put(expressionListName, indexedVal);
+
+            // Create "expressionlist2" field for function object
+            ArrayList<Expression> expressions2 = ((ForStatement)stmt).getExpressionList2();
+            expressionData = new HashMap<Value, Value>();
+            count = 0;
+            expressionListName = new StaticVal(Value_t.STRING, "expressionlist2");
+            for(Expression expr : expressions2){
+                index = new StaticVal(Value_t.INTEGER, count);
+                String errorInfo = "Object.("+count+")";
+                staticExprVal = new StaticVal<ASTNode>(Value_t.AST, expr);
+                exprVal = new DynamicVal(staticExprVal, errorInfo);
+                expressionData.put(index, exprVal);
+                count++;
+            }
+            expressionArray = new FoxArray(expressionData);
+            arrayVal = new StaticVal(Value_t.TABLE, expressionArray);
+
+            indexedVal = new DynamicVal(arrayVal, "Object.(expressionlist1)");
+            objectData.put(expressionListName, indexedVal);
         }
         else if(stmt instanceof FunctionDef){
             body = ((FunctionDef)stmt).getBody();
+            typeVal = new DynamicVal(new StaticVal(Value_t.STRING, "function"), "Object.(type)");
+
+            // Create "name" field for function object
+            String funcName = ((FunctionDef)stmt).getFuncName();
+            Value nameVal = new DynamicVal(new StaticVal(Value_t.STRING, funcName), "Object.(name)");
+            Value nameName = new StaticVal(Value_t.STRING, "name");
+            objectData.put(nameName, nameVal);
+
+            // Create "arguments" field for function object
+            ArrayList<IdentifierExpression> arguments = ((FunctionDef)stmt).getArguments();
+            HashMap<Value, Value> argumentData = new HashMap<Value, Value>();
+            int count = 0;
+            Value index;
+            Value staticargVal;
+            Value argVal;
+            Value argumentsName = new StaticVal(Value_t.STRING, "arguments");
+            for(IdentifierExpression id : arguments){
+                index = new StaticVal(Value_t.INTEGER, count);
+                String errorInfo = "Object.("+count+")";
+                staticargVal = new StaticVal<String>(Value_t.STRING, id.getIdentifier());
+                argVal = new DynamicVal(staticargVal, errorInfo);
+                argumentData.put(index, argVal);
+                count++;
+            }
+            FoxArray argumentArray = new FoxArray(argumentData);
+            Value arrayVal = new StaticVal(Value_t.TABLE, argumentArray);
+
+            Value indexedVal = new DynamicVal(arrayVal, "Object.(arguments)");
+            objectData.put(argumentsName, indexedVal);
         }
         else{
-            String msg = "Argument of getStatements() should be of a Statement AST";
+            String msg = "Argument of getAsObject() should be a Statement AST";
             retVal = new StaticVal(Value_t.ERROR, msg);
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
+        objectData.put(typeName, typeVal);
 
-        HashMap<Value, Value> arrayData = new HashMap<Value, Value>();
 
+        // Create "statements" field for object and populate it accordingly
+        HashMap<Value, Value> statementData = new HashMap<Value, Value>();
         int count = 0;
         Value index;
         Value value;
@@ -299,11 +389,12 @@ public class LibraryFunctions {
         for(Statement cur_stmt : stmtlist){
             index = new StaticVal(Value_t.INTEGER, count);
             String errorInfo = "Object.(" + count + ")";
+            // If a compound statement is found, call this method recursively
             if(cur_stmt instanceof IfStatement || cur_stmt instanceof WhileStatement || cur_stmt instanceof ForStatement){
                 FunctionEnv tmpEnv = new FunctionEnv();
                 StaticVal staticval = new StaticVal(Value_t.AST, cur_stmt);
                 tmpEnv.insert(LIBRARY_FUNC_ARG + 0, new DynamicVal(staticval, errorInfo));
-                getStatements(tmpEnv);
+                getAsObject(tmpEnv);
                 value = ((FunctionEnv) tmpEnv).getReturnVal();
                 if (tmpEnv.getReturnVal().getType().equals(Value_t.ERROR)) {
                     return;
@@ -313,13 +404,23 @@ public class LibraryFunctions {
             }
             Value element = new DynamicVal(value, errorInfo);
 
-            arrayData.put(index, element);
+            statementData.put(index, element);
             count++;
         }
-        FoxArray farray = new FoxArray(arrayData);
-        retVal = new StaticVal(Value_t.TABLE, farray);
+        FoxArray farray = new FoxArray(statementData);
+        Value arrayVal = new StaticVal(Value_t.TABLE, farray);
+
+        
+        // Set object's statement list
+        Value indexedVal = new DynamicVal(arrayVal, "Object.(statements)");
+        Value indexedName = new StaticVal(Value_t.STRING, "statements");
+        objectData.put(indexedName, indexedVal);
+        
+        // Construct final FoxObject and return
+        FoxObject fobject = new FoxObject(objectData);
+        retVal = new StaticVal(Value_t.OBJECT, fobject);
         ((FunctionEnv) env).setReturnVal(retVal);
-    } 
+    }
 
     private static Value isType(Value val, Value_t type) {
         if (val.getType().equals(type)) {

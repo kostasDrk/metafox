@@ -27,7 +27,7 @@ public enum LibraryFunction_t {
     DIAGNOSE("diagnose", 3),
     ADDFIRST("addFirst", 2),
     ADDONEXITPOINTS("addOnExitPoints", 2),
-    GETSTATEMENTS("getStatements", 1);
+    GETASOBJECT("getAsObject", 1);
 
     private final String _name;
     private final int _totalArgs;
@@ -125,7 +125,7 @@ public enum LibraryFunction_t {
             case "addOnExitPoints":
                 totalArgs = 2;
                 break;
-            case "getStatements":
+            case "getAsObject":
                 totalArgs = 1;
                 break;
             default:
@@ -159,7 +159,7 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.ISAST.toString())
                 || name.equals(LibraryFunction_t.ADDFIRST.toString())
                 || name.equals(LibraryFunction_t.ADDONEXITPOINTS.toString())
-                || name.equals(LibraryFunction_t.GETSTATEMENTS.toString());
+                || name.equals(LibraryFunction_t.GETASOBJECT.toString());
     }
 
 }
