@@ -17,7 +17,7 @@ public enum LibraryFunction_t {
     ISREAL("isReal", 1),
     ISSTRING("isString", 1),
     ISBOOLEAN("isBoolean", 1),
-    ISTABLE("isTable", 1),
+    ISARRAY("isArray", 1),
     ISFUNC("isFunc", 1),
     ISLIBFUNC("isLibFunc", 1),
     ISOBJECT("isObject", 1),
@@ -26,7 +26,8 @@ public enum LibraryFunction_t {
     //COPY("copy", 1),
     DIAGNOSE("diagnose", 3),
     ADDFIRST("addFirst", 2),
-    ADDONEXITPOINTS("addOnExitPoints", 2);
+    ADDONEXITPOINTS("addOnExitPoints", 2),
+    GETSTATEMENTS("getStatements", 1);
 
     private final String _name;
     private final int _totalArgs;
@@ -94,7 +95,7 @@ public enum LibraryFunction_t {
             case "isBoolean":
                 totalArgs = 1;
                 break;
-            case "isTable":
+            case "isArray":
                 totalArgs = 1;
                 break;
             case "isFunc":
@@ -124,6 +125,9 @@ public enum LibraryFunction_t {
             case "addOnExitPoints":
                 totalArgs = 2;
                 break;
+            case "getStatements":
+                totalArgs = 1;
+                break;
             default:
                 //fatal error
                 break;
@@ -148,13 +152,14 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.ISREAL.toString())
                 || name.equals(LibraryFunction_t.ISSTRING.toString())
                 || name.equals(LibraryFunction_t.ISBOOLEAN.toString())
-                || name.equals(LibraryFunction_t.ISTABLE.toString())
+                || name.equals(LibraryFunction_t.ISARRAY.toString())
                 || name.equals(LibraryFunction_t.ISFUNC.toString())
                 || name.equals(LibraryFunction_t.ISLIBFUNC.toString())
                 || name.equals(LibraryFunction_t.ISOBJECT.toString())
                 || name.equals(LibraryFunction_t.ISAST.toString())
                 || name.equals(LibraryFunction_t.ADDFIRST.toString())
-                || name.equals(LibraryFunction_t.ADDONEXITPOINTS.toString());
+                || name.equals(LibraryFunction_t.ADDONEXITPOINTS.toString())
+                || name.equals(LibraryFunction_t.GETSTATEMENTS.toString());
     }
 
 }

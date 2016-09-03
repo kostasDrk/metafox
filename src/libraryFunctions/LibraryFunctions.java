@@ -3,6 +3,7 @@ package libraryFunctions;
 import ast.ASTNode;
 import ast.ASTVisitor;
 import ast.ASTVisitorException;
+import java.util.HashMap;
 import java.util.ArrayList;
 
 import environment.Environment;
@@ -12,7 +13,15 @@ import ast.Statement;
 import ast.ExpressionStatement;
 import ast.Block;
 import ast.Expression;
+import ast.IdentifierExpression;
 import ast.FunctionDef;
+import ast.IndexedElement;
+import ast.ObjectDefinition;
+import ast.ReturnStatement;
+import ast.StringLiteral;
+import ast.IfStatement;
+import ast.ForStatement;
+import ast.WhileStatement;
 import ast.visitors.ToStringASTVisitor;
 
 import dataStructures.FoxObject;
@@ -22,6 +31,7 @@ import dataStructures.AFoxDataStructure;
 import symbols.value.Value;
 import symbols.value.Value_t;
 import symbols.value.StaticVal;
+import symbols.value.DynamicVal;
 
 import static utils.Constants.LIBRARY_FUNC_ARG;
 
@@ -211,6 +221,106 @@ public class LibraryFunctions {
         }
     }
 
+    public static void factory(Environment env){
+ 
+         if(env.totalActuals() % 2 !=0){
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "Call to factory lib function requires even number of arguments: "+env.totalActuals()+" found");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+          }
+     
+        int count = env.totalActuals();
+        ArrayList<IndexedElement> indexElements = new ArrayList<IndexedElement>();
+        ArrayList<IndexedElement> indexElements1 = new ArrayList<IndexedElement>();
+        ObjectDefinition binAST = null;
+        Value result = null;
+       for(int i=0; i<count; i=i+2){
+          int num2 = i+1;
+             Value tempArg1 = env.getActualArgument(LIBRARY_FUNC_ARG+i);
+             Value tempArg = env.getActualArgument(LIBRARY_FUNC_ARG+num2);
+            indexElements.add(new IndexedElement((Expression)tempArg1.getData(),(Expression)tempArg.getData()));
+            indexElements1.add(new IndexedElement((Expression)tempArg1.getData(),(Expression)tempArg.getData()));
+        }
+  
+        ObjectDefinition ex = new ObjectDefinition(indexElements1);
+          ReturnStatement returnStmt = new ReturnStatement(ex);
+          ArrayList<Statement> stlist = new ArrayList<Statement>();
+          stlist.add(returnStmt);
+          Block bl = new Block(stlist);
+          ArrayList<IdentifierExpression> idl = new ArrayList<IdentifierExpression>();
+          indexElements.add(new IndexedElement(new StringLiteral("new"), new FunctionDef("#ANONYMOUS#_", idl, bl)));
+     
+          binAST = new ObjectDefinition(indexElements);
+          result = new StaticVal<ASTNode>(Value_t.AST, binAST);
+          ((FunctionEnv) env).setReturnVal(result);
+    }
+
+    public static void getStatements(Environment env){
+         if (!checkArgumentsNum(LibraryFunction_t.GETSTATEMENTS, env)) {
+            return;
+        }
+        Value retVal = null;
+        Statement body;
+
+        Statement stmt = getStatementArgument(env);
+
+        if(stmt instanceof IfStatement){
+            body = ((IfStatement)stmt).getStatement();
+        }
+        else if(stmt instanceof WhileStatement){
+            body = ((WhileStatement)stmt).getStatement();
+        }
+        else if(stmt instanceof ForStatement){
+            body = ((ForStatement)stmt).getStatement();
+        }
+        else if(stmt instanceof FunctionDef){
+            body = ((FunctionDef)stmt).getBody();
+        }
+        else{
+            String msg = "Argument of getStatements() should be of a Statement AST";
+            retVal = new StaticVal(Value_t.ERROR, msg);
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+
+        HashMap<Value, Value> arrayData = new HashMap<Value, Value>();
+
+        int count = 0;
+        Value index;
+        Value value;
+        ArrayList<Statement> stmtlist;
+        if(body instanceof Block){
+            stmtlist = ((Block) body).getStatementList();
+        }else{
+            stmtlist = new ArrayList<Statement>();
+            stmtlist.add(body);
+        }
+
+        for(Statement cur_stmt : stmtlist){
+            index = new StaticVal(Value_t.INTEGER, count);
+            String errorInfo = "Object.(" + count + ")";
+            if(cur_stmt instanceof IfStatement || cur_stmt instanceof WhileStatement || cur_stmt instanceof ForStatement){
+                FunctionEnv tmpEnv = new FunctionEnv();
+                StaticVal staticval = new StaticVal(Value_t.AST, cur_stmt);
+                tmpEnv.insert(LIBRARY_FUNC_ARG + 0, new DynamicVal(staticval, errorInfo));
+                getStatements(tmpEnv);
+                value = ((FunctionEnv) tmpEnv).getReturnVal();
+                if (tmpEnv.getReturnVal().getType().equals(Value_t.ERROR)) {
+                    return;
+                }
+            }else{
+                value = new StaticVal<ASTNode>(Value_t.AST, cur_stmt);
+            }
+            Value element = new DynamicVal(value, errorInfo);
+
+            arrayData.put(index, element);
+            count++;
+        }
+        FoxArray farray = new FoxArray(arrayData);
+        retVal = new StaticVal(Value_t.TABLE, farray);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    } 
+
     private static Value isType(Value val, Value_t type) {
         if (val.getType().equals(type)) {
             return new StaticVal<>(Value_t.BOOLEAN, true);
@@ -273,8 +383,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(ret);
     }
 
-    public static void isTable(Environment env) {
-        if (!checkArgumentsNum(LibraryFunction_t.ISTABLE, env)) {
+    public static void isArray(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISARRAY, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -447,4 +557,16 @@ public class LibraryFunctions {
         FunctionDef funcdef = (FunctionDef) value.getData();
         return funcdef;
     }
+
+    private static Statement getStatementArgument(Environment env){
+        Value value = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        if(!(value.getData() instanceof Statement)) {
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument must be a statement AST.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return null;
+        }
+        Statement stmt = (Statement) value.getData();
+        return stmt;
+    }
+
 }

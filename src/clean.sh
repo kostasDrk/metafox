@@ -4,6 +4,7 @@ rm *.class
 
 rm ast/*class
 rm ast/utils/*class
+rm ast/visitors/*class
 
 rm MyLexer.java*
 

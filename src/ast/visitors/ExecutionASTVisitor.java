@@ -631,7 +631,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         int count = 0;
         for (Expression expression : node.getExpressionList()) {
             Value argValue = null;
-            if(expression instanceof MetaSyntax){
+            if(expression instanceof MetaSyntax && _inMeta){
                 argValue = new StaticVal<ASTNode>(Value_t.AST, expression);
             }else{
                 argValue = expression.accept(this);
