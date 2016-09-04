@@ -190,7 +190,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(BinaryExpression node) throws ASTVisitorException {
-        //System.out.println("-BinaryExpression");
+        System.out.println("-BinaryExpression");
         Value result = null;
         Value left = node.getExpression1().accept(this);
         Value right = node.getExpression2().accept(this);
@@ -310,9 +310,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
         } else if (left.isNull()) {
 
             if (op.equals(Operator.LOGIC_AND)) {
-                result = new StaticVal<>(Value_t.BOOLEAN, Boolean.TRUE);
+                result = new StaticVal<>(Value_t.BOOLEAN, Boolean.FALSE);
             } else if (op.equals(Operator.LOGIC_OR)) {
-                result = new StaticVal<>(Value_t.BOOLEAN, Boolean.TRUE);
+                result = new StaticVal<>(Value_t.BOOLEAN, Boolean.FALSE);
             } else if (op.equals(Operator.CMP_EQUAL)) {
                 result = new StaticVal<>(Value_t.BOOLEAN, (Objects.equals(left, right)));
             } else if (op.equals(Operator.NOT_EQUAL)) {
