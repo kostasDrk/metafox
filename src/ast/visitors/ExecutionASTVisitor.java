@@ -1091,10 +1091,14 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(MetaToText node) throws ASTVisitorException {
-        if (node.getExpression() != null) {
-            node.getExpression().accept(this);
-        }
+        if (node.getExpression() == null)
+            return new StaticVal<String>(Value_t.STRING, "");
+        Expression expr = (Expression) node.getExpression();
+        ASTVisitor astVisitor = new ToStringASTVisitor();
+        expr.accept(astVisitor);
 
-        return null;
+        String data = astVisitor.toString();
+
+        return new StaticVal<String>(Value_t.STRING, data);
     }
 }

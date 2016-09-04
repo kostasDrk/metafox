@@ -152,7 +152,7 @@ precedence nonassoc  CMP_EQUAL, NOT_EQUAL;
 precedence nonassoc  GREATER, GREATER_OR_EQUAL, LESS, LESS_OR_EQUAL;
 precedence left PLUS, MINUS;
 precedence left MUL, DIV, MOD;
-precedence right NOT,PLUS_PLUS, MINUS_MINUS, UMINUS, QUASI_EXEC, QUASI_ESC, QUASI_RUN, QUASI_TO_TEXT;
+precedence right NOT,PLUS_PLUS, MINUS_MINUS, UMINUS, QUASI_EXEC, QUASI_ESC, QUASI_RUN;
 precedence left  DOT, DOUBLE_DOT;
 precedence left LEFT_BRACKET, RIGHT_BRACKET;
 precedence left  LEFT_PARENTHESIS, RIGHT_PARENTHESIS;
