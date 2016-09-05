@@ -1049,12 +1049,19 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(MetaExecute node) throws ASTVisitorException {
         Value ret = new StaticVal();
 
-        enterMetaSpace();
+
+        // If the following expression is a function call, enter meta space beforehand, so possible produced 
+        // ASTs get executed correctly
+        if(node.getExpression() instanceof LvalueCall)
+            enterMetaSpace();
+
         Value exprVal = node.getExpression().accept(this);
+        enterMetaSpace();
         if (!exprVal.isAST()) {
             String msg = "'.!' requires an AST: " + exprVal.getType() + " found";
             ASTUtils.error(node, msg);
         }
+
         if (exprVal.getData() instanceof Expression) {
             Expression astExpr = (Expression) exprVal.getData();
             ret = astExpr.accept(this);
