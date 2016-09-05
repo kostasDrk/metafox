@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import environment.Environment;
 import environment.FunctionEnv;
 
+import ast.Program;
 import ast.Statement;
 import ast.ExpressionStatement;
 import ast.Block;
@@ -44,16 +45,25 @@ public class LibraryFunctions {
 
         int totalActuals = env.totalActuals();
         for (int i = 0; i < totalActuals; i++) {
-            String data;
+            String data = "";
 
             Value argument = env.getActualArgument(LIBRARY_FUNC_ARG + i);
             if (argument.isUserFunction() || argument.isAST()) {
-                ASTNode program = (ASTNode) argument.getData();
+                ArrayList<Statement> stmtlist;
+                if (!(argument.getData() instanceof ArrayList<?>)) {
+                    stmtlist = new ArrayList<Statement>();
+                    Statement exstmt = (argument.getData() instanceof Expression) ? 
+                                          new ExpressionStatement((Expression) argument.getData())
+                                        : (FunctionDef) argument.getData();
+                    stmtlist.add(exstmt);
+                } else {
+                    stmtlist = (ArrayList<Statement>) argument.getData();
+                }
+
+                Program program = new Program(stmtlist);
                 ASTVisitor astVisitor = new ToStringASTVisitor();
                 program.accept(astVisitor);
-
                 data = astVisitor.toString();
-
             } else if (argument.isLibraryFunction()) {
                 //Get Library Function Name
                 String func = argument.getData().toString()
