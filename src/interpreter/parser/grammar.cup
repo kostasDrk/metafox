@@ -17,6 +17,8 @@ import ast.UnaryExpression;
 import ast.TermExpression;
 import ast.TermExpressionStmt;
 import ast.IdentifierExpression;
+import ast.IdentifierExpressionLocal;
+import ast.IdentifierExpressionGlobal;
 import ast.Operator;
 import ast.Primary;
 import ast.Lvalue;
@@ -100,7 +102,7 @@ parser code
 :};
 
 
-terminal WHILE, FOR, IF, ELSE, RETURN, BREAK, CONTINUE, FUNCTION, TRUE, FALSE, NULL;
+terminal WHILE, FOR, IF, ELSE, RETURN, BREAK, CONTINUE, FUNCTION, TRUE, FALSE, NULL, LOCAL;
 terminal LEFT_PARENTHESIS, RIGHT_PARENTHESIS, SEMICOLON, COLON, LEFT_BRACKET, RIGHT_BRACKET, OPEN_BLOCK, CLOSE_BLOCK, DOT, DOUBLE_DOT, COMMA;
 terminal DOUBLE_COLON;
 terminal ASSIGN;
@@ -455,13 +457,19 @@ primary ::= lvalue:lval{:
 
 lvalue ::=   ID:id
 			{:
-				RESULT = new IdentifierExpression(id, true);	// boolean value used to indicate local/global scope
+				RESULT = new IdentifierExpression(id);
+				RESULT.setLine(idleft);
+				RESULT.setColumn(idright);
+			:}
+			|LOCAL ID:id
+			{:
+				RESULT = new IdentifierExpressionLocal(id);
 				RESULT.setLine(idleft);
 				RESULT.setColumn(idright);
 			:}
 			|DOUBLE_COLON ID:id
 			{:
-				RESULT = new IdentifierExpression(id, false); // boolean value used to indicate local/global scope
+				RESULT = new IdentifierExpressionGlobal(id);
 				RESULT.setLine(idleft);
 				RESULT.setColumn(idright);
 			:}
@@ -691,7 +699,7 @@ idlist	::=             {:
 			{:
 				RESULT = new ArrayList<IdentifierExpression>();
 
-				IdentifierExpression tmpID = new IdentifierExpression(id, true);	// boolean value used to indicate local/global scope
+				IdentifierExpression tmpID = new IdentifierExpression(id);
 				tmpID.setLine(idleft);
 				tmpID.setColumn(idright);
 
@@ -699,7 +707,7 @@ idlist	::=             {:
 			:}
 			| idlist:idl COMMA ID:id
 			{:
-				IdentifierExpression tmpID = new IdentifierExpression(id, true);	// boolean value used to indicate local/global scope
+				IdentifierExpression tmpID = new IdentifierExpression(id);
 				tmpID.setLine(idleft);
 				tmpID.setColumn(idright);
 
