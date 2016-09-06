@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ $# -eq 1  ]
+then
+    java interpreter.MetafoxInterpreter $1
+
+else
+    echo "Usage : ./mfox <inputfile>"   
+fi
