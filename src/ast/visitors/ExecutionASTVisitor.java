@@ -215,12 +215,14 @@ public class ExecutionASTVisitor implements ASTVisitor {
         String rightInfo = (right instanceof DynamicVal) ? ((DynamicVal) right).getErrorInfo() + "(" + right.getType() + ")" : right.getData() + "(" + right.getType() + ")";
         rightInfo = "'" + right.getData() + "' (" + right.getType() + ")";
 
-        if(op.isLogical() && !left.getType().toString().equals(right.getType().toString())){
+        if (op.isLogical() && !left.getType().toString().equals(right.getType().toString())) {
             result = new StaticVal<>(Value_t.BOOLEAN, Boolean.FALSE);
-            if(op.equals(Operator.NOT_EQUAL))
+            if (op.equals(Operator.NOT_EQUAL)) {
                 result = new StaticVal<>(Value_t.BOOLEAN, Boolean.TRUE);
-            if(!left.isNumeric() && !right.isNumeric())
+            }
+            if (!left.isNumeric() && !right.isNumeric()) {
                 return result;
+            }
         }
 
         //Handle error cases.
@@ -236,16 +238,17 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         } else if ((!left.isNumeric() || !right.isNumeric()) && (!left.isBoolean() || !right.isBoolean())) {
             if ((left.isString() || right.isString())) {
-                if(op.equals(Operator.PLUS))
+                if (op.equals(Operator.PLUS)) {
                     result = new StaticVal(Value_t.STRING, (String) left.getData().toString() + (String) right.getData().toString());
-                else if(op.equals(Operator.CMP_EQUAL))
+                } else if (op.equals(Operator.CMP_EQUAL)) {
                     result = new StaticVal(Value_t.BOOLEAN, left.getData().toString().equals(right.getData().toString()));
-                else if(op.equals(Operator.NOT_EQUAL))
+                } else if (op.equals(Operator.NOT_EQUAL)) {
                     result = new StaticVal(Value_t.BOOLEAN, !left.getData().toString().equals(right.getData().toString()));
-                else
+                } else {
                     ASTUtils.error(node, typeError);
+                }
                 return result;
-            }else {
+            } else {
                 ASTUtils.error(node, typeError);
             }
         }
@@ -648,7 +651,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         if (ret.getType().equals(Value_t.ERROR)) {
             String msg = "Error during Function Execution @'" + ((DynamicVal) lvalue).getErrorInfo() + "'  - " + ret.getData();
             ASTUtils.error(node, msg);
-        }else if(ret == null){
+        } else if (ret == null) {
             ret = NULL;
         }
         //System.out.println(_envStack.toString());
@@ -673,7 +676,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         int count = 0;
         for (Expression expression : node.getExpressionList()) {
             Value argValue = null;
-            if(expression instanceof MetaSyntax && _inMeta){
+            if (expression instanceof MetaSyntax && _inMeta) {
                 argValue = new StaticVal<ASTNode>(Value_t.AST, expression);
             } else {
                 argValue = expression.accept(this);
@@ -885,13 +888,16 @@ public class ExecutionASTVisitor implements ASTVisitor {
         if (val.isNull() || val.isUndefined()) {
             // ASTUtils.error(node, "If expression must be boolean: " + val.getType() + " given");
             enter = false;
-        }else if(val.isNumeric()){
+        } else if (val.isNumeric()) {
             int s = (val.getData() instanceof Double) ? ((Double) val.getData()).intValue() : (Integer) val.getData();
-            if(s == 0) enter = false;
-            else enter = true;
-        }else if(val.isBoolean()){
-            enter = (Boolean)val.getData();
-        }else{
+            if (s == 0) {
+                enter = false;
+            } else {
+                enter = true;
+            }
+        } else if (val.isBoolean()) {
+            enter = (Boolean) val.getData();
+        } else {
             enter = true;
         }
         if (enter) {
@@ -1049,11 +1055,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(MetaExecute node) throws ASTVisitorException {
         Value ret = new StaticVal();
 
-
         // If the following expression is a function call, enter meta space beforehand, so possible produced 
         // ASTs get executed correctly
-        if(node.getExpression() instanceof LvalueCall)
+        if (node.getExpression() instanceof LvalueCall) {
             enterMetaSpace();
+        }
 
         Value exprVal = node.getExpression().accept(this);
         enterMetaSpace();
@@ -1098,8 +1104,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(MetaToText node) throws ASTVisitorException {
-        if (node.getExpression() == null)
+        if (node.getExpression() == null) {
             return new StaticVal<String>(Value_t.STRING, "");
+        }
         Expression expr = (Expression) node.getExpression();
         ASTVisitor astVisitor = new ToStringASTVisitor();
         expr.accept(astVisitor);
