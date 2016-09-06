@@ -1,17 +1,17 @@
-echo "[+] Lex analysis"
-jflex lexAnalysis.jflex
+echo "[+] Generating Lexer"
+jflex interpreter/lexer/lexAnalysis.jflex
 
 echo "[+] Generating grammar parser"
-java -jar lib/java-cup-11a.jar grammar.cup
+java -jar lib/java-cup-11a.jar -destdir interpreter/parser -package interpreter.parser interpreter/parser/grammar.cup
 
 echo "[+] Compiling sym.java"
-javac sym.java
+javac interpreter/parser/sym.java
 
 echo "[+] Compiling parser.java"
-javac parser.java
+javac interpreter/parser/parser.java
 
 echo "[+] Compiling Lexer"
-javac MyLexer.java
+javac interpreter/lexer/lexer.java
 
 echo "[+] Compiling Symbols package"
 javac symbols/value/*.java
@@ -32,4 +32,4 @@ echo "[+] Compiling Environment"
 javac environment/*.java
 
 echo "[+] Compilerception"
-javac MetafoxCompiler.java
+javac interpreter/MetafoxInterpreter.java

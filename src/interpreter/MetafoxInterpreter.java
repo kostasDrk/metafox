@@ -1,3 +1,4 @@
+package interpreter;
 
 import java.io.FileReader;
 
@@ -6,14 +7,17 @@ import ast.ASTVisitor;
 import ast.visitors.ExecutionASTVisitor;
 import ast.visitors.ToStringASTVisitor;
 
-public class MetafoxCompiler {
+import interpreter.parser.parser;
+import interpreter.lexer.lexer;
+
+public class MetafoxInterpreter {
 
     public static void main(String[] args) {
         if (args.length == 0) {
             System.out.println("Usage : Compiler <inputfile>");
         } else {
             try {
-                parser p = new parser(new MyLexer(new FileReader(args[0])));
+                parser p = new parser(new lexer(new FileReader(args[0])));
 
                 ASTNode program = (ASTNode) p.parse().value;
 

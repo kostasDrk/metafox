@@ -1,23 +1,22 @@
 echo "Clean-up directory."
 
-rm *.class
-
 rm ast/*class
 rm ast/utils/*class
 rm ast/visitors/*class
 
-rm MyLexer.java*
-
-rm parser.java
-
-rm sym.java
-
-rm libraryFunctions/*class
-
-rm utils/*class
+rm dataStructures/*.class
 
 rm environment/*class
 
+rm interpreter/*.class
+rm interpreter/parser/*.class
+rm interpreter/lexer/*.class
+rm interpreter/lexer/lexer.java*
+rm interpreter/parser/parser.java
+rm interpreter/parser/sym.java
+
+rm libraryFunctions/*class
+
 rm symbols/value/*.class
 
-rm dataStructures/*.class
+rm utils/*class

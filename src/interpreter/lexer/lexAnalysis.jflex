@@ -1,10 +1,12 @@
+package interpreter.lexer;
+
 import static java.lang.System.out;
 import java.util.*;
 import java_cup.runtime.*;
-
+import interpreter.parser.sym;
 %%
 
-%class MyLexer
+%class lexer
 %unicode
 %public
 %line
@@ -26,12 +28,12 @@ import java_cup.runtime.*;
 
 %eof{
     if(yystate()==STRING) 
-        throw new Error("@MyLexer: Unterminated string: "+ string.toString() + " in line "+ stringLine+".");
+        throw new Error("@Lexer: Unterminated string: "+ string.toString() + " in line "+ stringLine+".");
     
     if(openComments>0){
         for (int i = commentsState.size() - 1 ; i >= 0 ; i--) {
             if (commentsState.get(i).equals("Unclosed")) {
-                throw new Error("@MyLexer: Unclosed comment in line: "+ commentsPositions.get(i)+".");
+                throw new Error("@Lexer: Unclosed comment in line: "+ commentsPositions.get(i)+".");
             }
         }
     }
@@ -151,12 +153,12 @@ whiteSpace     = {LineTerminator} | [ \t\f] | " "
 	
   {LineTerminator}  { 
                       yybegin(YYINITIAL); 
-                      // System.out.println("@MyLexer: Line comment in line: " + (yyline + 1)+".");
+                      // System.out.println("@Lexer: Line comment in line: " + (yyline + 1)+".");
   }
 
   <<EOF>>           { 
                       yybegin(YYINITIAL); 
-                      // System.out.println("@MyLexer: Line comment in line: " + (yyline + 1)+".");
+                      // System.out.println("@Lexer: Line comment in line: " + (yyline + 1)+".");
   }
 
   . 				        { }
