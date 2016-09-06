@@ -71,8 +71,19 @@ public class EnvironmentStack {
         return topEnv().lookupTop(name);
     }
 
+    /**
+     * Use it to search for symbols with local in front of them in the current
+     * environment.
+     *
+     * @param name
+     * @return
+     */
+    public DynamicVal lookupCurrentEnv(String name) {
+        return topEnv().lookupAll(name);
+    }
+
     public DynamicVal lookupAll(String name) {
-        DynamicVal varInfo = topEnv().lookupAll(name);
+        DynamicVal varInfo = lookupCurrentEnv(name);
 
         //If we don't find the variable in the top environment then check in 
         //in the global.
@@ -85,12 +96,12 @@ public class EnvironmentStack {
 
     public void insertSymbol(String name, DynamicVal value) {
         topEnv().insert(name, value);
-        // System.out.println(toString());
+        System.out.println(toString());
     }
 
     public void insertSymbol(String name) {
         topEnv().insert(name);
-        // System.out.println(toString());
+        System.out.println(toString());
     }
 
     public int topEnvScope() {

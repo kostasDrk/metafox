@@ -20,6 +20,8 @@ import ast.ForStatement;
 import ast.FunctionDef;
 import ast.FunctionDefExpression;
 import ast.IdentifierExpression;
+import ast.IdentifierExpressionLocal;
+import ast.IdentifierExpressionGlobal;
 import ast.IfStatement;
 import ast.IndexedElement;
 import ast.IntegerLiteral;
@@ -404,24 +406,46 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(IdentifierExpression node) throws ASTVisitorException {
-        //System.out.println("-IdentifierExpression");
+        System.out.println("-IdentifierExpression");
         String name = node.getIdentifier();
         Value symbolInfo;
 
-        //if variable has :: at the front it is "global"
-        if (!node.isLocal()) {
-            symbolInfo = _envStack.lookupGlobalScope(name);
-            if (symbolInfo == null) {
-                String msg = "Global variable: " + name + " doesn't exist";
-                ASTUtils.error(node, msg);
-            }
-        } else {
-            symbolInfo = _envStack.lookupAll(name);
-            if (symbolInfo == null) {
-                _envStack.insertSymbol(name);
-                symbolInfo = _envStack.lookupCurrentScope(name); // Retrieve newly added symbol
-            }
+        symbolInfo = _envStack.lookupAll(name);
+        if (symbolInfo == null) {
+            _envStack.insertSymbol(name);
+            symbolInfo = _envStack.lookupCurrentScope(name); // Retrieve newly added symbol
         }
+
+        return symbolInfo;
+    }
+
+    @Override
+    public Value visit(IdentifierExpressionLocal node) throws ASTVisitorException {
+        System.out.println("-IdentifierExpressionLocal");
+        String name = node.getIdentifier();
+        Value symbolInfo;
+
+        symbolInfo = _envStack.lookupCurrentScope(name);
+        if (symbolInfo == null) {
+            _envStack.insertSymbol(name);
+            symbolInfo = _envStack.lookupCurrentScope(name); // Retrieve newly added symbol
+        }
+
+        return symbolInfo;
+    }
+
+    @Override
+    public Value visit(IdentifierExpressionGlobal node) throws ASTVisitorException {
+        System.out.println("-IdentifierExpressionGlobal");
+        String name = node.getIdentifier();
+        Value symbolInfo;
+
+        symbolInfo = _envStack.lookupGlobalScope(name);
+        if (symbolInfo == null) {
+            String msg = "Global variable: " + name + " doesn't exist";
+            ASTUtils.error(node, msg);
+        }
+
         return symbolInfo;
     }
 

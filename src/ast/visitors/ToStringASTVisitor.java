@@ -19,6 +19,8 @@ import ast.UnaryExpression;
 import ast.TermExpression;
 import ast.TermExpressionStmt;
 import ast.IdentifierExpression;
+import ast.IdentifierExpressionLocal;
+import ast.IdentifierExpressionGlobal;
 import ast.Operator;
 import ast.Primary;
 import ast.Lvalue;
@@ -85,7 +87,7 @@ public class ToStringASTVisitor implements ASTVisitor {
             node.getExpression().accept(this);
         }
         semicolon();
-        
+
         return null;
     }
 
@@ -126,10 +128,24 @@ public class ToStringASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(IdentifierExpression node) throws ASTVisitorException {
-        if (!node.isLocal()) {
-            _programm.append("::");
-        }
         _programm.append(node.getIdentifier());
+
+        return null;
+    }
+
+    @Override
+    public Value visit(IdentifierExpressionLocal node) throws ASTVisitorException {
+        _programm.append("local ");
+        _programm.append(node.getIdentifier());
+
+        return null;
+    }
+
+    @Override
+    public Value visit(IdentifierExpressionGlobal node) throws ASTVisitorException {
+        _programm.append("::");
+        _programm.append(node.getIdentifier());
+        
         return null;
     }
 
