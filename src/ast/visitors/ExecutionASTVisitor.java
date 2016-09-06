@@ -198,7 +198,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         // Handle possible meta operands
         if (left.isAST() && right.isAST()) {
-            BinaryExpression binAST = null;
+            BinaryExpression binAST;
             if (left.isAST() && !right.isAST()) {
                 binAST = new BinaryExpression(op, ((Expression) left.getData()), node.getExpression2());
             } else if (!left.isAST() && right.isAST()) {
@@ -206,7 +206,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
             } else {
                 binAST = new BinaryExpression(op, (Expression) left.getData(), (Expression) right.getData());
             }
-            result = new StaticVal<ASTNode>(Value_t.AST, binAST);
+            result = new StaticVal<>(Value_t.AST, binAST);
             return result;
         }
 
@@ -431,7 +431,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         Value lvalue = null;
         Value key = null;
-        Value retVal = NULL;
+        Value retVal;
 
         String id = node.getIdentifier();
         if ((node.getLvalue() != null) && (id != null)) { // lvalue.id 
@@ -675,9 +675,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
         HashMap<Integer, Value> arguments = new HashMap<>();
         int count = 0;
         for (Expression expression : node.getExpressionList()) {
-            Value argValue = null;
+            Value argValue;
             if (expression instanceof MetaSyntax && _inMeta) {
-                argValue = new StaticVal<ASTNode>(Value_t.AST, expression);
+                argValue = new StaticVal<>(Value_t.AST, expression);
             } else {
                 argValue = expression.accept(this);
             }
@@ -890,11 +890,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
             enter = false;
         } else if (val.isNumeric()) {
             int s = (val.getData() instanceof Double) ? ((Double) val.getData()).intValue() : (Integer) val.getData();
-            if (s == 0) {
-                enter = false;
-            } else {
-                enter = true;
-            }
+            enter = s != 0;
         } else if (val.isBoolean()) {
             enter = (Boolean) val.getData();
         } else {
@@ -1009,7 +1005,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(ReturnStatement node) throws ASTVisitorException {
         //System.out.println("-ReturnStatement");
-        Value ret = null;
+        Value ret;
 
         if (_inFunction == 0) {
             ASTUtils.error(node, "Use of 'return' while not in a function.");
@@ -1027,7 +1023,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
             if (_inMeta) {
                 return node.getExpression().accept(this);
             } else {
-                return new StaticVal<ASTNode>(Value_t.AST, node.getExpression());
+                return new StaticVal<>(Value_t.AST, node.getExpression());
             }
         } else {
             if (_inMeta) {
@@ -1035,7 +1031,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
                     stmt.accept(this);
                 }
             } else {
-                return new StaticVal<ArrayList<Statement>>(Value_t.AST, node.getStatementList());
+                return new StaticVal<>(Value_t.AST, node.getStatementList());
             }
         }
         return new StaticVal();
@@ -1105,7 +1101,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(MetaToText node) throws ASTVisitorException {
         if (node.getExpression() == null) {
-            return new StaticVal<String>(Value_t.STRING, "");
+            return new StaticVal<>(Value_t.STRING, "");
         }
         Expression expr = (Expression) node.getExpression();
         ASTVisitor astVisitor = new ToStringASTVisitor();
@@ -1113,6 +1109,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         String data = astVisitor.toString();
 
-        return new StaticVal<String>(Value_t.STRING, data);
+        return new StaticVal<>(Value_t.STRING, data);
     }
 }
