@@ -5,11 +5,9 @@ import symbols.value.Value;
 public class IdentifierExpression extends Lvalue {
 
 	private String _identifier;
-	private boolean _local;
 
-	public IdentifierExpression(String identifier, boolean local) {
+	public IdentifierExpression(String identifier) {
 		this._identifier = identifier;
-		this._local = local;
 	}
 
 	public String getIdentifier() {
@@ -18,14 +16,6 @@ public class IdentifierExpression extends Lvalue {
 
 	public void setIdentifier(String identifier) {
 		this._identifier = identifier;
-	}
-
-	public boolean isLocal(){
-		return this._local;
-	}
-
-	public void setLocal(boolean local){
-		this._local = local;
 	}
 
 	@Override

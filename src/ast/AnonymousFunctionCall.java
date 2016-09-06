@@ -9,7 +9,7 @@ public class AnonymousFunctionCall extends Call {
 
     public AnonymousFunctionCall(FunctionDef functionDef, NormCall normCall) {
         _FunctionDef = functionDef;
-        _lvalueCall = new LvalueCall(new IdentifierExpression(functionDef.getFuncName(), true), normCall);
+        _lvalueCall = new LvalueCall(new IdentifierExpression(functionDef.getFuncName()), normCall);
     }
 
     public FunctionDef getFunctionDef() {

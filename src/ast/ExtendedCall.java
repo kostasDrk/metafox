@@ -35,7 +35,7 @@ public class ExtendedCall extends Call {
     }
 
     public void setLvalueCall(String lvalue, NormCall normCall) {
-        _lvalueCall = new LvalueCall(new IdentifierExpression(lvalue, true), normCall);
+        _lvalueCall = new LvalueCall(new IdentifierExpression(lvalue), normCall);
     }
 
     @Override
