@@ -4,8 +4,6 @@ import ast.*;
 import ast.utils.ASTUtils;
 
 import environment.EnvironmentStack;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 import symbols.value.Value;
 import symbols.value.Value_t;
@@ -15,6 +13,9 @@ import symbols.value.DynamicVal;
 import dataStructures.FoxObject;
 import dataStructures.FoxArray;
 
+import interpreter.parser.parser;
+import interpreter.lexer.lexer;
+
 import libraryFunctions.LibraryFunction_t;
 
 import java.util.ArrayList;
@@ -22,6 +23,16 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import java.io.ByteArrayInputStream;
+import java.io.FileReader;
+import java.io.InputStream;
+
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import static utils.Constants.BREAK;
 import static utils.Constants.CONTINUE;
@@ -1062,11 +1073,27 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(MetaRun node) throws ASTVisitorException {
-        if (node.getExpression() != null) {
-            node.getExpression().accept(this);
+        Value exprVal = node.getExpression().accept(this);
+        Value retVal;
+
+        if (!exprVal.isString()) {
+            String msg = "'.!' requires a StringLiteral: " + exprVal.getType() + " found";
+            ASTUtils.error(node, msg);
         }
 
-        return null;
+        InputStream stream = new ByteArrayInputStream(((String) exprVal.getData()).getBytes(StandardCharsets.UTF_8));
+
+        parser p = new parser(new lexer(stream));
+        ASTNode program = null;
+        try {
+            program = (ASTNode) p.parse().value;
+        } catch (Exception e) {
+            String msg = "'.!' StringLiteral is NOT a valid statment.";
+            ASTUtils.error(node, msg);
+        }
+
+        retVal = new StaticVal<>(Value_t.AST, ((Program) program).getStatements());
+        return retVal;
     }
 
     @Override
