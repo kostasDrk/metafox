@@ -148,7 +148,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(BinaryExpression node) throws ASTVisitorException {
-        System.out.println("-BinaryExpression");
+        //System.out.println("-BinaryExpression");
         Value result = null;
         Value left = node.getExpression1().accept(this);
         Value right = node.getExpression2().accept(this);
@@ -362,7 +362,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(IdentifierExpression node) throws ASTVisitorException {
-        System.out.println("-IdentifierExpression");
+        //System.out.println("-IdentifierExpression");
         String name = node.getIdentifier();
         Value symbolInfo;
 
@@ -377,7 +377,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(IdentifierExpressionLocal node) throws ASTVisitorException {
-        System.out.println("-IdentifierExpressionLocal");
+        //System.out.println("-IdentifierExpressionLocal");
         String name = node.getIdentifier();
         Value symbolInfo;
 
@@ -392,7 +392,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(IdentifierExpressionGlobal node) throws ASTVisitorException {
-        System.out.println("-IdentifierExpressionGlobal");
+        //System.out.println("-IdentifierExpressionGlobal");
         String name = node.getIdentifier();
         Value symbolInfo;
 
