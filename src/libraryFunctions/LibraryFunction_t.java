@@ -27,7 +27,10 @@ public enum LibraryFunction_t {
     DIAGNOSE("diagnose", 3),
     ADDFIRST("addFirst", 2),
     ADDONEXITPOINTS("addOnExitPoints", 2),
-    GETASOBJECT("getAsObject", 1);
+    GETASOBJECT("getAsObject", 1),
+    ITERATOR("iterator", -1),
+    GETNEXTITEM("getNextItem", 1),
+    HASNEXTITEM("hasNextItem", 1);
 
     private final String _name;
     private final int _totalArgs;
@@ -128,6 +131,15 @@ public enum LibraryFunction_t {
             case "getAsObject":
                 totalArgs = 1;
                 break;
+            case "iterator":
+                totalArgs = -1;
+                break;
+            case "getNextItem":
+                totalArgs = -1;
+                break;
+            case "hasNextItem":
+                totalArgs = -1;
+                break;
             default:
                 //fatal error
                 break;
@@ -159,7 +171,10 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.ISAST.toString())
                 || name.equals(LibraryFunction_t.ADDFIRST.toString())
                 || name.equals(LibraryFunction_t.ADDONEXITPOINTS.toString())
-                || name.equals(LibraryFunction_t.GETASOBJECT.toString());
+                || name.equals(LibraryFunction_t.GETASOBJECT.toString())
+                || name.equals(LibraryFunction_t.ITERATOR.toString())
+                || name.equals(LibraryFunction_t.GETNEXTITEM.toString())
+                || name.equals(LibraryFunction_t.HASNEXTITEM.toString());
     }
 
 }

@@ -14,8 +14,12 @@ import ast.Statement;
 import ast.ExpressionStatement;
 import ast.Block;
 import ast.Expression;
+import ast.Lvalue;
 import ast.IdentifierExpression;
+import ast.Member;
 import ast.FunctionDef;
+import ast.LvalueCall;
+import ast.NormCall;
 import ast.IndexedElement;
 import ast.ObjectDefinition;
 import ast.ReturnStatement;
@@ -23,7 +27,9 @@ import ast.StringLiteral;
 import ast.IfStatement;
 import ast.ForStatement;
 import ast.WhileStatement;
+
 import ast.visitors.ToStringASTVisitor;
+import ast.visitors.IteratorASTVisitor;
 
 import dataStructures.FoxObject;
 import dataStructures.FoxArray;
@@ -429,6 +435,128 @@ public class LibraryFunctions {
         // Construct final FoxObject and return
         FoxObject fobject = new FoxObject(objectData);
         retVal = new StaticVal(Value_t.OBJECT, fobject);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void iterator(Environment env) throws ASTVisitorException{
+        // Check for # of arguments here
+        FunctionDef funcdef = getFunctionArgument(env);
+        if (funcdef == null) {
+            return;
+        }
+        
+        ASTVisitor astVisitor = new IteratorASTVisitor();
+        funcdef.accept(astVisitor);
+
+        HashMap<Value, Value> objectData = new HashMap<Value, Value>();
+        // Set "iter" field
+        Value iterName = new StaticVal<String>(Value_t.STRING, "iter");
+        Value iterValue = new StaticVal(Value_t.OBJECT, astVisitor);
+        iterValue = new DynamicVal(iterValue, "iter");
+        objectData.put(iterName, iterValue);
+
+        // Compose "next" field, to call getNext on iterator
+        Value nextName = new StaticVal<String>(Value_t.STRING, "next");
+        //Argument list consists only of the given iterator
+        ArrayList<IdentifierExpression> arguments = new ArrayList<IdentifierExpression>();
+        arguments.add(new IdentifierExpression("iterator"));
+        // Function body is an LvalueCall to the library function `getNext()`
+        Lvalue lvalue = new IdentifierExpression("getNextItem");
+        // Argument to `getNext` LvalueCall is the "iter" field of the given iterator
+        Lvalue memberLvalue = new IdentifierExpression("iterator");
+        String memberIdentifier = "iter";
+        Member member = new Member(memberLvalue, memberIdentifier, null, null);
+        // Set LvalueCall's call suffix
+        ArrayList<Expression> actualArguments = new ArrayList<Expression>();
+        actualArguments.add(member);
+        NormCall callsuffix = new NormCall(actualArguments);
+        LvalueCall getNextCall = new LvalueCall(lvalue, callsuffix);
+        // Create the corresponding expression statement
+        ReturnStatement retstmt = new ReturnStatement(getNextCall);
+        // The above forms an ExpressionStatement of the form ==>  getNext(iterator.iter);
+        ArrayList<Statement> stmtlist = new ArrayList<Statement>();
+        stmtlist.add(retstmt);
+        Block funcBody = new Block(stmtlist);
+
+        // Set final "next" function field
+        FunctionDef nextFuncDef = new FunctionDef("#ANONYMOUS#_", arguments, funcBody);
+        Value nextValue = new StaticVal(Value_t.USER_FUNCTION, nextFuncDef);
+        nextValue = new DynamicVal(nextValue, "next");
+        objectData.put(nextName, nextValue);
+
+        // Compose "hasNext" field, to call hasNextItem on iterator
+        Value hasNextName = new StaticVal<String>(Value_t.STRING, "hasNext");
+        // Compose LvalueCall for hasNextItem
+        lvalue = new IdentifierExpression("hasNextItem");
+        // Use same call suffic as above
+        LvalueCall hasNextItemCall = new LvalueCall(lvalue, callsuffix);
+        // Create the corresponding expression statement
+        retstmt = new ReturnStatement(hasNextItemCall);
+        stmtlist = new ArrayList<Statement>();
+        stmtlist.add(retstmt);
+        funcBody = new Block(stmtlist);
+        FunctionDef hasNextFuncDef = new FunctionDef("#ANONYMOUS#_", arguments, funcBody);
+        Value hasNextValue = new StaticVal(Value_t.USER_FUNCTION, hasNextFuncDef);
+        nextValue = new DynamicVal(nextValue, "hasNext");
+        objectData.put(hasNextName, hasNextValue);
+
+
+        FoxObject fobject = new FoxObject(objectData);
+        Value retVal = new StaticVal(Value_t.OBJECT, fobject);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void getNextItem(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.GETNEXTITEM, env)) {
+            return;
+        }
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        if(!(val.getData() instanceof IteratorASTVisitor)){
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument to getNext should be an iterator object.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        IteratorASTVisitor astVisitor = (IteratorASTVisitor) val.getData();
+
+        int curItem = astVisitor.getCurItem();
+        if(curItem >= astVisitor.getStatementList().size()){
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "Statement iterator out of bounds.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        Statement curStmt = astVisitor.getStatement(curItem);
+        Value retVal;
+        Expression expr = null;
+        if(curStmt instanceof ExpressionStatement){  // When an ExpressionStatement is next, return its expression instead
+            expr = ((ExpressionStatement)curStmt).getExpression();
+            retVal = new StaticVal(Value_t.OBJECT, expr);
+        }else{
+            retVal = new StaticVal(Value_t.OBJECT, curStmt);
+        }
+        
+        // Increment curItem counter
+        astVisitor.incCurItem();
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void hasNextItem(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.HASNEXTITEM, env)) {
+            return;
+        }
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        if(!(val.getData() instanceof IteratorASTVisitor)){
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument to getNext should be an iterator object.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        IteratorASTVisitor astVisitor = (IteratorASTVisitor) val.getData();
+        int curItem = astVisitor.getCurItem();
+        StaticVal retVal;
+        if(curItem >= astVisitor.getStatementList().size()){
+            retVal = new StaticVal(Value_t.BOOLEAN, Boolean.FALSE);
+        }else{
+            retVal = new StaticVal(Value_t.BOOLEAN, Boolean.TRUE);
+        }
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
