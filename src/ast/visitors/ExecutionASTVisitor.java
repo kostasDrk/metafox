@@ -1,55 +1,9 @@
 package ast.visitors;
 
-import ast.ASTNode;
-import ast.ASTVisitor;
-import ast.ASTVisitorException;
-import ast.AnonymousFunctionCall;
-import ast.ArrayDef;
-import ast.AssignmentExpression;
-import ast.BinaryExpression;
-import ast.Operator;
-import ast.Block;
-import ast.BreakStatement;
-import ast.ContinueStatement;
-import ast.DoubleLiteral;
-import ast.Expression;
-import ast.ExpressionStatement;
-import ast.ExtendedCall;
-import ast.FalseLiteral;
-import ast.ForStatement;
-import ast.FunctionDef;
-import ast.FunctionDefExpression;
-import ast.IdentifierExpression;
-import ast.IdentifierExpressionLocal;
-import ast.IdentifierExpressionGlobal;
-import ast.IfStatement;
-import ast.IndexedElement;
-import ast.IntegerLiteral;
-import ast.LvalueCall;
-import ast.Member;
-import ast.MethodCall;
-import ast.NormCall;
-import ast.NullLiteral;
-import ast.ObjectDefinition;
-import ast.Program;
-import ast.ReturnStatement;
-import ast.Statement;
-import ast.StringLiteral;
-import ast.TermExpressionStmt;
-import ast.TrueLiteral;
-import ast.UnaryExpression;
-import ast.WhileStatement;
-import ast.MetaSyntax;
-import ast.MetaEscape;
-import ast.MetaEval;
-import ast.MetaExecute;
-import ast.MetaRun;
-import ast.MetaToText;
+import ast.*;
 import ast.utils.ASTUtils;
 
 import environment.EnvironmentStack;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 import symbols.value.Value;
 import symbols.value.Value_t;
@@ -59,6 +13,9 @@ import symbols.value.DynamicVal;
 import dataStructures.FoxObject;
 import dataStructures.FoxArray;
 
+import interpreter.parser.parser;
+import interpreter.lexer.lexer;
+
 import libraryFunctions.LibraryFunction_t;
 
 import java.util.ArrayList;
@@ -66,6 +23,16 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import java.io.ByteArrayInputStream;
+import java.io.FileReader;
+import java.io.InputStream;
+
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import static utils.Constants.BREAK;
 import static utils.Constants.CONTINUE;
@@ -192,7 +159,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(BinaryExpression node) throws ASTVisitorException {
-        // System.out.println("-BinaryExpression");
+        //System.out.println("-BinaryExpression");
         Value result = null;
         Value left = node.getExpression1().accept(this);
         Value right = node.getExpression2().accept(this);
@@ -406,7 +373,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(IdentifierExpression node) throws ASTVisitorException {
-        // System.out.println("-IdentifierExpression");
+        //System.out.println("-IdentifierExpression");
         String name = node.getIdentifier();
         Value symbolInfo;
 
@@ -421,7 +388,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(IdentifierExpressionLocal node) throws ASTVisitorException {
-        // System.out.println("-IdentifierExpressionLocal");
+        //System.out.println("-IdentifierExpressionLocal");
         String name = node.getIdentifier();
         Value symbolInfo;
 
@@ -436,7 +403,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(IdentifierExpressionGlobal node) throws ASTVisitorException {
-        // System.out.println("-IdentifierExpressionGlobal");
+        //System.out.println("-IdentifierExpressionGlobal");
         String name = node.getIdentifier();
         Value symbolInfo;
 
@@ -1106,20 +1073,34 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(MetaRun node) throws ASTVisitorException {
-        if (node.getExpression() != null) {
-            node.getExpression().accept(this);
+        Value exprVal = node.getExpression().accept(this);
+        Value retVal;
+
+        if (!exprVal.isString()) {
+            String msg = "'.!' requires a StringLiteral: " + exprVal.getType() + " found";
+            ASTUtils.error(node, msg);
         }
 
-        return null;
+        InputStream stream = new ByteArrayInputStream(((String) exprVal.getData()).getBytes(StandardCharsets.UTF_8));
+
+        parser p = new parser(new lexer(stream));
+        ASTNode program = null;
+        try {
+            program = (ASTNode) p.parse().value;
+        } catch (Exception e) {
+            String msg = "'.!' StringLiteral is NOT a valid statment.";
+            ASTUtils.error(node, msg);
+        }
+
+        retVal = new StaticVal<>(Value_t.AST, ((Program) program).getStatements());
+        return retVal;
     }
 
     @Override
     public Value visit(MetaEval node) throws ASTVisitorException {
-        if (node.getExpression() != null) {
-            node.getExpression().accept(this);
-        }
+        Value retVal = node.getEvalNode().accept(this);
 
-        return null;
+        return retVal;
     }
 
     @Override
