@@ -9,18 +9,20 @@ import symbols.value.Value;
 
 public class MetaEval extends TermExpression {
 
-    private Expression _expression;
+    private final Expression _expression;
+    private final MetaExecute _metaExecute;
 
     public MetaEval(Expression expression) {
-        this._expression = expression;
+        _expression = expression;
+        _metaExecute = new MetaExecute(new MetaRun(expression));
     }
 
     public Expression getExpression() {
         return _expression;
     }
 
-    public void setExpression(Expression expression) {
-        this._expression = expression;
+    public MetaExecute getEvalNode() {
+        return _metaExecute;
     }
 
     @Override

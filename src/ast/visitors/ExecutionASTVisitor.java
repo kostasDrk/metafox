@@ -1098,11 +1098,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(MetaEval node) throws ASTVisitorException {
-        if (node.getExpression() != null) {
-            node.getExpression().accept(this);
-        }
+        Value retVal = node.getEvalNode().accept(this);
 
-        return null;
+        return retVal;
     }
 
     @Override
