@@ -234,7 +234,7 @@ stmt ::=	 expr:ex SEMICOLON
 				RESULT = fdef;
 			:}
 			|SEMICOLON			
-                        {:
+			{:
 				RESULT = new ExpressionStatement(null);
 			:}
 			;

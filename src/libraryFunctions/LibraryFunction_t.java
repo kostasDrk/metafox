@@ -30,7 +30,26 @@ public enum LibraryFunction_t {
     GETASOBJECT("getAsObject", 1),
     ITERATOR("iterator", -1),
     GETNEXTITEM("getNextItem", 1),
-    HASNEXTITEM("hasNextItem", 1);
+    GETPREVITEM("getPrevItem", 1),
+    HASNEXTITEM("hasNextItem", 1),
+    HASPREVITEM("hasPrevItem", 1),
+    ISSTATEMENT("isStatement", 1),
+    ISIFSTATEMENT("isIfStatement", 1),
+    ISFORSTATEMENT("isForStatement", 1),
+    ISWHILESTATEMENT("isWhileStatement", 1),
+    ISRETURNSTATEMENT("isReturnStatement", 1),
+    ISBREAKSTATEMENT("isBreakStatement", 1),
+    ISCONTINUESTATEMENT("isContinueStatement", 1),
+    ISFUNCTIONDEFINITION("isFunctionDefinition", 1),
+    ISEXPRESSION("isExpression", 1),
+    ISASSIGNMENTEXPRESSION("isAssignmentExpression", 1),
+    ISBINARYEXPRESSION("isBinaryExpression", 1),
+    ISUNARYEXPRESSION("isUnaryExpression", 1),
+    ISMETASYNTAX("isMetaSyntax", 1),
+    ISMETAEXECUTE("isMetaExecute", 1),
+    ISMETARUN("isMetaRun", 1),
+    ISMETAEVAL("isMetaEval", 1),
+    ISMETATOTEXT("isMetaToText", 1);
 
     private final String _name;
     private final int _totalArgs;
@@ -132,13 +151,70 @@ public enum LibraryFunction_t {
                 totalArgs = 1;
                 break;
             case "iterator":
-                totalArgs = -1;
+                totalArgs = 1;
                 break;
             case "getNextItem":
-                totalArgs = -1;
+                totalArgs = 1;
+                break;
+            case "getPrevItem":
+                totalArgs = 1;
                 break;
             case "hasNextItem":
-                totalArgs = -1;
+                totalArgs = 1;
+                break;
+            case "hasPrevItem":
+                totalArgs = 1;
+                break;
+            case "isStatement":
+                totalArgs = 1;
+                break;
+            case "isIfStatement":
+                totalArgs = 1;
+                break;
+            case "isForStatement":
+                totalArgs = 1;
+                break;
+            case "isWhileStatement":
+                totalArgs = 1;
+                break;
+            case "isReturnStatement":
+                totalArgs = 1;
+                break;
+            case "isBreakStatement":
+                totalArgs = 1;
+                break;
+            case "isContinueStatement":
+                totalArgs = 1;
+                break;
+            case "isFunctionDefinition":
+                totalArgs = 1;
+                break;
+            case "isExpression":
+                totalArgs = 1;
+                break;
+            case "isAssignmentExpression":
+                totalArgs = 1;
+                break;
+            case "isBinaryExpression":
+                totalArgs = 1;
+                break;
+            case "isUnaryExpression":
+                totalArgs = 1;
+                break;
+            case "isMetaSyntax":
+                totalArgs = 1;
+                break;
+            case "isMetaExecute":
+                totalArgs = 1;
+                break;
+            case "isMetaRun":
+                totalArgs = 1;
+                break;
+            case "isMetaEval":
+                totalArgs = 1;
+                break;
+            case "isMetaToText":
+                totalArgs = 1;
                 break;
             default:
                 //fatal error
@@ -174,7 +250,26 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.GETASOBJECT.toString())
                 || name.equals(LibraryFunction_t.ITERATOR.toString())
                 || name.equals(LibraryFunction_t.GETNEXTITEM.toString())
-                || name.equals(LibraryFunction_t.HASNEXTITEM.toString());
+                || name.equals(LibraryFunction_t.GETPREVITEM.toString())
+                || name.equals(LibraryFunction_t.HASNEXTITEM.toString())
+                || name.equals(LibraryFunction_t.HASPREVITEM.toString())
+                || name.equals(LibraryFunction_t.ISSTATEMENT.toString())
+                || name.equals(LibraryFunction_t.ISIFSTATEMENT.toString())
+                || name.equals(LibraryFunction_t.ISFORSTATEMENT.toString())
+                || name.equals(LibraryFunction_t.ISWHILESTATEMENT.toString())
+                || name.equals(LibraryFunction_t.ISRETURNSTATEMENT.toString())
+                || name.equals(LibraryFunction_t.ISBREAKSTATEMENT.toString())
+                || name.equals(LibraryFunction_t.ISCONTINUESTATEMENT.toString())
+                || name.equals(LibraryFunction_t.ISFUNCTIONDEFINITION.toString())
+                || name.equals(LibraryFunction_t.ISEXPRESSION.toString())
+                || name.equals(LibraryFunction_t.ISASSIGNMENTEXPRESSION.toString())
+                || name.equals(LibraryFunction_t.ISBINARYEXPRESSION.toString())
+                || name.equals(LibraryFunction_t.ISUNARYEXPRESSION.toString())
+                || name.equals(LibraryFunction_t.ISMETASYNTAX.toString())
+                || name.equals(LibraryFunction_t.ISMETAEXECUTE.toString())
+                || name.equals(LibraryFunction_t.ISMETARUN.toString())
+                || name.equals(LibraryFunction_t.ISMETAEVAL.toString())
+                || name.equals(LibraryFunction_t.ISMETATOTEXT.toString());
     }
 
 }
