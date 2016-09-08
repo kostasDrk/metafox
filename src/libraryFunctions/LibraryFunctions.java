@@ -153,6 +153,31 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
+    public static void copy(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.COPY, env)) {
+            return;
+        }
+
+        AFoxDataStructure fdataStructure = getObjectArgument(env);
+        if (fdataStructure == null) {
+            return;
+        }
+
+        StaticVal retVal = null;
+
+        if (fdataStructure instanceof FoxObject) {
+            retVal = new StaticVal(Value_t.OBJECT, new FoxObject((FoxObject) fdataStructure));
+
+        } else if (fdataStructure instanceof FoxArray) {
+            retVal = new StaticVal(Value_t.TABLE, new FoxArray((FoxArray) fdataStructure));
+            
+        } else {
+            //fatal error
+        }
+
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
     public static void diagnose(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.DIAGNOSE, env)) {
             return;

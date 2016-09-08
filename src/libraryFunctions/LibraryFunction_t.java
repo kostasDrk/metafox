@@ -1,7 +1,7 @@
 package libraryFunctions;
 
 public enum LibraryFunction_t {
-
+    
     PRINT("print", -1),
     PRINT_LN("println", -1),
     SQRT("sqrt", 1),
@@ -23,32 +23,32 @@ public enum LibraryFunction_t {
     ISOBJECT("isObject", 1),
     ISAST("isAST", 1),
     //FACTORY("factory", -2),
-    //COPY("copy", 1),
+    COPY("copy", 1),
     DIAGNOSE("diagnose", 3),
     ADDFIRST("addFirst", 2),
     ADDONEXITPOINTS("addOnExitPoints", 2),
     GETASOBJECT("getAsObject", 1);
-
+    
     private final String _name;
     private final int _totalArgs;
-
+    
     private LibraryFunction_t(String name, int totalArgs) {
         _name = name;
         _totalArgs = totalArgs;
     }
-
+    
     @Override
     public String toString() {
         return _name;
     }
-
+    
     public int totalArgs() {
         return _totalArgs;
     }
-
+    
     public static int totalArgs(String func) {
         int totalArgs = 0;
-
+        
         switch (func) {
             case "print":
                 totalArgs = -1;
@@ -113,9 +113,9 @@ public enum LibraryFunction_t {
 //            case "factory":
 //                totalArgs = -2;
 //                break;
-//            case "copy":
-//                totalArgs = 1;
-//                break;
+            case "copy":
+                totalArgs = 1;
+                break;
             case "diagnose":
                 totalArgs = 3;
                 break;
@@ -132,10 +132,10 @@ public enum LibraryFunction_t {
                 //fatal error
                 break;
         }
-
+        
         return totalArgs;
     }
-
+    
     public static boolean isLibraryFunction(String name) {
         return name.equals(LibraryFunction_t.PRINT.toString())
                 || name.equals(LibraryFunction_t.SQRT.toString())
@@ -157,9 +157,10 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.ISLIBFUNC.toString())
                 || name.equals(LibraryFunction_t.ISOBJECT.toString())
                 || name.equals(LibraryFunction_t.ISAST.toString())
+                || name.equals(LibraryFunction_t.COPY.toString())
                 || name.equals(LibraryFunction_t.ADDFIRST.toString())
                 || name.equals(LibraryFunction_t.ADDONEXITPOINTS.toString())
                 || name.equals(LibraryFunction_t.GETASOBJECT.toString());
     }
-
+    
 }
