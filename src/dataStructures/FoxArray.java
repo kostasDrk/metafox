@@ -11,8 +11,9 @@ import java.util.Collection;
 import symbols.value.StaticVal;
 import symbols.value.Value;
 import symbols.value.Value_t;
-import static utils.Constants.NULL;
+import symbols.value.DynamicVal;
 
+import static utils.Constants.NULL;
 import static utils.Constants.UNDEFINED;
 
 public class FoxArray extends AFoxDataStructure {
@@ -34,6 +35,27 @@ public class FoxArray extends AFoxDataStructure {
         _otherTypeIndexedData = new HashMap<>();
 
         _numberIndexedDataMaxIndex = numberIndexedData.size();
+    }
+
+    public FoxArray(FoxArray foxArray) {
+        this();
+
+        for (int i = 0; i < foxArray.size(); i++) {
+            StaticVal key = new StaticVal(Value_t.INTEGER, i);
+            Value value = foxArray.get(key);
+
+            if (value != NULL) {
+                this.put(key, value);
+            }
+        }
+
+        foxArray.getOtherTypeIndexedData().entrySet().stream().forEach((pair) -> {
+            Value key = new StaticVal(pair.getKey());
+            Value value = new DynamicVal((DynamicVal) pair.getValue());
+
+            this.put(key, value);
+        });
+
     }
 
     @Override
@@ -140,8 +162,8 @@ public class FoxArray extends AFoxDataStructure {
             } else {
                 msg.append(", ");
             }
-
         }
+
         msg.setCharAt(msg.length() - 1, ']');
         if (msg.length() > 2) {
             msg.setCharAt(msg.length() - 2, ' ');
