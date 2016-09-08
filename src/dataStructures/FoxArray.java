@@ -11,10 +11,11 @@ import java.util.Collection;
 import symbols.value.StaticVal;
 import symbols.value.Value;
 import symbols.value.Value_t;
+import static utils.Constants.NULL;
 
 import static utils.Constants.UNDEFINED;
 
-public class FoxArray extends AFoxDataStructure{
+public class FoxArray extends AFoxDataStructure {
 
     private final HashMap<Value, Value> _numberIndexedData;
     private final HashMap<Value, Value> _otherTypeIndexedData;
@@ -35,15 +36,8 @@ public class FoxArray extends AFoxDataStructure{
         _numberIndexedDataMaxIndex = numberIndexedData.size();
     }
 
-    public FoxArray(HashMap<Value, Value> numberIndexedData, HashMap<Value, Value> otherTypeIndexedData){
-        _numberIndexedData = numberIndexedData;
-        _otherTypeIndexedData = otherTypeIndexedData;
-
-        _numberIndexedDataMaxIndex = numberIndexedData.size();
-    }
-
     @Override
-    public void put(Value key, Value value) {
+    public final void put(Value key, Value value) {
 
         if (key.isInteger() || key.isConvertedToInteger()) {
             _numberIndexedData.put(key, value);
@@ -77,7 +71,7 @@ public class FoxArray extends AFoxDataStructure{
             return value;
         }
 
-        return new StaticVal(Value_t.UNDEFINED, null);
+        return NULL;
     }
 
     public void add(Value value) {
@@ -109,15 +103,13 @@ public class FoxArray extends AFoxDataStructure{
         return _numberIndexedDataMaxIndex;
     }
 
-    public HashMap<Value, Value> getNumberIndexedData(){
-        return this._numberIndexedData;
+    private HashMap<Value, Value> getNumberIndexedData() {
+        return _numberIndexedData;
     }
 
-
-    public HashMap<Value, Value> getOtherTypeIndexedData(){
-        return this._otherTypeIndexedData;
+    private HashMap<Value, Value> getOtherTypeIndexedData() {
+        return _otherTypeIndexedData;
     }
-
 
     @Override
     public HashMap<Value, Value> values() {
@@ -125,7 +117,7 @@ public class FoxArray extends AFoxDataStructure{
         HashMap<Value, Value> values = new HashMap<>();
         int count = 0;
 
-        for(Value value: valuesCollection){
+        for (Value value : valuesCollection) {
             StaticVal key = new StaticVal(Value_t.INTEGER, count);
             StaticVal val = new StaticVal(value);
             values.put(key, val);
@@ -134,19 +126,27 @@ public class FoxArray extends AFoxDataStructure{
 
         return values;
     }
-    
+
     @Override
     public String toString() {
         StringBuilder msg = new StringBuilder();
-        
+
         msg.append("[ ");
-        for(int i = 0; i<_numberIndexedData.size(); i++){
+        for (int i = 0; i < _numberIndexedDataMaxIndex; i++) {
             StaticVal key = new StaticVal(Value_t.INTEGER, i);
-            msg.append(_numberIndexedData.get(key).getData()).append(", ");
+            Value data = _numberIndexedData.get(key);
+            if (data != null) {
+                msg.append(_numberIndexedData.get(key).getData()).append(", ");
+            } else {
+                msg.append(", ");
+            }
+
         }
-        msg.setCharAt(msg.length()-1, ']');
-        msg.setCharAt(msg.length()-2, ' ');
-        
+        msg.setCharAt(msg.length() - 1, ']');
+        if (msg.length() > 2) {
+            msg.setCharAt(msg.length() - 2, ' ');
+        }
+
         return msg.toString();
     }
 
