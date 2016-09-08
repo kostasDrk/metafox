@@ -12,8 +12,11 @@ import java.util.Collection;
 import symbols.value.Value;
 import symbols.value.Value_t;
 import symbols.value.StaticVal;
+import symbols.value.DynamicVal;
 
-public class FoxObject extends AFoxDataStructure{
+import static utils.Constants.NULL;
+
+public class FoxObject extends AFoxDataStructure {
 
     private final HashMap<Value, Value> _data;
 
@@ -22,7 +25,19 @@ public class FoxObject extends AFoxDataStructure{
     }
 
     public FoxObject(HashMap<Value, Value> data) {
-        _data = new HashMap<Value, Value>(data);
+        _data = new HashMap<>(data);
+    }
+
+    public FoxObject(FoxObject foxObject) {
+        this();
+
+        foxObject.getData().entrySet().stream().forEach((pair) -> {
+            Value key = new StaticVal(pair.getKey());
+            Value value = new DynamicVal((DynamicVal) pair.getValue());
+
+            _data.put(key, value);
+        });
+
     }
 
     @Override
@@ -32,7 +47,13 @@ public class FoxObject extends AFoxDataStructure{
 
     @Override
     public Value get(Value key) {
-        return _data.get(key);
+        Value retVal = _data.get(key);
+
+        if (retVal == null) {
+            retVal = NULL;
+        }
+
+        return retVal;
     }
 
     @Override
@@ -45,16 +66,16 @@ public class FoxObject extends AFoxDataStructure{
         return _data.size();
     }
 
-    public HashMap<Value, Value> getData(){
+    private HashMap<Value, Value> getData() {
         return _data;
     }
 
     public HashMap<Value, Value> keys() {
-        Set<Value> setKeys =  _data.keySet();
+        Set<Value> setKeys = _data.keySet();
         HashMap<Value, Value> keys = new HashMap<>();
         int count = 0;
-        
-        for(Value value : setKeys){
+
+        for (Value value : setKeys) {
             StaticVal key = new StaticVal(Value_t.INTEGER, count);
             StaticVal val = new StaticVal(value);
             keys.put(key, val);
@@ -70,7 +91,7 @@ public class FoxObject extends AFoxDataStructure{
         HashMap<Value, Value> values = new HashMap<>();
         int count = 0;
 
-        for(Value value: valuesCollection){
+        for (Value value : valuesCollection) {
             StaticVal key = new StaticVal(Value_t.INTEGER, count);
             StaticVal val = new StaticVal(value);
             values.put(key, val);
@@ -80,20 +101,23 @@ public class FoxObject extends AFoxDataStructure{
         return values;
     }
 
-   @Override
+    @Override
     public String toString() {
         StringBuilder msg = new StringBuilder();
-        
+
         msg.append("{ ");
         _data.entrySet().stream().forEach((pair) -> {
             msg.append(pair.getKey().getData()).append(":");
             msg.append(pair.getValue().getData()).append(", ");
         });
-        msg.setCharAt(msg.length()-1, '}');
-        msg.setCharAt(msg.length()-2, ' ');
-        
+
+        msg.setCharAt(msg.length() - 1, '}');
+        if (msg.length() > 2) {
+            msg.setCharAt(msg.length() - 2, ' ');
+        }
+
         return msg.toString();
 
     }
-    
+
 }
