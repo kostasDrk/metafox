@@ -151,7 +151,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         setNodeIsLValueIfMember(node.getExpression());
         Value right = node.getExpression().accept(this);
-        
+
         _envStack.setValue((DynamicVal) left, right);
         // System.out.println(_envStack.toString());
         return left;

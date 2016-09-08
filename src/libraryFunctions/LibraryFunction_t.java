@@ -1,7 +1,7 @@
 package libraryFunctions;
 
 public enum LibraryFunction_t {
-    
+
     PRINT("print", -1),
     PRINT_LN("println", -1),
     SQRT("sqrt", 1),
@@ -27,28 +27,31 @@ public enum LibraryFunction_t {
     DIAGNOSE("diagnose", 3),
     ADDFIRST("addFirst", 2),
     ADDONEXITPOINTS("addOnExitPoints", 2),
-    GETASOBJECT("getAsObject", 1);
-    
+    GETASOBJECT("getAsObject", 1),
+    ITERATOR("iterator", -1),
+    GETNEXTITEM("getNextItem", 1),
+    HASNEXTITEM("hasNextItem", 1);
+
     private final String _name;
     private final int _totalArgs;
-    
+
     private LibraryFunction_t(String name, int totalArgs) {
         _name = name;
         _totalArgs = totalArgs;
     }
-    
+
     @Override
     public String toString() {
         return _name;
     }
-    
+
     public int totalArgs() {
         return _totalArgs;
     }
-    
+
     public static int totalArgs(String func) {
         int totalArgs = 0;
-        
+
         switch (func) {
             case "print":
                 totalArgs = -1;
@@ -128,14 +131,23 @@ public enum LibraryFunction_t {
             case "getAsObject":
                 totalArgs = 1;
                 break;
+            case "iterator":
+                totalArgs = -1;
+                break;
+            case "getNextItem":
+                totalArgs = -1;
+                break;
+            case "hasNextItem":
+                totalArgs = -1;
+                break;
             default:
                 //fatal error
                 break;
         }
-        
+
         return totalArgs;
     }
-    
+
     public static boolean isLibraryFunction(String name) {
         return name.equals(LibraryFunction_t.PRINT.toString())
                 || name.equals(LibraryFunction_t.SQRT.toString())
@@ -160,7 +172,10 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.COPY.toString())
                 || name.equals(LibraryFunction_t.ADDFIRST.toString())
                 || name.equals(LibraryFunction_t.ADDONEXITPOINTS.toString())
-                || name.equals(LibraryFunction_t.GETASOBJECT.toString());
+                || name.equals(LibraryFunction_t.GETASOBJECT.toString())
+                || name.equals(LibraryFunction_t.ITERATOR.toString())
+                || name.equals(LibraryFunction_t.GETNEXTITEM.toString())
+                || name.equals(LibraryFunction_t.HASNEXTITEM.toString());
     }
-    
+
 }
