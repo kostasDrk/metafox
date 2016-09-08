@@ -151,7 +151,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         setNodeIsLValueIfMember(node.getExpression());
         Value right = node.getExpression().accept(this);
-
+        
         _envStack.setValue((DynamicVal) left, right);
         // System.out.println(_envStack.toString());
         return left;
@@ -475,7 +475,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         Value value = (lvalue.isObject()) ? ((FoxObject) lvalue.getData()).get(key) : ((FoxArray) lvalue.getData()).get(key);
 
-        if (value == null) {
+        if (value == NULL) {
             if (node.isLValue()) {
                 String errorInfo = "Object." + "id.";
 
