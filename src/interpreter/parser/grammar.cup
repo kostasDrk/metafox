@@ -757,6 +757,8 @@ forstmt ::=  FOR LEFT_PARENTHESIS elist:el1 SEMICOLON expr:ex SEMICOLON elist:el
 returnstmt ::= RETURN returnStmt:retst SEMICOLON
 			{:
 				RESULT = retst;
+				RESULT.setLine(retstleft);
+				RESULT.setColumn(retstright);
 			:}
 			;
 

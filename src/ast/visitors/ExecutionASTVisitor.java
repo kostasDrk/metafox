@@ -333,16 +333,15 @@ public class ExecutionASTVisitor implements ASTVisitor {
             } else if (op.equals(Operator.LOGIC_NOT)) {
                 if (value.isBoolean()) {
                     returnVal = new StaticVal(Value_t.BOOLEAN, !(boolean) value.getData());
-
-                } else if (value.isInteger() || value.isReal() || value.isString() || value.isUserFunction() || value.isLibraryFunction() || value.isTable() || value.isObject()) {
+                } else if (value.isInteger() || value.isReal() || value.isString() || value.isUserFunction() || value.isLibraryFunction() || value.isTable() || value.isObject() || value.isAST()) {
                     returnVal = new StaticVal(Value_t.BOOLEAN, Boolean.FALSE);
 
-                } else if (value.isNull()) {
+                } else if (value.isNull() || value.isUndefined()) {
                     returnVal = new StaticVal(Value_t.BOOLEAN, Boolean.TRUE);
 
                 } else {
                     String msg = "Symbol '" + ((DynamicVal) value).getErrorInfo()
-                            + "' can not converted to boolean type.";
+                            + "' cannot be converted to boolean type.";
                     ASTUtils.error(node, msg);
                 }
             }

@@ -1014,7 +1014,11 @@ public class LibraryFunctions {
             retExpression = ((MetaToText) ast).getExpression();
         if(retExpression instanceof ParenthesisExpression)
             retExpression = ((ParenthesisExpression) retExpression).getExpression();
-        retVal = new StaticVal(Value_t.AST, retExpression);
+        
+        if(retExpression == null)
+            retVal = utils.Constants.NULL;
+        else
+            retVal = new StaticVal(Value_t.AST, retExpression);
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
