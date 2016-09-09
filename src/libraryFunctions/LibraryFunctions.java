@@ -618,6 +618,8 @@ public class LibraryFunctions {
         Value retVal;
         if(curItem instanceof ExpressionStatement){ // When an ExpressionStatement is next, return its expression instead
             Expression expr = ((ExpressionStatement)curItem).getExpression();
+            if(expr instanceof ParenthesisExpression)
+                expr = ((ParenthesisExpression) expr).getExpression();
             retVal = new StaticVal(Value_t.AST, expr);
         } else{
             retVal = new StaticVal(Value_t.AST, curItem);
@@ -641,11 +643,13 @@ public class LibraryFunctions {
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
-        // Statement curStmt = astVisitor.getStatement(curItem);
+
         ASTNode curItem = astVisitor.getPrevItem();
         Value retVal;
         if(curItem instanceof ExpressionStatement){  // When an ExpressionStatement is next, return its expression instead
             Expression expr = ((ExpressionStatement)curItem).getExpression();
+            if(expr instanceof ParenthesisExpression)
+                expr = ((ParenthesisExpression) expr).getExpression();
             retVal = new StaticVal(Value_t.AST, expr);
         } else{
             retVal = new StaticVal(Value_t.AST, curItem);
@@ -985,28 +989,32 @@ public class LibraryFunctions {
             return;
         }
         ASTNode ast = (ASTNode) val.getData();
+        Expression retExpression = null;
         if(ast instanceof IfStatement)
-            retVal = new StaticVal(Value_t.AST, ((IfStatement) ast).getExpression());
+            retExpression = ((IfStatement) ast).getExpression();
         else if(ast instanceof ForStatement)
-            retVal = new StaticVal(Value_t.AST, ((ForStatement) ast).getExpression());
+            retExpression = ((ForStatement) ast).getExpression();
         else if(ast instanceof WhileStatement)
-            retVal = new StaticVal(Value_t.AST, ((WhileStatement) ast).getExpression());
+            retExpression = ((WhileStatement) ast).getExpression();
         else if(ast instanceof ReturnStatement)
-            retVal = new StaticVal(Value_t.AST, ((ReturnStatement) ast).getExpression());
+            retExpression = ((ReturnStatement) ast).getExpression();
         else if(ast instanceof AssignmentExpression)
-            retVal = new StaticVal(Value_t.AST, ((AssignmentExpression) ast).getExpression());
+            retExpression = ((AssignmentExpression) ast).getExpression();
         else if(ast instanceof UnaryExpression)
-            retVal = new StaticVal(Value_t.AST, ((UnaryExpression) ast).getExpression());
+            retExpression = ((UnaryExpression) ast).getExpression();
         else if(ast instanceof MetaSyntax)
-            retVal = new StaticVal(Value_t.AST, ((MetaSyntax) ast).getExpression());
+            retExpression = ((MetaSyntax) ast).getExpression();
         else if(ast instanceof MetaExecute)
-            retVal = new StaticVal(Value_t.AST, ((MetaExecute) ast).getExpression());
+            retExpression = ((MetaExecute) ast).getExpression();
         else if(ast instanceof MetaRun)
-            retVal = new StaticVal(Value_t.AST, ((MetaRun) ast).getExpression());
+            retExpression = ((MetaRun) ast).getExpression();
         else if(ast instanceof MetaEval)
-            retVal = new StaticVal(Value_t.AST, ((MetaEval) ast).getExpression());
+            retExpression = ((MetaEval) ast).getExpression();
         else if(ast instanceof MetaToText)
-            retVal = new StaticVal(Value_t.AST, ((MetaToText) ast).getExpression());
+            retExpression = ((MetaToText) ast).getExpression();
+        if(retExpression instanceof ParenthesisExpression)
+            retExpression = ((ParenthesisExpression) retExpression).getExpression();
+        retVal = new StaticVal(Value_t.AST, retExpression);
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
@@ -1071,6 +1079,8 @@ public class LibraryFunctions {
             return;
         }
         Expression leftExpression = ((BinaryExpression) val.getData()).getExpression1();
+        if(leftExpression instanceof ParenthesisExpression)
+            leftExpression = ((ParenthesisExpression) leftExpression).getExpression();
         retVal = new StaticVal(Value_t.AST, leftExpression);
         ((FunctionEnv) env).setReturnVal(retVal);
     }
@@ -1087,7 +1097,43 @@ public class LibraryFunctions {
             return;
         }
         Expression rightExpression = ((BinaryExpression) val.getData()).getExpression2();
+        if(rightExpression instanceof ParenthesisExpression)
+            rightExpression = ((ParenthesisExpression) rightExpression).getExpression();
         retVal = new StaticVal(Value_t.AST, rightExpression);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void getLine(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.GETLINE, env)){
+            return;
+        }
+        Value retVal;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        if(!(val.getData() instanceof ASTNode)){
+            retVal = new StaticVal(Value_t.ERROR, "getLine requires an AST node");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        ASTNode astNode = (ASTNode) val.getData();
+        int line = astNode.getLine();
+        retVal = new StaticVal<Integer>(Value_t.INTEGER, line);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void getColumn(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.GETCOLUMN, env)){
+            return;
+        }
+        Value retVal;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        if(!(val.getData() instanceof ASTNode)){
+            retVal = new StaticVal(Value_t.ERROR, "getColumn requires an AST node");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        ASTNode astNode = (ASTNode) val.getData();
+        int col = astNode.getColumn();
+        retVal = new StaticVal<Integer>(Value_t.INTEGER, col);
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
