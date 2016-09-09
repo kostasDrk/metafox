@@ -1,68 +1,20 @@
 package libraryFunctions;
 
-import utils.Constants;
-import ast.ASTNode;
-import ast.utils.ASTUtils;
-import ast.ASTVisitor;
-import ast.ASTVisitorException;
-import java.util.HashMap;
-import java.util.ArrayList;
+import ast.*;
+import ast.visitors.ToStringASTVisitor;
+import ast.visitors.IteratorASTVisitor;
+
+import dataStructures.*;
 
 import environment.Environment;
 import environment.FunctionEnv;
 
-import ast.Program;
-import ast.Statement;
-import ast.ExpressionStatement;
-import ast.ParenthesisExpression;
-import ast.Block;
-import ast.Expression;
-import ast.Lvalue;
-import ast.IdentifierExpression;
-import ast.AssignmentExpression;
-import ast.BinaryExpression;
-import ast.UnaryExpression;
-import ast.MetaSyntax;
-import ast.MetaExecute;
-import ast.MetaEval;
-import ast.MetaRun;
-import ast.MetaToText;
-import ast.Member;
-import ast.FunctionDef;
-import ast.BreakStatement;
-import ast.ContinueStatement;
-import ast.Call;
-import ast.LvalueCall;
-import ast.ExtendedCall;
-import ast.AnonymousFunctionCall;
-import ast.NormCall;
-import ast.IndexedElement;
-import ast.ObjectDefinition;
-import ast.ArrayDef;
-import ast.ReturnStatement;
-import ast.IntegerLiteral;
-import ast.DoubleLiteral;
-import ast.StringLiteral;
-import ast.NullLiteral;
-import ast.TrueLiteral;
-import ast.FalseLiteral;
-import ast.IfStatement;
-import ast.ForStatement;
-import ast.WhileStatement;
-
-import ast.visitors.ToStringASTVisitor;
-import ast.visitors.IteratorASTVisitor;
-
-import dataStructures.FoxObject;
-import dataStructures.FoxArray;
-import dataStructures.AFoxDataStructure;
-
-import symbols.value.Value;
-import symbols.value.Value_t;
-import symbols.value.StaticVal;
-import symbols.value.DynamicVal;
+import symbols.value.*;
 
 import static utils.Constants.LIBRARY_FUNC_ARG;
+
+import java.util.HashMap;
+import java.util.ArrayList;
 
 public class LibraryFunctions {
 
@@ -198,7 +150,7 @@ public class LibraryFunctions {
 
         } else if (fdataStructure instanceof FoxArray) {
             retVal = new StaticVal(Value_t.TABLE, new FoxArray((FoxArray) fdataStructure));
-            
+
         } else {
             //fatal error
         }
@@ -312,25 +264,25 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(result);
     }
 
-    public static void iterator(Environment env) throws ASTVisitorException{
+    public static void iterator(Environment env) throws ASTVisitorException {
         if (!checkArgumentsNum(LibraryFunction_t.ITERATOR, env)) {
             return;
         }
 
         // FunctionDef funcdef = getFunctionArgument(env);
         Value value = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
-        if(!value.getType().equals(Value_t.AST) && !value.getType().equals(Value_t.USER_FUNCTION)){
+        if (!value.getType().equals(Value_t.AST) && !value.getType().equals(Value_t.USER_FUNCTION)) {
             StaticVal retVal = new StaticVal(Value_t.ERROR, "iterator requires a statement AST.");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
 
         ASTNode astNode;
-        if(value.getData() instanceof ArrayList<?>)
+        if (value.getData() instanceof ArrayList<?>) {
             astNode = new Block((ArrayList<Statement>) value.getData());
-        else if(value.getData() instanceof Statement)
+        } else if (value.getData() instanceof Statement) {
             astNode = (Statement) value.getData();
-        else{
+        } else {
             StaticVal retVal = new StaticVal(Value_t.ERROR, "iterator requires a statement AST.");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
@@ -340,17 +292,16 @@ public class LibraryFunctions {
         astVisitor = new IteratorASTVisitor();
         ((Statement) astNode).accept(astVisitor);
 
-        HashMap<Value, Value> objectData = new HashMap<Value, Value>();
+        HashMap<Value, Value> objectData = new HashMap<>();
         // Set "iter" field
-        Value iterName = new StaticVal<String>(Value_t.STRING, "iter");
-        Value iterValue = new StaticVal(Value_t.OBJECT, astVisitor);
-        iterValue = new DynamicVal(iterValue, "iter");
+        Value iterName = new StaticVal<>(Value_t.STRING, "iter");
+        Value iterValue = new DynamicVal(Value_t.OBJECT, astVisitor, "iter");
         objectData.put(iterName, iterValue);
 
         // Compose "next" field, to call getNext on iterator
-        Value nextName = new StaticVal<String>(Value_t.STRING, "next");
+        Value nextName = new StaticVal<>(Value_t.STRING, "next");
         //Argument list consists only of the given iterator
-        ArrayList<IdentifierExpression> arguments = new ArrayList<IdentifierExpression>();
+        ArrayList<IdentifierExpression> arguments = new ArrayList<>();
         arguments.add(new IdentifierExpression("iterator"));
         // Function body is an LvalueCall to the library function `getNext()`
         Lvalue lvalue = new IdentifierExpression("getNextItem");
@@ -359,48 +310,46 @@ public class LibraryFunctions {
         String memberIdentifier = "iter";
         Member member = new Member(memberLvalue, memberIdentifier, null, null);
         // Set LvalueCall's call suffix
-        ArrayList<Expression> actualArguments = new ArrayList<Expression>();
+        ArrayList<Expression> actualArguments = new ArrayList<>();
         actualArguments.add(member);
         NormCall callsuffix = new NormCall(actualArguments);
         LvalueCall getNextCall = new LvalueCall(lvalue, callsuffix);
         // Create the corresponding expression statement
         ReturnStatement retstmt = new ReturnStatement(getNextCall);
         // The above forms an ExpressionStatement of the form ==>  getNext(iterator.iter);
-        ArrayList<Statement> stmtlist = new ArrayList<Statement>();
+        ArrayList<Statement> stmtlist = new ArrayList<>();
         stmtlist.add(retstmt);
         Block funcBody = new Block(stmtlist);
 
         // Set final "next" function field
         FunctionDef nextFuncDef = new FunctionDef("#ANONYMOUS#_", arguments, funcBody);
-        Value nextValue = new StaticVal(Value_t.USER_FUNCTION, nextFuncDef);
-        nextValue = new DynamicVal(nextValue, "next");
+        Value nextValue = new DynamicVal(Value_t.USER_FUNCTION, nextFuncDef, "next");
         objectData.put(nextName, nextValue);
 
         // Compose "prev" field, to call getPrevItem on iterator
-        Value prevName = new StaticVal<String>(Value_t.STRING, "prev");
+        Value prevName = new StaticVal<>(Value_t.STRING, "prev");
         // Compose LvalueCall for getPrevItem
         lvalue = new IdentifierExpression("getPrevItem");
         // Use same call suffix as above
         LvalueCall getPrevItemCall = new LvalueCall(lvalue, callsuffix);
         // Create the corresponding expression statement
         retstmt = new ReturnStatement(getPrevItemCall);
-        stmtlist = new ArrayList<Statement>();
+        stmtlist = new ArrayList<>();
         stmtlist.add(retstmt);
         funcBody = new Block(stmtlist);
         FunctionDef prevFuncDef = new FunctionDef("#ANONYMOUS#_", arguments, funcBody);
-        Value prevValue = new StaticVal(Value_t.USER_FUNCTION, prevFuncDef);
-        prevValue = new DynamicVal(prevValue, "prev");
+        Value prevValue = new DynamicVal(Value_t.USER_FUNCTION, prevFuncDef, "prev");
         objectData.put(prevName, prevValue);
 
         // Compose "hasNext" field, to call hasNextItem on iterator
-        Value hasNextName = new StaticVal<String>(Value_t.STRING, "hasNext");
+        Value hasNextName = new StaticVal<>(Value_t.STRING, "hasNext");
         // Compose LvalueCall for hasNextItem
         lvalue = new IdentifierExpression("hasNextItem");
         // Use same call suffix as above
         LvalueCall hasNextItemCall = new LvalueCall(lvalue, callsuffix);
         // Create the corresponding expression statement
         retstmt = new ReturnStatement(hasNextItemCall);
-        stmtlist = new ArrayList<Statement>();
+        stmtlist = new ArrayList<>();
         stmtlist.add(retstmt);
         funcBody = new Block(stmtlist);
         FunctionDef hasNextFuncDef = new FunctionDef("#ANONYMOUS#_", arguments, funcBody);
@@ -409,14 +358,14 @@ public class LibraryFunctions {
         objectData.put(hasNextName, hasNextValue);
 
         // Compose "hasPrev" field, to call hasNextItem on iterator
-        Value hasPrevName = new StaticVal<String>(Value_t.STRING, "hasPrev");
+        Value hasPrevName = new StaticVal<>(Value_t.STRING, "hasPrev");
         // Compose LvalueCall for hasNextItem
         lvalue = new IdentifierExpression("hasPrevItem");
         // Use same call suffix as above
         LvalueCall hasPrevItemCall = new LvalueCall(lvalue, callsuffix);
         // Create the corresponding expression statement
         retstmt = new ReturnStatement(hasPrevItemCall);
-        stmtlist = new ArrayList<Statement>();
+        stmtlist = new ArrayList<>();
         stmtlist.add(retstmt);
         funcBody = new Block(stmtlist);
         FunctionDef hasPrevFuncDef = new FunctionDef("#ANONYMOUS#_", arguments, funcBody);
@@ -424,24 +373,23 @@ public class LibraryFunctions {
         hasPrevValue = new DynamicVal(hasPrevValue, "hasNext");
         objectData.put(hasPrevName, hasPrevValue);
 
-
         FoxObject fobject = new FoxObject(objectData);
         Value retVal = new StaticVal(Value_t.OBJECT, fobject);
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void getNextItem(Environment env){
+    public static void getNextItem(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.GETNEXTITEM, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
-        if(!(val.getData() instanceof IteratorASTVisitor)){
+        if (!(val.getData() instanceof IteratorASTVisitor)) {
             StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument to getNext should be an iterator object.");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
         IteratorASTVisitor astVisitor = (IteratorASTVisitor) val.getData();
-        if(!astVisitor.hasNext()){
+        if (!astVisitor.hasNext()) {
             StaticVal retVal = new StaticVal(Value_t.ERROR, "Statement iterator out of bounds.");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
@@ -449,29 +397,30 @@ public class LibraryFunctions {
 
         ASTNode curItem = astVisitor.getNextItem();
         Value retVal;
-        if(curItem instanceof ExpressionStatement){ // When an ExpressionStatement is next, return its expression instead
-            Expression expr = ((ExpressionStatement)curItem).getExpression();
-            if(expr instanceof ParenthesisExpression)
+        if (curItem instanceof ExpressionStatement) { // When an ExpressionStatement is next, return its expression instead
+            Expression expr = ((ExpressionStatement) curItem).getExpression();
+            if (expr instanceof ParenthesisExpression) {
                 expr = ((ParenthesisExpression) expr).getExpression();
+            }
             retVal = new StaticVal(Value_t.AST, expr);
-        } else{
+        } else {
             retVal = new StaticVal(Value_t.AST, curItem);
         }
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void getPrevItem(Environment env){
+    public static void getPrevItem(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.GETPREVITEM, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
-        if(!(val.getData() instanceof IteratorASTVisitor)){
+        if (!(val.getData() instanceof IteratorASTVisitor)) {
             StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument to getNext should be an iterator object.");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
         IteratorASTVisitor astVisitor = (IteratorASTVisitor) val.getData();
-        if(!astVisitor.hasPrev()){
+        if (!astVisitor.hasPrev()) {
             StaticVal retVal = new StaticVal(Value_t.ERROR, "Statement iterator out of bounds.");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
@@ -479,68 +428,70 @@ public class LibraryFunctions {
 
         ASTNode curItem = astVisitor.getPrevItem();
         Value retVal;
-        if(curItem instanceof ExpressionStatement){  // When an ExpressionStatement is next, return its expression instead
-            Expression expr = ((ExpressionStatement)curItem).getExpression();
-            if(expr instanceof ParenthesisExpression)
+        if (curItem instanceof ExpressionStatement) {  // When an ExpressionStatement is next, return its expression instead
+            Expression expr = ((ExpressionStatement) curItem).getExpression();
+            if (expr instanceof ParenthesisExpression) {
                 expr = ((ParenthesisExpression) expr).getExpression();
+            }
             retVal = new StaticVal(Value_t.AST, expr);
-        } else{
+        } else {
             retVal = new StaticVal(Value_t.AST, curItem);
         }
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-
-    public static void hasNextItem(Environment env){
+    public static void hasNextItem(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.HASNEXTITEM, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
-        if(!(val.getData() instanceof IteratorASTVisitor)){
+        if (!(val.getData() instanceof IteratorASTVisitor)) {
             StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument to getNext should be an iterator object.");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
         IteratorASTVisitor astVisitor = (IteratorASTVisitor) val.getData();
         StaticVal retVal;
-        if(!astVisitor.hasNext())
+        if (!astVisitor.hasNext()) {
             retVal = new StaticVal(Value_t.BOOLEAN, Boolean.FALSE);
-        else
+        } else {
             retVal = new StaticVal(Value_t.BOOLEAN, Boolean.TRUE);
+        }
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void hasPrevItem(Environment env){
+    public static void hasPrevItem(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.HASPREVITEM, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
-        if(!(val.getData() instanceof IteratorASTVisitor)){
+        if (!(val.getData() instanceof IteratorASTVisitor)) {
             StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument to getNext should be an iterator object.");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
         IteratorASTVisitor astVisitor = (IteratorASTVisitor) val.getData();
         StaticVal retVal;
-        if(!astVisitor.hasPrev())
+        if (!astVisitor.hasPrev()) {
             retVal = new StaticVal(Value_t.BOOLEAN, Boolean.FALSE);
-        else
+        } else {
             retVal = new StaticVal(Value_t.BOOLEAN, Boolean.TRUE);
+        }
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isStatement(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISSTATEMENT, env)){
+    public static void isStatement(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISSTATEMENT, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
         // instanceof is needed here because all statements are subclasses of Statement
         Value retVal = (val.getData() instanceof Statement) ? new StaticVal<>(Value_t.BOOLEAN, true) : new StaticVal<>(Value_t.BOOLEAN, false);
         ((FunctionEnv) env).setReturnVal(retVal);
-    }    
+    }
 
-    public static void isIfStatement(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISIFSTATEMENT, env)){
+    public static void isIfStatement(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISIFSTATEMENT, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -548,8 +499,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isForStatement(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISFORSTATEMENT, env)){
+    public static void isForStatement(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISFORSTATEMENT, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -557,8 +508,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isWhileStatement(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISWHILESTATEMENT, env)){
+    public static void isWhileStatement(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISWHILESTATEMENT, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -566,8 +517,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isReturnStatement(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISRETURNSTATEMENT, env)){
+    public static void isReturnStatement(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISRETURNSTATEMENT, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -575,8 +526,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isBreakStatement(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISBREAKSTATEMENT, env)){
+    public static void isBreakStatement(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISBREAKSTATEMENT, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -584,8 +535,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isContinueStatement(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISCONTINUESTATEMENT, env)){
+    public static void isContinueStatement(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISCONTINUESTATEMENT, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -593,8 +544,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isFunctionDefinition(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISFUNCTIONDEFINITION, env)){
+    public static void isFunctionDefinition(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISFUNCTIONDEFINITION, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -602,17 +553,17 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isExpression(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISEXPRESSION, env)){
+    public static void isExpression(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISEXPRESSION, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
         Value retVal = (val.getData() instanceof Expression) ? new StaticVal<>(Value_t.BOOLEAN, true) : new StaticVal<>(Value_t.BOOLEAN, false);
         ((FunctionEnv) env).setReturnVal(retVal);
-    }    
+    }
 
-    public static void isAssignmentExpression(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISASSIGNMENTEXPRESSION, env)){
+    public static void isAssignmentExpression(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISASSIGNMENTEXPRESSION, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -620,8 +571,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isBinaryExpression(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISBINARYEXPRESSION, env)){
+    public static void isBinaryExpression(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISBINARYEXPRESSION, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -629,8 +580,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isUnaryExpression(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISUNARYEXPRESSION, env)){
+    public static void isUnaryExpression(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISUNARYEXPRESSION, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -638,8 +589,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isMetaSyntax(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISMETASYNTAX, env)){
+    public static void isMetaSyntax(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISMETASYNTAX, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -647,8 +598,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isMetaExecute(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISMETAEXECUTE, env)){
+    public static void isMetaExecute(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISMETAEXECUTE, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -656,17 +607,17 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isMetaRun(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISMETARUN, env)){
+    public static void isMetaRun(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISMETARUN, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
         Value retVal = (val.getData() instanceof MetaRun) ? new StaticVal<>(Value_t.BOOLEAN, true) : new StaticVal<>(Value_t.BOOLEAN, false);
         ((FunctionEnv) env).setReturnVal(retVal);
-    }    
+    }
 
-    public static void isMetaEval(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISMETAEVAL, env)){
+    public static void isMetaEval(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISMETAEVAL, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -674,8 +625,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isMetaToText(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISMETATOTEXT, env)){
+    public static void isMetaToText(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISMETATOTEXT, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -683,8 +634,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isIdentifier(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISIDENTIFIER, env)){
+    public static void isIdentifier(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISIDENTIFIER, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -692,8 +643,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isMember(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISMEMBER, env)){
+    public static void isMember(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISMEMBER, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -701,8 +652,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isCall(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISCALL, env)){
+    public static void isCall(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISCALL, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -710,8 +661,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isLvalueCall(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISLVALUECALL, env)){
+    public static void isLvalueCall(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISLVALUECALL, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -719,8 +670,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isExtendedCall(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISEXTENDEDCALL, env)){
+    public static void isExtendedCall(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISEXTENDEDCALL, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -728,8 +679,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isAnonymousCall(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISANONYMOUSCALL, env)){
+    public static void isAnonymousCall(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISANONYMOUSCALL, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -737,8 +688,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isObjectDefinition(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISOBJECTDEFINITION, env)){
+    public static void isObjectDefinition(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISOBJECTDEFINITION, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -746,8 +697,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isArrayDefinition(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISARRAYDEFINITION, env)){
+    public static void isArrayDefinition(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISARRAYDEFINITION, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -755,8 +706,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isIntegerLiteral(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISINTEGERLITERAL, env)){
+    public static void isIntegerLiteral(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISINTEGERLITERAL, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -764,8 +715,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isDoubleLiteral(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISDOUBLELITERAL, env)){
+    public static void isDoubleLiteral(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISDOUBLELITERAL, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -773,8 +724,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isStringLiteral(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISSTRINGLITERAL, env)){
+    public static void isStringLiteral(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISSTRINGLITERAL, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -782,8 +733,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isNullLiteral(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISNULLLITERAL, env)){
+    public static void isNullLiteral(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISNULLLITERAL, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -791,8 +742,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isTrueLiteral(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISTRUELITERAL, env)){
+    public static void isTrueLiteral(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISTRUELITERAL, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -800,8 +751,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isFalseLiteral(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ISFALSELITERAL, env)){
+    public static void isFalseLiteral(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.ISFALSELITERAL, env)) {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -810,167 +761,196 @@ public class LibraryFunctions {
     }
 
     // ASTNode's getters for fox
-    public static void getExpression(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.GETEXPRESSION, env)){
+    public static void getExpression(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.GETEXPRESSION, env)) {
             return;
         }
-        Value retVal = utils.Constants.NULL;
+        Value retVal;
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
-        if(!val.getType().equals(Value_t.AST)){
+        if (!val.getType().equals(Value_t.AST)) {
             retVal = new StaticVal(Value_t.ERROR, "getExpression requires an AST");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
         ASTNode ast = (ASTNode) val.getData();
         Expression retExpression = null;
-        if(ast instanceof IfStatement)
+        if (ast instanceof IfStatement) {
             retExpression = ((IfStatement) ast).getExpression();
-        else if(ast instanceof ForStatement)
+
+        } else if (ast instanceof ForStatement) {
             retExpression = ((ForStatement) ast).getExpression();
-        else if(ast instanceof WhileStatement)
+
+        } else if (ast instanceof WhileStatement) {
             retExpression = ((WhileStatement) ast).getExpression();
-        else if(ast instanceof ReturnStatement)
+
+        } else if (ast instanceof ReturnStatement) {
             retExpression = ((ReturnStatement) ast).getExpression();
-        else if(ast instanceof AssignmentExpression)
+
+        } else if (ast instanceof AssignmentExpression) {
             retExpression = ((AssignmentExpression) ast).getExpression();
-        else if(ast instanceof UnaryExpression)
+
+        } else if (ast instanceof UnaryExpression) {
             retExpression = ((UnaryExpression) ast).getExpression();
-        else if(ast instanceof MetaSyntax)
+
+        } else if (ast instanceof MetaSyntax) {
             retExpression = ((MetaSyntax) ast).getExpression();
-        else if(ast instanceof MetaExecute)
+
+        } else if (ast instanceof MetaExecute) {
             retExpression = ((MetaExecute) ast).getExpression();
-        else if(ast instanceof MetaRun)
+
+        } else if (ast instanceof MetaRun) {
             retExpression = ((MetaRun) ast).getExpression();
-        else if(ast instanceof MetaEval)
+
+        } else if (ast instanceof MetaEval) {
             retExpression = ((MetaEval) ast).getExpression();
-        else if(ast instanceof MetaToText)
+
+        } else if (ast instanceof MetaToText) {
             retExpression = ((MetaToText) ast).getExpression();
-        if(retExpression instanceof ParenthesisExpression)
+        }
+
+        if (retExpression instanceof ParenthesisExpression) {
             retExpression = ((ParenthesisExpression) retExpression).getExpression();
-        
-        if(retExpression == null)
+        }
+
+        if (retExpression == null) {
             retVal = utils.Constants.NULL;
-        else
+        } else {
             retVal = new StaticVal(Value_t.AST, retExpression);
+        }
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void setExpression(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.SETEXPRESSION, env)){
+    public static void setExpression(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.SETEXPRESSION, env)) {
             return;
         }
         Value retVal = utils.Constants.NULL;
         Value stmtVal = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
         Value exprVal = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
-        if(!stmtVal.getType().equals(Value_t.AST) || !exprVal.getType().equals(Value_t.AST) || !(stmtVal.getData() instanceof Statement)){
+        if (!stmtVal.getType().equals(Value_t.AST)
+                || !exprVal.getType().equals(Value_t.AST)
+                || !(stmtVal.getData() instanceof Statement)) {
             retVal = new StaticVal(Value_t.ERROR, "setExpression requires a statement AST and an expression AST");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
         ASTNode stmtast = (ASTNode) stmtVal.getData();
-        if(!(exprVal.getData() instanceof Expression)){
+        if (!(exprVal.getData() instanceof Expression)) {
             retVal = new StaticVal(Value_t.ERROR, "setExpression's second argument should be an expression AST");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
         Expression expr = (Expression) exprVal.getData();
 
-        if(stmtast instanceof IfStatement)
+        if (stmtast instanceof IfStatement) {
             ((IfStatement) stmtast).setExpression(expr);
-        else if(stmtast instanceof ForStatement)
+
+        } else if (stmtast instanceof ForStatement) {
             ((ForStatement) stmtast).setExpression(expr);
-        else if(stmtast instanceof WhileStatement)
+
+        } else if (stmtast instanceof WhileStatement) {
             ((WhileStatement) stmtast).setExpression(expr);
-        else if(stmtast instanceof ReturnStatement)
+
+        } else if (stmtast instanceof ReturnStatement) {
             ((ReturnStatement) stmtast).setExpression(expr);
-        else if(stmtast instanceof AssignmentExpression)
+
+        } else if (stmtast instanceof AssignmentExpression) {
             ((AssignmentExpression) stmtast).setExpression(expr);
-        else if(stmtast instanceof UnaryExpression)
+
+        } else if (stmtast instanceof UnaryExpression) {
             ((UnaryExpression) stmtast).setExpression(expr);
-        else if(stmtast instanceof MetaSyntax)
+
+        } else if (stmtast instanceof MetaSyntax) {
             ((MetaSyntax) stmtast).setExpression(expr);
-        else if(stmtast instanceof MetaExecute)
+
+        } else if (stmtast instanceof MetaExecute) {
             ((MetaExecute) stmtast).setExpression(expr);
-        else if(stmtast instanceof MetaRun)
+
+        } else if (stmtast instanceof MetaRun) {
             ((MetaRun) stmtast).setExpression(expr);
-        else if(stmtast instanceof MetaEval)
+
+        } else if (stmtast instanceof MetaEval) {
             ((MetaEval) stmtast).setExpression(expr);
-        else if(stmtast instanceof MetaToText)
+
+        } else if (stmtast instanceof MetaToText) {
             ((MetaToText) stmtast).setExpression(expr);
-        else{
+
+        } else {
             retVal = new StaticVal(Value_t.ERROR, "setExpression's first argument should be a statement AST that "
-                                                    +"has an expression");
+                    + "has an expression");
         }
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void getLeftExpression(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.GETLEFTEXPRESSION, env)){
+    public static void getLeftExpression(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.GETLEFTEXPRESSION, env)) {
             return;
         }
         Value retVal;
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
-        if(!(val.getData() instanceof BinaryExpression)){
+        if (!(val.getData() instanceof BinaryExpression)) {
             retVal = new StaticVal(Value_t.ERROR, "getLeftExpression requires a BinaryExpression AST");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
         Expression leftExpression = ((BinaryExpression) val.getData()).getExpression1();
-        if(leftExpression instanceof ParenthesisExpression)
+        if (leftExpression instanceof ParenthesisExpression) {
             leftExpression = ((ParenthesisExpression) leftExpression).getExpression();
+        }
         retVal = new StaticVal(Value_t.AST, leftExpression);
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void getRightExpression(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.GETRIGHTEXPRESSION, env)){
+    public static void getRightExpression(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.GETRIGHTEXPRESSION, env)) {
             return;
         }
         Value retVal;
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
-        if(!(val.getData() instanceof BinaryExpression)){
+        if (!(val.getData() instanceof BinaryExpression)) {
             retVal = new StaticVal(Value_t.ERROR, "getRightExpression requires a BinaryExpression AST");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
         Expression rightExpression = ((BinaryExpression) val.getData()).getExpression2();
-        if(rightExpression instanceof ParenthesisExpression)
+        if (rightExpression instanceof ParenthesisExpression) {
             rightExpression = ((ParenthesisExpression) rightExpression).getExpression();
+        }
         retVal = new StaticVal(Value_t.AST, rightExpression);
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void getLine(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.GETLINE, env)){
+    public static void getLine(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.GETLINE, env)) {
             return;
         }
         Value retVal;
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
-        if(!(val.getData() instanceof ASTNode)){
+        if (!(val.getData() instanceof ASTNode)) {
             retVal = new StaticVal(Value_t.ERROR, "getLine requires an AST node");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
         ASTNode astNode = (ASTNode) val.getData();
         int line = astNode.getLine();
-        retVal = new StaticVal<Integer>(Value_t.INTEGER, line);
+        retVal = new StaticVal<>(Value_t.INTEGER, line);
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void getColumn(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.GETCOLUMN, env)){
+    public static void getColumn(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.GETCOLUMN, env)) {
             return;
         }
         Value retVal;
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
-        if(!(val.getData() instanceof ASTNode)){
+        if (!(val.getData() instanceof ASTNode)) {
             retVal = new StaticVal(Value_t.ERROR, "getColumn requires an AST node");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
         ASTNode astNode = (ASTNode) val.getData();
         int col = astNode.getColumn();
-        retVal = new StaticVal<Integer>(Value_t.INTEGER, col);
+        retVal = new StaticVal<>(Value_t.INTEGER, col);
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
