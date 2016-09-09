@@ -1,5 +1,6 @@
 package libraryFunctions;
 
+import utils.Constants;
 import ast.ASTNode;
 import ast.utils.ASTUtils;
 import ast.ASTVisitor;
@@ -30,12 +31,21 @@ import ast.Member;
 import ast.FunctionDef;
 import ast.BreakStatement;
 import ast.ContinueStatement;
+import ast.Call;
 import ast.LvalueCall;
+import ast.ExtendedCall;
+import ast.AnonymousFunctionCall;
 import ast.NormCall;
 import ast.IndexedElement;
 import ast.ObjectDefinition;
+import ast.ArrayDef;
 import ast.ReturnStatement;
+import ast.IntegerLiteral;
+import ast.DoubleLiteral;
 import ast.StringLiteral;
+import ast.NullLiteral;
+import ast.TrueLiteral;
+import ast.FalseLiteral;
 import ast.IfStatement;
 import ast.ForStatement;
 import ast.WhileStatement;
@@ -574,9 +584,9 @@ public class LibraryFunctions {
         Expression expr = null;
         if(curStmt instanceof ExpressionStatement){  // When an ExpressionStatement is next, return its expression instead
             expr = ((ExpressionStatement)curStmt).getExpression();
-            retVal = new StaticVal(Value_t.OBJECT, expr);
+            retVal = new StaticVal(Value_t.AST, expr);
         } else{
-            retVal = new StaticVal(Value_t.OBJECT, curStmt);
+            retVal = new StaticVal(Value_t.AST, curStmt);
         }
         
         // Increment curItem counter
@@ -608,9 +618,9 @@ public class LibraryFunctions {
         Expression expr = null;
         if(curStmt instanceof ExpressionStatement){  // When an ExpressionStatement is next, return its expression instead
             expr = ((ExpressionStatement)curStmt).getExpression();
-            retVal = new StaticVal(Value_t.OBJECT, expr);
+            retVal = new StaticVal(Value_t.AST, expr);
         } else{
-            retVal = new StaticVal(Value_t.OBJECT, curStmt);
+            retVal = new StaticVal(Value_t.AST, curStmt);
         }
         
         // Increment curItem counter
@@ -823,6 +833,219 @@ public class LibraryFunctions {
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
         Value retVal = (val.getData() instanceof MetaToText) ? new StaticVal<>(Value_t.BOOLEAN, true) : new StaticVal<>(Value_t.BOOLEAN, false);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void isIdentifier(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.ISIDENTIFIER, env)){
+            return;
+        }
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value retVal = (val.getData() instanceof IdentifierExpression) ? new StaticVal<>(Value_t.BOOLEAN, true) : new StaticVal<>(Value_t.BOOLEAN, false);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void isMember(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.ISMEMBER, env)){
+            return;
+        }
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value retVal = (val.getData() instanceof Member) ? new StaticVal<>(Value_t.BOOLEAN, true) : new StaticVal<>(Value_t.BOOLEAN, false);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void isCall(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.ISCALL, env)){
+            return;
+        }
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value retVal = (val.getData() instanceof Call) ? new StaticVal<>(Value_t.BOOLEAN, true) : new StaticVal<>(Value_t.BOOLEAN, false);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void isLvalueCall(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.ISLVALUECALL, env)){
+            return;
+        }
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value retVal = (val.getData() instanceof LvalueCall) ? new StaticVal<>(Value_t.BOOLEAN, true) : new StaticVal<>(Value_t.BOOLEAN, false);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void isExtendedCall(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.ISEXTENDEDCALL, env)){
+            return;
+        }
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value retVal = (val.getData() instanceof ExtendedCall) ? new StaticVal<>(Value_t.BOOLEAN, true) : new StaticVal<>(Value_t.BOOLEAN, false);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void isAnonymousCall(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.ISANONYMOUSCALL, env)){
+            return;
+        }
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value retVal = (val.getData() instanceof AnonymousFunctionCall) ? new StaticVal<>(Value_t.BOOLEAN, true) : new StaticVal<>(Value_t.BOOLEAN, false);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void isObjectDefinition(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.ISOBJECTDEFINITION, env)){
+            return;
+        }
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value retVal = (val.getData() instanceof ObjectDefinition) ? new StaticVal<>(Value_t.BOOLEAN, true) : new StaticVal<>(Value_t.BOOLEAN, false);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void isArrayDefinition(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.ISARRAYDEFINITION, env)){
+            return;
+        }
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value retVal = (val.getData() instanceof ArrayDef) ? new StaticVal<>(Value_t.BOOLEAN, true) : new StaticVal<>(Value_t.BOOLEAN, false);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void isIntegerLiteral(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.ISINTEGERLITERAL, env)){
+            return;
+        }
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value retVal = (val.getData() instanceof IntegerLiteral) ? new StaticVal<>(Value_t.BOOLEAN, true) : new StaticVal<>(Value_t.BOOLEAN, false);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void isDoubleLiteral(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.ISDOUBLELITERAL, env)){
+            return;
+        }
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value retVal = (val.getData() instanceof DoubleLiteral) ? new StaticVal<>(Value_t.BOOLEAN, true) : new StaticVal<>(Value_t.BOOLEAN, false);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void isStringLiteral(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.ISSTRINGLITERAL, env)){
+            return;
+        }
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value retVal = (val.getData() instanceof StringLiteral) ? new StaticVal<>(Value_t.BOOLEAN, true) : new StaticVal<>(Value_t.BOOLEAN, false);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void isNullLiteral(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.ISNULLLITERAL, env)){
+            return;
+        }
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value retVal = (val.getData() instanceof NullLiteral) ? new StaticVal<>(Value_t.BOOLEAN, true) : new StaticVal<>(Value_t.BOOLEAN, false);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void isTrueLiteral(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.ISTRUELITERAL, env)){
+            return;
+        }
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value retVal = (val.getData() instanceof TrueLiteral) ? new StaticVal<>(Value_t.BOOLEAN, true) : new StaticVal<>(Value_t.BOOLEAN, false);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void isFalseLiteral(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.ISFALSELITERAL, env)){
+            return;
+        }
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value retVal = (val.getData() instanceof FalseLiteral) ? new StaticVal<>(Value_t.BOOLEAN, true) : new StaticVal<>(Value_t.BOOLEAN, false);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    // ASTNode's getters for fox
+    public static void getExpression(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.GETEXPRESSION, env)){
+            return;
+        }
+        Value retVal = utils.Constants.NULL;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        if(!val.getType().equals(Value_t.AST)){
+            retVal = new StaticVal(Value_t.ERROR, "getExpression requires an AST");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        ASTNode ast = (ASTNode) val.getData();
+        if(ast instanceof IfStatement)
+            retVal = new StaticVal(Value_t.AST, ((IfStatement) ast).getExpression());
+        else if(ast instanceof ForStatement)
+            retVal = new StaticVal(Value_t.AST, ((ForStatement) ast).getExpression());
+        else if(ast instanceof WhileStatement)
+            retVal = new StaticVal(Value_t.AST, ((WhileStatement) ast).getExpression());
+        else if(ast instanceof ReturnStatement)
+            retVal = new StaticVal(Value_t.AST, ((ReturnStatement) ast).getExpression());
+        else if(ast instanceof AssignmentExpression)
+            retVal = new StaticVal(Value_t.AST, ((AssignmentExpression) ast).getExpression());
+        else if(ast instanceof UnaryExpression)
+            retVal = new StaticVal(Value_t.AST, ((UnaryExpression) ast).getExpression());
+        else if(ast instanceof MetaSyntax)
+            retVal = new StaticVal(Value_t.AST, ((MetaSyntax) ast).getExpression());
+        else if(ast instanceof MetaExecute)
+            retVal = new StaticVal(Value_t.AST, ((MetaExecute) ast).getExpression());
+        else if(ast instanceof MetaRun)
+            retVal = new StaticVal(Value_t.AST, ((MetaRun) ast).getExpression());
+        else if(ast instanceof MetaEval)
+            retVal = new StaticVal(Value_t.AST, ((MetaEval) ast).getExpression());
+        else if(ast instanceof MetaToText)
+            retVal = new StaticVal(Value_t.AST, ((MetaToText) ast).getExpression());
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void setExpression(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.SETEXPRESSION, env)){
+            return;
+        }
+        Value retVal = utils.Constants.NULL;
+        Value stmtVal = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value exprVal = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
+        if(!stmtVal.getType().equals(Value_t.AST) || !exprVal.getType().equals(Value_t.AST) || !(stmtVal.getData() instanceof Statement)){
+            retVal = new StaticVal(Value_t.ERROR, "setExpression requires a statement AST and an expression AST");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        ASTNode stmtast = (ASTNode) stmtVal.getData();
+        if(!(exprVal.getData() instanceof Expression)){
+            retVal = new StaticVal(Value_t.ERROR, "setExpression's second argument should be an expression AST");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        Expression expr = (Expression) exprVal.getData();
+
+        if(stmtast instanceof IfStatement)
+            ((IfStatement) stmtast).setExpression(expr);
+        else if(stmtast instanceof ForStatement)
+            ((ForStatement) stmtast).setExpression(expr);
+        else if(stmtast instanceof WhileStatement)
+            ((WhileStatement) stmtast).setExpression(expr);
+        else if(stmtast instanceof ReturnStatement)
+            ((ReturnStatement) stmtast).setExpression(expr);
+        else if(stmtast instanceof AssignmentExpression)
+            ((AssignmentExpression) stmtast).setExpression(expr);
+        else if(stmtast instanceof UnaryExpression)
+            ((UnaryExpression) stmtast).setExpression(expr);
+        else if(stmtast instanceof MetaSyntax)
+            ((MetaSyntax) stmtast).setExpression(expr);
+        else if(stmtast instanceof MetaExecute)
+            ((MetaExecute) stmtast).setExpression(expr);
+        else if(stmtast instanceof MetaRun)
+            ((MetaRun) stmtast).setExpression(expr);
+        else if(stmtast instanceof MetaEval)
+            ((MetaEval) stmtast).setExpression(expr);
+        else if(stmtast instanceof MetaToText)
+            ((MetaToText) stmtast).setExpression(expr);
+        else{
+            retVal = new StaticVal(Value_t.ERROR, "setExpression's first argument should be a statement AST that "
+                                                    +"has an expression");
+        }
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 

@@ -49,7 +49,23 @@ public enum LibraryFunction_t {
     ISMETAEXECUTE("isMetaExecute", 1),
     ISMETARUN("isMetaRun", 1),
     ISMETAEVAL("isMetaEval", 1),
-    ISMETATOTEXT("isMetaToText", 1);
+    ISMETATOTEXT("isMetaToText", 1),
+    ISIDENTIFIER("isIdentifier", 1),
+    ISMEMBER("isMember", 1),
+    ISLVALUECALL("isLvalueCall", 1),
+    ISEXTENDEDCALL("isExtendedCall", 1),
+    ISANONYMOUSCALL("isAnonymousCall", 1),
+    ISCALL("isCall", 1),
+    ISOBJECTDEFINITION("isObjectDefinition", 1),
+    ISARRAYDEFINITION("isArrayDefinition", 1),
+    ISINTEGERLITERAL("isIntegerLiteral", 1),
+    ISDOUBLELITERAL("isDoubleLiteral", 1),
+    ISSTRINGLITERAL("isStringLiteral", 1),
+    ISNULLLITERAL("isNullLiteral", 1),
+    ISTRUELITERAL("isTrueLiteral", 1),
+    ISFALSELITERAL("isFalseLiteral", 1),
+    GETEXPRESSION("getExpression", 1),
+    SETEXPRESSION("setExpression", 2);
 
     private final String _name;
     private final int _totalArgs;
@@ -216,6 +232,54 @@ public enum LibraryFunction_t {
             case "isMetaToText":
                 totalArgs = 1;
                 break;
+            case "isIdentifier":
+                totalArgs = 1;
+                break;
+            case "isMember":
+                totalArgs = 1;
+                break;
+            case "isLvalueCall":
+                totalArgs = 1;
+                break;
+            case "isExtendedCall":
+                totalArgs = 1;
+                break;
+            case "isAnonymousCall":
+                totalArgs = 1;
+                break;
+            case "isCall":
+                totalArgs = 1;
+                break;
+            case "isObjectDefinition":
+                totalArgs = 1;
+                break;
+            case "isArrayDefinition":
+                totalArgs = 1;
+                break;
+            case "isIntegerLiteral":
+                totalArgs = 1;
+                break;
+            case "isDoubleLiteral":
+                totalArgs = 1;
+                break;
+            case "isStringLiteral":
+                totalArgs = 1;
+                break;
+            case "isNullLiteral":
+                totalArgs = 1;
+                break;
+            case "isTrueLiteral":
+                totalArgs = 1;
+                break;
+            case "isFalseLiteral":
+                totalArgs = 1;
+                break;
+            case "getExpression":
+                totalArgs = 1;
+                break;
+            case "setExpression":
+                totalArgs = 1;
+                break;
             default:
                 //fatal error
                 break;
@@ -269,7 +333,23 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.ISMETAEXECUTE.toString())
                 || name.equals(LibraryFunction_t.ISMETARUN.toString())
                 || name.equals(LibraryFunction_t.ISMETAEVAL.toString())
-                || name.equals(LibraryFunction_t.ISMETATOTEXT.toString());
+                || name.equals(LibraryFunction_t.ISMETATOTEXT.toString())
+                || name.equals(LibraryFunction_t.ISIDENTIFIER.toString())
+                || name.equals(LibraryFunction_t.ISMEMBER.toString())
+                || name.equals(LibraryFunction_t.ISLVALUECALL.toString())
+                || name.equals(LibraryFunction_t.ISEXTENDEDCALL.toString())
+                || name.equals(LibraryFunction_t.ISANONYMOUSCALL.toString())
+                || name.equals(LibraryFunction_t.ISCALL.toString())
+                || name.equals(LibraryFunction_t.ISOBJECTDEFINITION.toString())
+                || name.equals(LibraryFunction_t.ISARRAYDEFINITION.toString())
+                || name.equals(LibraryFunction_t.ISINTEGERLITERAL.toString())
+                || name.equals(LibraryFunction_t.ISDOUBLELITERAL.toString())
+                || name.equals(LibraryFunction_t.ISSTRINGLITERAL.toString())
+                || name.equals(LibraryFunction_t.ISNULLLITERAL.toString())
+                || name.equals(LibraryFunction_t.ISTRUELITERAL.toString())
+                || name.equals(LibraryFunction_t.ISFALSELITERAL.toString())
+                || name.equals(LibraryFunction_t.GETEXPRESSION.toString())
+                || name.equals(LibraryFunction_t.SETEXPRESSION.toString());
     }
 
 }
