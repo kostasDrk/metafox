@@ -12,10 +12,6 @@ student = {
 
 };
 
-
-println(student);
-
-
 studentCopy = copy(student);
 
 println(student);
@@ -25,7 +21,7 @@ println(studentCopy);
 student.name = "makis";
 studentCopy.from.city = "Athens";
 
-println();
+println("=========");
 println(student);
 println(studentCopy);
 
@@ -39,7 +35,7 @@ courses["number"] = 3;
 
 student.courses = courses;
 
-println();
+println("=========");
 println(student);
 println(studentCopy);
 

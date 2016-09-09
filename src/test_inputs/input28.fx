@@ -7,7 +7,15 @@ function bar(o){
     function foo(){
 	return 1;
     }
-
+    5;
+    6.94;
+    "string";
+    null;
+    true;
+    false;
+    [1 , 3.21, "str", x];
+    {x : 4, y : "str"};
+    (function foo(abc){println(a);})(3);
     println(o);
     5+7;
     .#.<a+b>.;
@@ -35,8 +43,13 @@ while(s..hasNext()){
 	println("[+] Statement: ");
 	println(cur_stmt);
     }*/
-    if(isMetaToText(cur_stmt)){
+    if(isWhileStatement(cur_stmt)){
+	expr = getExpression(cur_stmt);
         println("[+] Expression: ");
-        println(cur_stmt);
+        println(expr);
+	setExpression(cur_stmt, .<false>.);
+	expr = getExpression(cur_stmt);
+	println("[+] New expression: ");
+	println(expr);
     }
 }
