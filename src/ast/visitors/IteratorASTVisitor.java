@@ -1,131 +1,72 @@
 package ast.visitors;
 
-import ast.ASTVisitor;
-import ast.ASTVisitorException;
-
-import ast.ASTNode;
-import ast.Program;
-import ast.Statement;
-import ast.IfStatement;
-import ast.WhileStatement;
-import ast.ForStatement;
-import ast.BreakStatement;
-import ast.ContinueStatement;
-import ast.ReturnStatement;
-import ast.Expression;
-import ast.ExpressionStatement;
-import ast.AssignmentExpression;
-import ast.BinaryExpression;
-import ast.UnaryExpression;
-import ast.TermExpression;
-import ast.ParenthesisExpression;
-import ast.IdentifierExpression;
-import ast.IdentifierExpressionLocal;
-import ast.IdentifierExpressionGlobal;
-import ast.Operator;
-import ast.Primary;
-import ast.Lvalue;
-import ast.Member;
-import ast.Constant;
-import ast.IntegerLiteral;
-import ast.DoubleLiteral;
-import ast.StringLiteral;
-import ast.TrueLiteral;
-import ast.FalseLiteral;
-import ast.NullLiteral;
-import ast.Call;
-import ast.ExtendedCall;
-import ast.LvalueCall;
-import ast.AnonymousFunctionCall;
-import ast.CallSuffix;
-import ast.NormCall;
-import ast.MethodCall;
-import ast.Block;
-import ast.ArrayDef;
-import ast.FunctionDef;
-import ast.FunctionDefExpression;
-import ast.ObjectDefinition;
-import ast.IndexedElement;
-import ast.MetaSyntax;
-import ast.MetaEscape;
-import ast.MetaEval;
-import ast.MetaExecute;
-import ast.MetaRun;
-import ast.MetaToText;
+import ast.*;
 
 import symbols.value.Value;
-import symbols.value.Value_t;
-import symbols.value.StaticVal;
 
 import java.util.ArrayList;
 
 public class IteratorASTVisitor implements ASTVisitor {
 
-	private ArrayList<Statement> _statementList;
-	private int _curItem;
+    private ArrayList<Statement> _statementList;
+    private int _curItem;
 
-	public IteratorASTVisitor(){
-		_statementList = new ArrayList<Statement>();
-		_curItem = -1;
-	}
+    public IteratorASTVisitor() {
+        _statementList = new ArrayList<>();
+        _curItem = -1;
+    }
 
-	public ArrayList<Statement> getStatementList(){
-		return this._statementList;
-	}
+    public ArrayList<Statement> getStatementList() {
+        return _statementList;
+    }
 
-	public void setStatementList(ArrayList<Statement> statementList){
-		this._statementList = statementList;
-	}
+    public void setStatementList(ArrayList<Statement> statementList) {
+        _statementList = statementList;
+    }
 
-	public Statement getStatement(int pos){
-		return this._statementList.get(pos);
-	}
+    public Statement getStatement(int pos) {
+        return _statementList.get(pos);
+    }
 
-    public ASTNode getNextItem(){
+    public ASTNode getNextItem() {
         incCurItem();
-        return this._statementList.get(this._curItem);
+        return _statementList.get(_curItem);
     }
 
-    public ASTNode getPrevItem(){
+    public ASTNode getPrevItem() {
         decCurItem();
-        return this._statementList.get(this._curItem);
+        return _statementList.get(_curItem);
     }
 
-	public int getCurItem(){
-		return this._curItem;
-	}
-
-	public void setCurItem(int curItem){
-		this._curItem = curItem;
-	}
-
-	public void incCurItem(){
-		this._curItem++;
-	}
-
-    public void decCurItem(){
-        this._curItem--;
+    public int getCurItem() {
+        return _curItem;
     }
 
-    public boolean hasNext(){
-        if(this._curItem >= this._statementList.size()-1)
-                return false;
-        return true;
+    public void setCurItem(int curItem) {
+        _curItem = curItem;
     }
 
-    public boolean hasPrev(){
-        if(this._curItem <= 0)
-                return false;
-        return true;
+    public void incCurItem() {
+        _curItem++;
     }
 
-	@Override
-	public Value visit(Program node) throws ASTVisitorException {
-        for (Statement stmt : node.getStatements()) {
-            if (stmt != null) {
-            	this._statementList.add(stmt);
-            }
-        }
+    public void decCurItem() {
+        _curItem--;
+    }
+
+    public boolean hasNext() {
+        return _curItem < _statementList.size() - 1;
+    }
+
+    public boolean hasPrev() {
+        return _curItem > 0;
+    }
+
+    @Override
+    public Value visit(Program node) throws ASTVisitorException {
+        node.getStatements().stream().filter((stmt) -> (stmt != null)).forEach((stmt) -> {
+            _statementList.add(stmt);
+        });
         return null;
     }
 
@@ -260,10 +201,10 @@ public class IteratorASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(Block node) throws ASTVisitorException {
-        for (Statement stmt : node.getStatementList()) {
-        	this._statementList.add(stmt);
+        node.getStatementList().stream().forEach((stmt) -> {
+            _statementList.add(stmt);
             // stmt.accept(this);
-        }
+        });
         return null;
     }
 
@@ -312,15 +253,17 @@ public class IteratorASTVisitor implements ASTVisitor {
     @Override
     public Value visit(IfStatement node) throws ASTVisitorException {
         // node.getExpression().accept(this);
-        if(node.getStatement() instanceof Block)
-        	node.getStatement().accept(this);
-        else
-        	this._statementList.add(node.getStatement());
+        if (node.getStatement() instanceof Block) {
+            node.getStatement().accept(this);
+        } else {
+            _statementList.add(node.getStatement());
+        }
         if (node.getElseStatement() != null) {
-        	if(node.getElseStatement() instanceof Block)
-            	node.getElseStatement().accept(this);
-            else
-            	this._statementList.add(node.getElseStatement());
+            if (node.getElseStatement() instanceof Block) {
+                node.getElseStatement().accept(this);
+            } else {
+                _statementList.add(node.getElseStatement());
+            }
         }
         return null;
     }
@@ -328,10 +271,11 @@ public class IteratorASTVisitor implements ASTVisitor {
     @Override
     public Value visit(WhileStatement node) throws ASTVisitorException {
         // node.getExpression().accept(this);
-        if(node.getStatement() instanceof Block)
-        	node.getStatement().accept(this);
-        else
-        	this._statementList.add(node.getStatement());
+        if (node.getStatement() instanceof Block) {
+            node.getStatement().accept(this);
+        } else {
+            _statementList.add(node.getStatement());
+        }
         return null;
     }
 
@@ -342,15 +286,15 @@ public class IteratorASTVisitor implements ASTVisitor {
         }
 
         // node.getExpression().accept(this);
-
         for (Expression expression : node.getExpressionList2()) {
             // expression.accept(this);
         }
 
-        if(node.getStatement() instanceof Block)
-        	node.getStatement().accept(this);
-        else
-        	this._statementList.add(node.getStatement());
+        if (node.getStatement() instanceof Block) {
+            node.getStatement().accept(this);
+        } else {
+            _statementList.add(node.getStatement());
+        }
         return null;
     }
 
