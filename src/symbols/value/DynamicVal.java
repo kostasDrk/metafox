@@ -15,6 +15,12 @@ public class DynamicVal<T> extends Value {
 
     }
 
+    public DynamicVal(DynamicVal dynamicVal) {
+        super(dynamicVal.getType(), dynamicVal.getData());
+        _errorInfo = dynamicVal._errorInfo;
+
+    }
+
     public DynamicVal(String errorInfo) {
         super();
         _errorInfo = errorInfo;

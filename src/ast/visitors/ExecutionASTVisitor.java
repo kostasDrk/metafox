@@ -475,7 +475,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         Value value = (lvalue.isObject()) ? ((FoxObject) lvalue.getData()).get(key) : ((FoxArray) lvalue.getData()).get(key);
 
-        if (value == null) {
+        if (value == NULL) {
             if (node.isLValue()) {
                 String errorInfo = "Object." + "id.";
 

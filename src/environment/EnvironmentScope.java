@@ -30,7 +30,7 @@ class EnvironmentScope {
     }
 
     void insert(String name, DynamicVal dynamicVal) {
-        //System.out.println(", scope " + _scope);
+        // System.out.println(", scope " + _scope);
         _env.put(name, dynamicVal);
     }
 

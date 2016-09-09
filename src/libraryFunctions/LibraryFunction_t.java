@@ -23,7 +23,7 @@ public enum LibraryFunction_t {
     ISOBJECT("isObject", 1),
     ISAST("isAST", 1),
     //FACTORY("factory", -2),
-    //COPY("copy", 1),
+    COPY("copy", 1),
     DIAGNOSE("diagnose", 3),
     ADDFIRST("addFirst", 2),
     ADDONEXITPOINTS("addOnExitPoints", 2),
@@ -151,9 +151,9 @@ public enum LibraryFunction_t {
 //            case "factory":
 //                totalArgs = -2;
 //                break;
-//            case "copy":
-//                totalArgs = 1;
-//                break;
+            case "copy":
+                totalArgs = 1;
+                break;
             case "diagnose":
                 totalArgs = 3;
                 break;
@@ -309,6 +309,7 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.ISLIBFUNC.toString())
                 || name.equals(LibraryFunction_t.ISOBJECT.toString())
                 || name.equals(LibraryFunction_t.ISAST.toString())
+                || name.equals(LibraryFunction_t.COPY.toString())
                 || name.equals(LibraryFunction_t.ADDFIRST.toString())
                 || name.equals(LibraryFunction_t.ADDONEXITPOINTS.toString())
                 || name.equals(LibraryFunction_t.GETASOBJECT.toString())
