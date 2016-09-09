@@ -63,7 +63,7 @@ public class IteratorASTVisitor implements ASTVisitor {
 
 	public IteratorASTVisitor(){
 		_statementList = new ArrayList<Statement>();
-		_curItem = 0;
+		_curItem = -1;
 	}
 
 	public ArrayList<Statement> getStatementList(){
@@ -78,6 +78,16 @@ public class IteratorASTVisitor implements ASTVisitor {
 		return this._statementList.get(pos);
 	}
 
+    public Statement getNextStatement(){
+        incCurItem();
+        return this._statementList.get(this._curItem);
+    }
+
+    public Statement getPrevStatement(){
+        decCurItem();
+        return this._statementList.get(this._curItem);
+    }
+
 	public int getCurItem(){
 		return this._curItem;
 	}
@@ -89,6 +99,10 @@ public class IteratorASTVisitor implements ASTVisitor {
 	public void incCurItem(){
 		this._curItem++;
 	}
+
+    public void decCurItem(){
+        this._curItem--;
+    }
 
 	@Override
 	public Value visit(Program node) throws ASTVisitorException {

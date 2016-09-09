@@ -1077,7 +1077,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         Value retVal;
 
         if (!exprVal.isString()) {
-            String msg = "'.!' requires a StringLiteral: " + exprVal.getType() + " found";
+            String msg = "'.@' requires a StringLiteral: " + exprVal.getType() + " found";
             ASTUtils.error(node, msg);
         }
 
@@ -1088,7 +1088,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         try {
             program = (ASTNode) p.parse().value;
         } catch (Exception e) {
-            String msg = "'.!' StringLiteral is NOT a valid statment.";
+            String msg = "'.@' StringLiteral is NOT a valid statment.";
             ASTUtils.error(node, msg);
         }
 
