@@ -302,8 +302,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
     }
 
     @Override
-    public Value visit(TermExpressionStmt node) throws ASTVisitorException {
-        //System.out.println("-TermExpressionStmt");
+    public Value visit(ParenthesisExpression node) throws ASTVisitorException {
+        //System.out.println("-ParenthesisExpression");
 
         Value result = node.getExpression().accept(this);
         return result;

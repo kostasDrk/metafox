@@ -15,7 +15,7 @@ import ast.AssignmentExpression;
 import ast.BinaryExpression;
 import ast.UnaryExpression;
 import ast.TermExpression;
-import ast.TermExpressionStmt;
+import ast.ParenthesisExpression;
 import ast.IdentifierExpression;
 import ast.IdentifierExpressionLocal;
 import ast.IdentifierExpressionGlobal;
@@ -331,7 +331,7 @@ expr ::=	assignexpr:assignex
 term ::=	 LEFT_PARENTHESIS expr:ex RIGHT_PARENTHESIS
 			{:
 				//RESULT = ex;
-				RESULT = new TermExpressionStmt(ex);
+				RESULT = new ParenthesisExpression(ex);
 				RESULT.setLine(exleft);
 				RESULT.setColumn(exright);
 			:}

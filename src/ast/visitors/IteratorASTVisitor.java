@@ -2,7 +2,8 @@ package ast.visitors;
 
 import ast.ASTVisitor;
 import ast.ASTVisitorException;
-import symbols.value.Value;
+
+import ast.ASTNode;
 import ast.Program;
 import ast.Statement;
 import ast.IfStatement;
@@ -17,7 +18,7 @@ import ast.AssignmentExpression;
 import ast.BinaryExpression;
 import ast.UnaryExpression;
 import ast.TermExpression;
-import ast.TermExpressionStmt;
+import ast.ParenthesisExpression;
 import ast.IdentifierExpression;
 import ast.IdentifierExpressionLocal;
 import ast.IdentifierExpressionGlobal;
@@ -51,8 +52,10 @@ import ast.MetaEval;
 import ast.MetaExecute;
 import ast.MetaRun;
 import ast.MetaToText;
-import symbols.value.StaticVal;
+
+import symbols.value.Value;
 import symbols.value.Value_t;
+import symbols.value.StaticVal;
 
 import java.util.ArrayList;
 
@@ -78,12 +81,12 @@ public class IteratorASTVisitor implements ASTVisitor {
 		return this._statementList.get(pos);
 	}
 
-    public Statement getNextStatement(){
+    public ASTNode getNextItem(){
         incCurItem();
         return this._statementList.get(this._curItem);
     }
 
-    public Statement getPrevStatement(){
+    public ASTNode getPrevItem(){
         decCurItem();
         return this._statementList.get(this._curItem);
     }
@@ -102,6 +105,18 @@ public class IteratorASTVisitor implements ASTVisitor {
 
     public void decCurItem(){
         this._curItem--;
+    }
+
+    public boolean hasNext(){
+        if(this._curItem >= this._statementList.size()-1)
+                return false;
+        return true;
+    }
+
+    public boolean hasPrev(){
+        if(this._curItem <= 0)
+                return false;
+        return true;
     }
 
 	@Override
@@ -136,7 +151,7 @@ public class IteratorASTVisitor implements ASTVisitor {
     }
 
     @Override
-    public Value visit(TermExpressionStmt node) throws ASTVisitorException {
+    public Value visit(ParenthesisExpression node) throws ASTVisitorException {
         // node.getExpression().accept(this);
         return null;
     }

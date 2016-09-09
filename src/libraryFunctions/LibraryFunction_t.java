@@ -28,7 +28,7 @@ public enum LibraryFunction_t {
     ADDFIRST("addFirst", 2),
     ADDONEXITPOINTS("addOnExitPoints", 2),
     GETASOBJECT("getAsObject", 1),
-    ITERATOR("iterator", -1),
+    ITERATOR("iterator", 1),
     GETNEXTITEM("getNextItem", 1),
     GETPREVITEM("getPrevItem", 1),
     HASNEXTITEM("hasNextItem", 1),
@@ -65,7 +65,9 @@ public enum LibraryFunction_t {
     ISTRUELITERAL("isTrueLiteral", 1),
     ISFALSELITERAL("isFalseLiteral", 1),
     GETEXPRESSION("getExpression", 1),
-    SETEXPRESSION("setExpression", 2);
+    SETEXPRESSION("setExpression", 2),
+    GETLEFTEXPRESSION("getLeftExpression", 1),
+    GETRIGHTEXPRESSION("getRightExpression", 1),;
 
     private final String _name;
     private final int _totalArgs;
@@ -280,6 +282,12 @@ public enum LibraryFunction_t {
             case "setExpression":
                 totalArgs = 1;
                 break;
+            case "getLeftExpression":
+                totalArgs = 1;
+                break;
+            case "getRightExpression":
+                totalArgs = 1;
+                break;
             default:
                 //fatal error
                 break;
@@ -350,7 +358,9 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.ISTRUELITERAL.toString())
                 || name.equals(LibraryFunction_t.ISFALSELITERAL.toString())
                 || name.equals(LibraryFunction_t.GETEXPRESSION.toString())
-                || name.equals(LibraryFunction_t.SETEXPRESSION.toString());
+                || name.equals(LibraryFunction_t.SETEXPRESSION.toString())
+                || name.equals(LibraryFunction_t.GETLEFTEXPRESSION.toString())
+                || name.equals(LibraryFunction_t.GETRIGHTEXPRESSION.toString());
     }
 
 }

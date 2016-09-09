@@ -17,7 +17,7 @@ import ast.AssignmentExpression;
 import ast.BinaryExpression;
 import ast.UnaryExpression;
 import ast.TermExpression;
-import ast.TermExpressionStmt;
+import ast.ParenthesisExpression;
 import ast.IdentifierExpression;
 import ast.IdentifierExpressionLocal;
 import ast.IdentifierExpressionGlobal;
@@ -108,7 +108,7 @@ public class ToStringASTVisitor implements ASTVisitor {
     }
 
     @Override
-    public Value visit(TermExpressionStmt node) throws ASTVisitorException {
+    public Value visit(ParenthesisExpression node) throws ASTVisitorException {
         _programm.append("(");
         node.getExpression().accept(this);
         _programm.append(")");

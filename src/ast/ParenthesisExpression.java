@@ -2,11 +2,11 @@ package ast;
 
 import symbols.value.Value;
 
-public class TermExpressionStmt extends TermExpression {
+public class ParenthesisExpression extends TermExpression {
 
 	private Expression _expression;
 
-	public TermExpressionStmt(Expression expression){
+	public ParenthesisExpression(Expression expression){
 		this._expression = expression;
 	}
 

@@ -14,7 +14,7 @@ import environment.FunctionEnv;
 import ast.Program;
 import ast.Statement;
 import ast.ExpressionStatement;
-import ast.TermExpressionStmt;
+import ast.ParenthesisExpression;
 import ast.Block;
 import ast.Expression;
 import ast.Lvalue;
@@ -82,7 +82,7 @@ public class LibraryFunctions {
                     stmtlist = new ArrayList<>();
                     Statement exstmt = (argument.getData() instanceof Expression)
                             ? new ExpressionStatement((Expression) argument.getData())
-                            : (FunctionDef) argument.getData();
+                            : (Statement) argument.getData();
                     stmtlist.add(exstmt);
                 } else {
                     stmtlist = (ArrayList<Statement>) argument.getData();
@@ -480,14 +480,32 @@ public class LibraryFunctions {
     }
 
     public static void iterator(Environment env) throws ASTVisitorException{
-        // Check for # of arguments here
-        FunctionDef funcdef = getFunctionArgument(env);
-        if (funcdef == null) {
+        if (!checkArgumentsNum(LibraryFunction_t.ITERATOR, env)) {
             return;
         }
-        
-        ASTVisitor astVisitor = new IteratorASTVisitor();
-        funcdef.accept(astVisitor);
+
+        // FunctionDef funcdef = getFunctionArgument(env);
+        Value value = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        if(!value.getType().equals(Value_t.AST) && !value.getType().equals(Value_t.USER_FUNCTION)){
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "iterator requires a statement AST.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+
+        ASTNode astNode;
+        if(value.getData() instanceof ArrayList<?>)
+            astNode = new Block((ArrayList<Statement>) value.getData());
+        else if(value.getData() instanceof Statement)
+            astNode = (Statement) value.getData();
+        else{
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "iterator requires a statement AST.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+
+        ASTVisitor astVisitor;
+        astVisitor = new IteratorASTVisitor();
+        ((Statement) astNode).accept(astVisitor);
 
         HashMap<Value, Value> objectData = new HashMap<Value, Value>();
         // Set "iter" field
@@ -590,26 +608,20 @@ public class LibraryFunctions {
             return;
         }
         IteratorASTVisitor astVisitor = (IteratorASTVisitor) val.getData();
-
-        int curItem = astVisitor.getCurItem();
-        if(curItem >= astVisitor.getStatementList().size()){
+        if(!astVisitor.hasNext()){
             StaticVal retVal = new StaticVal(Value_t.ERROR, "Statement iterator out of bounds.");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
-        // Statement curStmt = astVisitor.getStatement(curItem);
-        Statement curStmt = astVisitor.getNextStatement();
+
+        ASTNode curItem = astVisitor.getNextItem();
         Value retVal;
-        Expression expr = null;
-        if(curStmt instanceof ExpressionStatement){  // When an ExpressionStatement is next, return its expression instead
-            expr = ((ExpressionStatement)curStmt).getExpression();
+        if(curItem instanceof ExpressionStatement){ // When an ExpressionStatement is next, return its expression instead
+            Expression expr = ((ExpressionStatement)curItem).getExpression();
             retVal = new StaticVal(Value_t.AST, expr);
         } else{
-            retVal = new StaticVal(Value_t.AST, curStmt);
+            retVal = new StaticVal(Value_t.AST, curItem);
         }
-        
-        // Increment curItem counter
-        // astVisitor.incCurItem();
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
@@ -624,26 +636,20 @@ public class LibraryFunctions {
             return;
         }
         IteratorASTVisitor astVisitor = (IteratorASTVisitor) val.getData();
-
-        int curItem = astVisitor.getCurItem();
-        if(curItem <= 0){
+        if(!astVisitor.hasPrev()){
             StaticVal retVal = new StaticVal(Value_t.ERROR, "Statement iterator out of bounds.");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
         // Statement curStmt = astVisitor.getStatement(curItem);
-        Statement curStmt = astVisitor.getPrevStatement();
+        ASTNode curItem = astVisitor.getPrevItem();
         Value retVal;
-        Expression expr = null;
-        if(curStmt instanceof ExpressionStatement){  // When an ExpressionStatement is next, return its expression instead
-            expr = ((ExpressionStatement)curStmt).getExpression();
+        if(curItem instanceof ExpressionStatement){  // When an ExpressionStatement is next, return its expression instead
+            Expression expr = ((ExpressionStatement)curItem).getExpression();
             retVal = new StaticVal(Value_t.AST, expr);
         } else{
-            retVal = new StaticVal(Value_t.AST, curStmt);
+            retVal = new StaticVal(Value_t.AST, curItem);
         }
-        
-        // Increment curItem counter
-        // astVisitor.decCurItem();
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
@@ -659,13 +665,11 @@ public class LibraryFunctions {
             return;
         }
         IteratorASTVisitor astVisitor = (IteratorASTVisitor) val.getData();
-        int curItem = astVisitor.getCurItem();
         StaticVal retVal;
-        if(curItem >= astVisitor.getStatementList().size()-1){
+        if(!astVisitor.hasNext())
             retVal = new StaticVal(Value_t.BOOLEAN, Boolean.FALSE);
-        }else{
+        else
             retVal = new StaticVal(Value_t.BOOLEAN, Boolean.TRUE);
-        }
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
@@ -680,25 +684,12 @@ public class LibraryFunctions {
             return;
         }
         IteratorASTVisitor astVisitor = (IteratorASTVisitor) val.getData();
-        int curItem = astVisitor.getCurItem();
         StaticVal retVal;
-        if(curItem <= 0){
+        if(!astVisitor.hasPrev())
             retVal = new StaticVal(Value_t.BOOLEAN, Boolean.FALSE);
-        }else{
+        else
             retVal = new StaticVal(Value_t.BOOLEAN, Boolean.TRUE);
-        }
         ((FunctionEnv) env).setReturnVal(retVal);
-    }
-
-    // AST type checking
-    private static Value isASTType(Value val, String className) {
-            String checkClass = "class ast."+className;
-            String originClass = val.getData().getClass().toString();
-            if(originClass.equals(checkClass)){
-                return new StaticVal<>(Value_t.BOOLEAN, true);
-            }else{
-                return new StaticVal<>(Value_t.BOOLEAN, false);
-            }
     }
 
     public static void isStatement(Environment env){
@@ -1065,6 +1056,38 @@ public class LibraryFunctions {
             retVal = new StaticVal(Value_t.ERROR, "setExpression's first argument should be a statement AST that "
                                                     +"has an expression");
         }
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void getLeftExpression(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.GETLEFTEXPRESSION, env)){
+            return;
+        }
+        Value retVal;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        if(!(val.getData() instanceof BinaryExpression)){
+            retVal = new StaticVal(Value_t.ERROR, "getLeftExpression requires a BinaryExpression AST");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        Expression leftExpression = ((BinaryExpression) val.getData()).getExpression1();
+        retVal = new StaticVal(Value_t.AST, leftExpression);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void getRightExpression(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.GETRIGHTEXPRESSION, env)){
+            return;
+        }
+        Value retVal;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        if(!(val.getData() instanceof BinaryExpression)){
+            retVal = new StaticVal(Value_t.ERROR, "getRightExpression requires a BinaryExpression AST");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        Expression rightExpression = ((BinaryExpression) val.getData()).getExpression2();
+        retVal = new StaticVal(Value_t.AST, rightExpression);
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 

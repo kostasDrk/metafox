@@ -11,9 +11,9 @@ public interface ASTVisitor {
 	Value visit(AssignmentExpression node) throws ASTVisitorException;
 	Value visit(ExpressionStatement node) throws ASTVisitorException;
 	Value visit(IdentifierExpression node) throws ASTVisitorException;
-        Value visit(IdentifierExpressionGlobal node) throws ASTVisitorException;
-        Value visit(IdentifierExpressionLocal node) throws ASTVisitorException; 
-	Value visit(TermExpressionStmt node) throws ASTVisitorException;
+    Value visit(IdentifierExpressionGlobal node) throws ASTVisitorException;
+    Value visit(IdentifierExpressionLocal node) throws ASTVisitorException; 
+	Value visit(ParenthesisExpression node) throws ASTVisitorException;
 	Value visit(BinaryExpression node) throws ASTVisitorException;
 	Value visit(UnaryExpression node) throws ASTVisitorException;
 	Value visit(Member node) throws ASTVisitorException;
