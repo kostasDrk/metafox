@@ -37,13 +37,17 @@ function traverse(stmt){
 	}
 	if(isReturnStatement(curItem)){
 	    retExpr = getExpression(curItem);
-	    if(!retExpr) 
+	    if(!retExpr){
 		println("[!] Missing return value @line "+getLine(curItem));
+		println("[!] Fixing with value: -1");
+		setExpression(curItem, .<-1>.);
+	    }
 	}
     }
 }
 
 println("=====");
+traverse(foo);
 
-
+println("=====");
 traverse(foo);
