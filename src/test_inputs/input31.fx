@@ -1,21 +1,20 @@
 
 function foo(a){
-    if(s = 2){
+   if(s = 2){
         b = 999;
 	return;
    } else {
 	b = -999;
 	return;
+	a = 1;
    }
    while(false){
 	for(i = 0; i<10; i++){
 	    i = i+1;
-	    if(i == 10){
-		return;
-	    }
 	}
 	println("infinityyyyyyyyyyyyy");
    }
+   return 3;
 }
 
 function traverse(stmt){
@@ -23,10 +22,12 @@ function traverse(stmt){
 	println("[!] traverse requires a statement AST");
     }
     it = iterator(stmt);
+    lastItem = null;
     while(it..hasNext()){
 	curItem = it..next();
 	if(isIfStatement(curItem)){
-	    it..add(.<println("Entering if..."); return 535;>.);
+	    it..replace(.<println("Replaced!"); println("Yes, indeed!");>.);
+	    it..addBefore(.<println("Entering if...");>.);
 	}
 	if(isIfStatement(curItem) or isForStatement(curItem) or isWhileStatement(curItem)){
 	    expr = getExpression(curItem);
@@ -37,7 +38,11 @@ function traverse(stmt){
 		println("[!] Dead code @line "+getLine(curItem));
 	    }
 	    traverse(curItem);  // Recursively traverse the curItem
+	    if(isIfStatement(curItem)){
+	         traverse(getElseStatement(curItem));
+	    }
 	}
+//	if(isForStatement(curItem)) it..remove();
 	if(isReturnStatement(curItem)){
 	    retExpr = getExpression(curItem);
 	    if(!retExpr){
@@ -45,10 +50,19 @@ function traverse(stmt){
 		println("[!] Fixing with value: -1");
 		setExpression(curItem, .<-1>.);
 	    }
+	    if(it..hasNext()){		
+		println("[!] Dead code @line "+getLine(curItem));
+	    }
 	}
+	lastItem = curItem;
     }
-    if(isReturnStatement(curItem)){
-
+    if(isFunctionDefinition(stmt)){
+	exit = .<println("Exiting foo..");>.;
+	if(isReturnStatement(lastItem)){
+	     it..addBefore(exit);
+	}else{
+	     it..addAfter(exit);
+	}
     }
 }
 
@@ -59,4 +73,4 @@ println("=====");
 //traverse(foo);
 //println(foo);
 l = foo(true);
-println(l);
+//println(l);

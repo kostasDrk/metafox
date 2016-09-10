@@ -375,27 +375,73 @@ public class LibraryFunctions {
         hasPrevValue = new DynamicVal(hasPrevValue, "hasNext");
         objectData.put(hasPrevName, hasPrevValue);
 
-        // Compose "hasPrev" field, to call hasNextItem on iterator
-        Value addName = new StaticVal<>(Value_t.STRING, "add");
+        // Compose "remove" field, to call hasNextItem on iterator
+        Value removeName = new StaticVal<>(Value_t.STRING, "remove");
+        // Compose LvalueCall for hasNextItem
+        lvalue = new IdentifierExpression("removeItem");
+        LvalueCall removeItemCall = new LvalueCall(lvalue, callsuffix);
+        // Create the corresponding expression statement
+        ExpressionStatement exprstmt = new ExpressionStatement(removeItemCall);
+        stmtlist = new ArrayList<>();
+        stmtlist.add(exprstmt);
+        funcBody = new Block(stmtlist);
+        FunctionDef removeFuncDef = new FunctionDef("#ANONYMOUS#_", arguments, funcBody);
+        Value removeValue = new StaticVal(Value_t.USER_FUNCTION, removeFuncDef);
+        removeValue = new DynamicVal(removeValue, "remove");
+        objectData.put(removeName, removeValue);
+
+        // Compose "addBefore" field, to call hasNextItem on iterator
+        Value addName = new StaticVal<>(Value_t.STRING, "addBefore");
         arguments = new ArrayList<>();
         arguments.add(new IdentifierExpression("iterator"));
         arguments.add(new IdentifierExpression("newStmt"));
         // Compose LvalueCall for hasNextItem
-        lvalue = new IdentifierExpression("addItem");
+        lvalue = new IdentifierExpression("addItemBefore");
         actualArguments = new ArrayList<>();
         actualArguments.add(member);
         actualArguments.add(new IdentifierExpression("newStmt"));
         callsuffix = new NormCall(actualArguments);
         LvalueCall addItemCall = new LvalueCall(lvalue, callsuffix);
         // Create the corresponding expression statement
-        ExpressionStatement exprstmt = new ExpressionStatement(addItemCall);
+        exprstmt = new ExpressionStatement(addItemCall);
         stmtlist = new ArrayList<>();
         stmtlist.add(exprstmt);
         funcBody = new Block(stmtlist);
         FunctionDef addFuncDef = new FunctionDef("#ANONYMOUS#_", arguments, funcBody);
         Value addValue = new StaticVal(Value_t.USER_FUNCTION, addFuncDef);
-        addValue = new DynamicVal(addValue, "addItem");
+        addValue = new DynamicVal(addValue, "addBefore");
         objectData.put(addName, addValue);
+
+
+        // Compose "addAfter" field, to call hasNextItem on iterator
+        addName = new StaticVal<>(Value_t.STRING, "addAfter");
+        // Compose LvalueCall for hasNextItem
+        lvalue = new IdentifierExpression("addItemAfter");
+        addItemCall = new LvalueCall(lvalue, callsuffix);
+        // Create the corresponding expression statement
+        exprstmt = new ExpressionStatement(addItemCall);
+        stmtlist = new ArrayList<>();
+        stmtlist.add(exprstmt);
+        funcBody = new Block(stmtlist);
+        addFuncDef = new FunctionDef("#ANONYMOUS#_", arguments, funcBody);
+        addValue = new StaticVal(Value_t.USER_FUNCTION, addFuncDef);
+        addValue = new DynamicVal(addValue, "addAfter");
+        objectData.put(addName, addValue);
+
+        // Compose "replace" field, to call hasNextItem on iterator
+        Value replaceName = new StaticVal<>(Value_t.STRING, "replace");
+        // Compose LvalueCall for hasNextItem
+        lvalue = new IdentifierExpression("replaceItem");
+        LvalueCall replaceItemCall = new LvalueCall(lvalue, callsuffix);
+        // Create the corresponding expression statement
+        exprstmt = new ExpressionStatement(replaceItemCall);
+        stmtlist = new ArrayList<>();
+        stmtlist.add(exprstmt);
+        funcBody = new Block(stmtlist);
+        FunctionDef replaceFuncDef = new FunctionDef("#ANONYMOUS#_", arguments, funcBody);
+        Value replaceValue = new StaticVal(Value_t.USER_FUNCTION, replaceFuncDef);
+        replaceValue = new DynamicVal(replaceValue, "replace");
+        objectData.put(replaceName, replaceValue);
 
         FoxObject fobject = new FoxObject(objectData);
         Value retVal = new StaticVal(Value_t.OBJECT, fobject);
@@ -504,8 +550,8 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void addItem(Environment env){
-        if (!checkArgumentsNum(LibraryFunction_t.ADDITEM, env)) {
+    public static void addItemBefore(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.ADDITEMBEFORE, env)) {
             return;
         }
         Value iterVal = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
@@ -523,12 +569,88 @@ public class LibraryFunctions {
                 ((FunctionEnv) env).setReturnVal(retVal);
                 return;
             }
-            astVisitor.addStatement(statementList);
+            astVisitor.addStatementBefore(statementList);
         }else{
             Statement newStmt = (Statement) stmtVal.getData();
-            astVisitor.addStatement(newStmt);
+            astVisitor.addStatementBefore(newStmt);
         }
         
+        
+        Value retVal = NULL;
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void addItemAfter(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.ADDITEMAFTER, env)) {
+            return;
+        }
+        Value iterVal = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value stmtVal = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
+        if (!(iterVal.getData() instanceof IteratorASTVisitor) || !(stmtVal.getData() instanceof Statement) && !(stmtVal.getData() instanceof ArrayList<?>)) {
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "addItem requires an iterator object and a statement list AST.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        IteratorASTVisitor astVisitor = (IteratorASTVisitor) iterVal.getData();
+        if(stmtVal.getData() instanceof ArrayList){
+            ArrayList statementList = (ArrayList) stmtVal.getData();
+            if(!(statementList.get(0) instanceof Statement)){
+                StaticVal retVal = new StaticVal(Value_t.ERROR, "addItem requires an iterator object and a statement list AST");
+                ((FunctionEnv) env).setReturnVal(retVal);
+                return;
+            }
+            astVisitor.addStatementAfter(statementList);
+        }else{
+            Statement newStmt = (Statement) stmtVal.getData();
+            astVisitor.addStatementAfter(newStmt);
+        }
+        
+        
+        Value retVal = NULL;
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void removeItem(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.REMOVEITEM, env)) {
+            return;
+        }
+        Value iterVal = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        if (!(iterVal.getData() instanceof IteratorASTVisitor)) {
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "removeItem requires an iterator object.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        IteratorASTVisitor astVisitor = (IteratorASTVisitor) iterVal.getData();
+        astVisitor.removeCurrentStatement();
+        
+        Value retVal = NULL;
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void replaceItem(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.REPLACEITEM, env)) {
+            return;
+        }
+        Value iterVal = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value stmtVal = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
+        if (!(iterVal.getData() instanceof IteratorASTVisitor) || !(stmtVal.getData() instanceof Statement) && !(stmtVal.getData() instanceof ArrayList<?>)) {
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "replaceItem requires an iterator object and a statement list AST.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        IteratorASTVisitor astVisitor = (IteratorASTVisitor) iterVal.getData();
+        if(stmtVal.getData() instanceof ArrayList){
+            ArrayList statementList = (ArrayList) stmtVal.getData();
+            if(!(statementList.get(0) instanceof Statement)){
+                StaticVal retVal = new StaticVal(Value_t.ERROR, "replaceItem requires an iterator object and a statement list AST");
+                ((FunctionEnv) env).setReturnVal(retVal);
+                return;
+            }
+            astVisitor.setCurrentStatement(statementList);
+        }else{
+            Statement newStmt = (Statement) stmtVal.getData();
+            astVisitor.setCurrentStatement(newStmt);
+        }
         
         Value retVal = NULL;
         ((FunctionEnv) env).setReturnVal(retVal);
@@ -971,6 +1093,23 @@ public class LibraryFunctions {
             rightExpression = ((ParenthesisExpression) rightExpression).getExpression();
         }
         retVal = new StaticVal(Value_t.AST, rightExpression);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void getElseStatement(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.GETELSESTATEMENT, env)) {
+            return;
+        }
+        Value retVal = NULL;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        if(!(val.getData() instanceof IfStatement)){
+            retVal = new StaticVal(Value_t.ERROR, "getElseStatement requires an IfStatement AST");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        Statement elseStmt = ((IfStatement) val.getData()).getElseStatement();
+        if(elseStmt != null)
+            retVal = new StaticVal(Value_t.AST, elseStmt);
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 

@@ -28,16 +28,43 @@ public class IteratorASTVisitor implements ASTVisitor {
         return _statementList.get(pos);
     }
 
-    public void addStatement(Statement stmt){
+    public void addStatementBefore(Statement stmt){
         _statementList.add(_curItem, stmt);
         incCurItem();
     }
 
-    public void addStatement(ArrayList<Statement> statementList){
+    public void addStatementBefore(ArrayList<Statement> statementList){
         for(Statement stmt : statementList){
             _statementList.add(_curItem, stmt);
             incCurItem();
         }
+    }
+
+    public void addStatementAfter(Statement stmt){
+        _statementList.add(_curItem+1, stmt);
+        incCurItem();
+    }
+
+    public void addStatementAfter(ArrayList<Statement> statementList){
+        for(Statement stmt : statementList){
+            _statementList.add(_curItem+1, stmt);
+            incCurItem();
+        }
+    }
+
+    public void removeCurrentStatement(){
+        _statementList.remove(_curItem);
+        decCurItem();
+    }
+
+    public void setCurrentStatement(Statement statement){
+        _statementList.set(_curItem, statement);
+    }
+
+    public void setCurrentStatement(ArrayList<Statement> statementList){
+        _statementList.set(_curItem, statementList.get(0));
+        statementList.remove(0); // First element already inserted
+        addStatementAfter(statementList);
     }
 
     public ASTNode getNextItem() {
@@ -270,13 +297,6 @@ public class IteratorASTVisitor implements ASTVisitor {
             node.getStatement().accept(this);
         } else {
             _statementList.add(node.getStatement());
-        }
-        if (node.getElseStatement() != null) {
-            if (node.getElseStatement() instanceof Block) {
-                node.getElseStatement().accept(this);
-            } else {
-                _statementList.add(node.getElseStatement());
-            }
         }
         return null;
     }
