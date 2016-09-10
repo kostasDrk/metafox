@@ -67,6 +67,7 @@ public enum LibraryFunction_t {
     SETEXPRESSION("setExpression", 2),
     GETLEFTEXPRESSION("getLeftExpression", 1),
     GETRIGHTEXPRESSION("getRightExpression", 1),
+    ADDITEM("addItem", 2),
     GETLINE("getLine", 1),
     GETCOLUMN("getColumn", 1);
 
@@ -286,6 +287,9 @@ public enum LibraryFunction_t {
             case "getRightExpression":
                 totalArgs = 1;
                 break;
+            case "addItem":
+                totalArgs = 2;
+                break;
             case "getLine":
                 totalArgs = 1;
                 break;
@@ -365,7 +369,8 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.GETLEFTEXPRESSION.toString())
                 || name.equals(LibraryFunction_t.GETRIGHTEXPRESSION.toString())
                 || name.equals(LibraryFunction_t.GETLINE.toString())
-                || name.equals(LibraryFunction_t.GETCOLUMN.toString());
+                || name.equals(LibraryFunction_t.GETCOLUMN.toString())
+                || name.equals(LibraryFunction_t.ADDITEM.toString());
     }
 
 }

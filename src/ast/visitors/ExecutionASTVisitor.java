@@ -1015,13 +1015,16 @@ public class ExecutionASTVisitor implements ASTVisitor {
             } else {
                 return new StaticVal<>(Value_t.AST, node.getExpression());
             }
-        } else {
+        }else {
             if (_inMeta) {
                 for (Statement stmt : node.getStatementList()) {
                     stmt.accept(this);
                 }
             } else {
-                return new StaticVal<>(Value_t.AST, node.getStatementList());
+                if(node.getStatementList().size() == 1)
+                    return new StaticVal<>(Value_t.AST, node.getStatementList().get(0));
+                else
+                    return new StaticVal<>(Value_t.AST, node.getStatementList());
             }
         }
         return new StaticVal();

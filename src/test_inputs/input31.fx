@@ -25,6 +25,9 @@ function traverse(stmt){
     it = iterator(stmt);
     while(it..hasNext()){
 	curItem = it..next();
+	if(isIfStatement(curItem)){
+	    it..add(.<println("Entering if..."); return 535;>.);
+	}
 	if(isIfStatement(curItem) or isForStatement(curItem) or isWhileStatement(curItem)){
 	    expr = getExpression(curItem);
 	    if(isAssignmentExpression(expr)){
@@ -44,10 +47,16 @@ function traverse(stmt){
 	    }
 	}
     }
+    if(isReturnStatement(curItem)){
+
+    }
 }
 
 println("=====");
 traverse(foo);
 
 println("=====");
-traverse(foo);
+//traverse(foo);
+//println(foo);
+l = foo(true);
+println(l);

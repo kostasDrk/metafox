@@ -4,6 +4,7 @@ import ast.*;
 import ast.visitors.ToStringASTVisitor;
 import ast.visitors.IteratorASTVisitor;
 
+
 import dataStructures.*;
 
 import environment.Environment;
@@ -12,6 +13,7 @@ import environment.FunctionEnv;
 import symbols.value.*;
 
 import static utils.Constants.LIBRARY_FUNC_ARG;
+import static utils.Constants.NULL;
 
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -262,7 +264,7 @@ public class LibraryFunctions {
         binAST = new ObjectDefinition(indexElements);
         result = new StaticVal<>(Value_t.AST, binAST);
         ((FunctionEnv) env).setReturnVal(result);
-    }
+    } 
 
     public static void iterator(Environment env) throws ASTVisitorException {
         if (!checkArgumentsNum(LibraryFunction_t.ITERATOR, env)) {
@@ -373,6 +375,28 @@ public class LibraryFunctions {
         hasPrevValue = new DynamicVal(hasPrevValue, "hasNext");
         objectData.put(hasPrevName, hasPrevValue);
 
+        // Compose "hasPrev" field, to call hasNextItem on iterator
+        Value addName = new StaticVal<>(Value_t.STRING, "add");
+        arguments = new ArrayList<>();
+        arguments.add(new IdentifierExpression("iterator"));
+        arguments.add(new IdentifierExpression("newStmt"));
+        // Compose LvalueCall for hasNextItem
+        lvalue = new IdentifierExpression("addItem");
+        actualArguments = new ArrayList<>();
+        actualArguments.add(member);
+        actualArguments.add(new IdentifierExpression("newStmt"));
+        callsuffix = new NormCall(actualArguments);
+        LvalueCall addItemCall = new LvalueCall(lvalue, callsuffix);
+        // Create the corresponding expression statement
+        ExpressionStatement exprstmt = new ExpressionStatement(addItemCall);
+        stmtlist = new ArrayList<>();
+        stmtlist.add(exprstmt);
+        funcBody = new Block(stmtlist);
+        FunctionDef addFuncDef = new FunctionDef("#ANONYMOUS#_", arguments, funcBody);
+        Value addValue = new StaticVal(Value_t.USER_FUNCTION, addFuncDef);
+        addValue = new DynamicVal(addValue, "addItem");
+        objectData.put(addName, addValue);
+
         FoxObject fobject = new FoxObject(objectData);
         Value retVal = new StaticVal(Value_t.OBJECT, fobject);
         ((FunctionEnv) env).setReturnVal(retVal);
@@ -477,6 +501,36 @@ public class LibraryFunctions {
         } else {
             retVal = new StaticVal(Value_t.BOOLEAN, Boolean.TRUE);
         }
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void addItem(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.ADDITEM, env)) {
+            return;
+        }
+        Value iterVal = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value stmtVal = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
+        if (!(iterVal.getData() instanceof IteratorASTVisitor) || !(stmtVal.getData() instanceof Statement) && !(stmtVal.getData() instanceof ArrayList<?>)) {
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "addItem requires an iterator object and a statement list AST.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        IteratorASTVisitor astVisitor = (IteratorASTVisitor) iterVal.getData();
+        if(stmtVal.getData() instanceof ArrayList){
+            ArrayList statementList = (ArrayList) stmtVal.getData();
+            if(!(statementList.get(0) instanceof Statement)){
+                StaticVal retVal = new StaticVal(Value_t.ERROR, "addItem requires an iterator object and a statement list AST");
+                ((FunctionEnv) env).setReturnVal(retVal);
+                return;
+            }
+            astVisitor.addStatement(statementList);
+        }else{
+            Statement newStmt = (Statement) stmtVal.getData();
+            astVisitor.addStatement(newStmt);
+        }
+        
+        
+        Value retVal = NULL;
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 

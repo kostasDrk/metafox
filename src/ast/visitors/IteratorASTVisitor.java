@@ -28,6 +28,18 @@ public class IteratorASTVisitor implements ASTVisitor {
         return _statementList.get(pos);
     }
 
+    public void addStatement(Statement stmt){
+        _statementList.add(_curItem, stmt);
+        incCurItem();
+    }
+
+    public void addStatement(ArrayList<Statement> statementList){
+        for(Statement stmt : statementList){
+            _statementList.add(_curItem, stmt);
+            incCurItem();
+        }
+    }
+
     public ASTNode getNextItem() {
         incCurItem();
         return _statementList.get(_curItem);
@@ -201,10 +213,11 @@ public class IteratorASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(Block node) throws ASTVisitorException {
-        node.getStatementList().stream().forEach((stmt) -> {
+        /*node.getStatementList().stream().forEach((stmt) -> {
             _statementList.add(stmt);
             // stmt.accept(this);
-        });
+        });*/
+        _statementList = node.getStatementList();
         return null;
     }
 
