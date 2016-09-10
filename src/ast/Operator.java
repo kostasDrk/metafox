@@ -19,23 +19,30 @@ public enum Operator {
     LESS_OR_EQUAL("<="),
     LESS("<");
 
-    private String type;
+    private final String _type;
 
     private Operator(String type) {
-        this.type = type;
+        _type = type;
     }
 
     public String getType() {
-        return type;
+        return _type;
     }
 
+    @Override
     public String toString() {
-        return type;
+        return _type;
     }
 
     public boolean isLogical() {
-        return this.equals(Operator.CMP_EQUAL) || this.equals(Operator.NOT_EQUAL) || this.equals(Operator.GREATER) || this.equals(Operator.GREATER_OR_EQUAL)
-                || this.equals(Operator.LESS) || this.equals(Operator.LESS_OR_EQUAL) || this.equals(Operator.LOGIC_AND) || this.equals(Operator.LOGIC_OR);
+        return this.equals(Operator.CMP_EQUAL)
+                || this.equals(Operator.NOT_EQUAL)
+                || this.equals(Operator.GREATER)
+                || this.equals(Operator.GREATER_OR_EQUAL)
+                || this.equals(Operator.LESS)
+                || this.equals(Operator.LESS_OR_EQUAL)
+                || this.equals(Operator.LOGIC_AND)
+                || this.equals(Operator.LOGIC_OR);
     }
 
 }
