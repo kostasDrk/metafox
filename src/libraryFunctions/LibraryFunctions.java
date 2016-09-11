@@ -305,6 +305,10 @@ public class LibraryFunctions {
             astNode = new Block((ArrayList<Statement>) value.getData());
         } else if (value.getData() instanceof Statement) {
             astNode = (Statement) value.getData();
+        } else if(value.getData() instanceof Program){
+            astNode = (Program) value.getData();
+            ArrayList<Statement> stmtlist = (ArrayList)((Program) astNode).getStatements();
+            astNode = new Block(stmtlist);
         } else {
             StaticVal retVal = new StaticVal(Value_t.ERROR, "iterator requires a statement AST.");
             ((FunctionEnv) env).setReturnVal(retVal);

@@ -3,6 +3,7 @@ package interpreter;
 import java.io.FileReader;
 
 import ast.ASTNode;
+import ast.Program;
 import ast.ASTVisitor;
 import ast.visitors.ExecutionASTVisitor;
 import ast.visitors.ToStringASTVisitor;
@@ -26,7 +27,7 @@ public class MetafoxInterpreter {
                 //System.out.println(printVisitor.toString());
                 //System.out.println("\n\n**Parse ok**\n\n");
                 
-                ASTVisitor executionASTVisitor = new ExecutionASTVisitor();
+                ASTVisitor executionASTVisitor = new ExecutionASTVisitor((Program)program);
                 program.accept(executionASTVisitor);
                 // System.out.println("\n\n**Execution ok**\n\n");
             } catch (Exception e) {
