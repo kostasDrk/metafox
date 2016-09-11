@@ -22,7 +22,6 @@ public enum LibraryFunction_t {
     ISLIBFUNC("isLibFunc", 1),
     ISOBJECT("isObject", 1),
     ISAST("isAST", 1),
-    //FACTORY("factory", -2),
     COPY("copy", 1),
     DIAGNOSE("diagnose", 3),
     ADDFIRST("addFirst", 2),
@@ -68,7 +67,8 @@ public enum LibraryFunction_t {
     GETLEFTEXPRESSION("getLeftExpression", 1),
     GETRIGHTEXPRESSION("getRightExpression", 1),
     GETLINE("getLine", 1),
-    GETCOLUMN("getColumn", 1);
+    GETCOLUMN("getColumn", 1),
+    ADDFIELDS("addFields", 2);
 
     private final String _name;
     private final int _totalArgs;
@@ -292,6 +292,9 @@ public enum LibraryFunction_t {
             case "getColumn":
                 totalArgs = 1;
                 break;
+            case "addFields":
+                totalArgs = 2;
+                break;
             default:
                 //fatal error
                 break;
@@ -365,7 +368,8 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.GETLEFTEXPRESSION.toString())
                 || name.equals(LibraryFunction_t.GETRIGHTEXPRESSION.toString())
                 || name.equals(LibraryFunction_t.GETLINE.toString())
-                || name.equals(LibraryFunction_t.GETCOLUMN.toString());
+                || name.equals(LibraryFunction_t.GETCOLUMN.toString())
+                || name.equals(LibraryFunction_t.ADDFIELDS.toString());
     }
 
 }

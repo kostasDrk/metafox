@@ -1,18 +1,16 @@
 function factory(pairs){
     if(len(pairs) % 2 != 0){
-	println("factory requires an even # of arguments");
-	return;
+    println("factory requires an even # of arguments");
+    return;
     }
     new = .<{}>.;
-    for(i=0; i < len(pairs); i = i+2){
-	key = pairs[i];
-	value = pairs[i+1];
-//	addField(new, key, value);
-    }
+   
+    addFields(new, pairs);
+    
     return new;
 }
 
-pairs = ["name", "", "lastName", "", "age", -1];
+pairs = [.<Name>., .<"Anna">., .<"lastName">., .<"kokolaki">., .<"age">., .<23>., .<{"hello":"anna"}>., .<"hy540">.];
 s = factory(pairs);
-b = .!s;
+if(s) b = .!s;
 if(isObject(b)) println(b);
