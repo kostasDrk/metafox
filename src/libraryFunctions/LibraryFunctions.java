@@ -1113,6 +1113,69 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
+    public static void getOperator(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.GETOPERATOR, env)) {
+            return;
+        }    
+        Value retVal;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        if (!(val.getData() instanceof BinaryExpression) 
+                && !(val.getData() instanceof UnaryExpression)) {
+            String msg = "getOperator requires a BinaryExpression or UnaryExpression.";
+            retVal = new StaticVal(Value_t.ERROR, msg);
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }    
+        
+        
+        String operator;
+        if(val.getData() instanceof BinaryExpression){
+            operator = ((BinaryExpression) val.getData()).getOperator().toString();
+        }else{
+            operator = ((UnaryExpression) val.getData()).getOperator().toString();        
+        }
+        
+        retVal = new StaticVal(Value_t.STRING, operator);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+    
+    
+    public static void setOperator(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.SETOPERATOR, env)) {
+            return;
+        }    
+        Value retVal = NULL;
+        Value expr = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value op = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
+        
+        if ((!(expr.getData() instanceof BinaryExpression) 
+                && !(expr.getData() instanceof UnaryExpression))
+                || !(op.getData() instanceof String)) {
+            String msg = "Requires a BinaryExpression or "
+                    + "UnaryExpression and a String which describes the operator.";
+            retVal = new StaticVal(Value_t.ERROR, msg);
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        
+        Operator operator = Operator.toOperator((String)op.getData());
+        if(operator == null){
+            String msg = "The given string '" +op.getData()+ 
+                    "' could not parsed to a valid Operator.";
+            retVal = new StaticVal(Value_t.ERROR, msg);
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        
+        if(expr.getData() instanceof BinaryExpression){
+            ((BinaryExpression) expr.getData()).setOperator(operator);
+        }else{
+            ((UnaryExpression) expr.getData()).setOperator(operator);
+        }
+        
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+    
     public static void getLine(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.GETLINE, env)) {
             return;

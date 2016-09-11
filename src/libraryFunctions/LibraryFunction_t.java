@@ -73,7 +73,9 @@ public enum LibraryFunction_t {
     REMOVEITEM("removeItem", 1),
     REPLACEITEM("replaceItem", 2),
     GETLINE("getLine", 1),
-    GETCOLUMN("getColumn", 1);
+    GETCOLUMN("getColumn", 1),
+    GETOPERATOR("getOperator", 1),
+    SETOPERATOR("setOperator", 2);
 
     private final String _name;
     private final int _totalArgs;
@@ -302,7 +304,7 @@ public enum LibraryFunction_t {
                 break;
             case "replaceItem":
                 totalArgs = 1;
-                break; 
+                break;
             case "getElseStatement":
                 totalArgs = 1;
                 break;
@@ -310,6 +312,12 @@ public enum LibraryFunction_t {
                 totalArgs = 1;
                 break;
             case "getColumn":
+                totalArgs = 1;
+                break;
+            case "getOperator":
+                totalArgs = 1;
+                break;
+            case "setOperator":
                 totalArgs = 1;
                 break;
             default:
@@ -390,7 +398,9 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.ADDITEMAFTER.toString())
                 || name.equals(LibraryFunction_t.GETELSESTATEMENT.toString())
                 || name.equals(LibraryFunction_t.REMOVEITEM.toString())
-                || name.equals(LibraryFunction_t.REPLACEITEM.toString());
+                || name.equals(LibraryFunction_t.REPLACEITEM.toString())
+                || name.equals(LibraryFunction_t.GETOPERATOR.toString())
+                || name.equals(LibraryFunction_t.SETOPERATOR.toString());
     }
 
 }
