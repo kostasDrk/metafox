@@ -45,4 +45,59 @@ public enum Operator {
                 || this.equals(Operator.LOGIC_OR);
     }
 
+    public static Operator toOperator(String operator) {
+        switch (operator) {
+            case "+":
+                return Operator.PLUS;
+
+            case "-":
+                return Operator.MINUS;
+
+            case "*":
+                return Operator.MUL;
+
+            case "/":
+                return Operator.DIV;
+
+            case "++":
+                return Operator.PLUS_PLUS;
+
+            case "--":
+                return Operator.MINUS_MINUS;
+
+            case "%":
+                return Operator.MOD;
+
+            case "and":
+                return Operator.LOGIC_AND;
+
+            case "or":
+                return Operator.LOGIC_OR;
+
+            case "not":
+                return Operator.LOGIC_NOT;
+
+            case "==":
+                return Operator.CMP_EQUAL;
+
+            case "!=":
+                return Operator.NOT_EQUAL;
+
+            case ">=":
+                return Operator.GREATER_OR_EQUAL;
+
+            case ">":
+                return Operator.GREATER;
+
+            case "<=":
+                return Operator.LESS_OR_EQUAL;
+
+            case "<":
+                return Operator.LESS;
+
+            default:
+                return null;
+        }
+
+    }
 }
