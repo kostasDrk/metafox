@@ -4,7 +4,6 @@ import ast.*;
 import ast.visitors.ToStringASTVisitor;
 import ast.visitors.IteratorASTVisitor;
 
-
 import dataStructures.*;
 
 import environment.Environment;
@@ -264,7 +263,7 @@ public class LibraryFunctions {
         binAST = new ObjectDefinition(indexElements);
         result = new StaticVal<>(Value_t.AST, binAST);
         ((FunctionEnv) env).setReturnVal(result);
-    } 
+    }
 
     public static void iterator(Environment env) throws ASTVisitorException {
         if (!checkArgumentsNum(LibraryFunction_t.ITERATOR, env)) {
@@ -412,7 +411,6 @@ public class LibraryFunctions {
         addValue = new DynamicVal(addValue, "addBefore");
         objectData.put(addName, addValue);
 
-
         // Compose "addAfter" field, to call hasNextItem on iterator
         addName = new StaticVal<>(Value_t.STRING, "addAfter");
         // Compose LvalueCall for hasNextItem
@@ -550,7 +548,7 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void addItemBefore(Environment env){
+    public static void addItemBefore(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.ADDITEMBEFORE, env)) {
             return;
         }
@@ -562,25 +560,24 @@ public class LibraryFunctions {
             return;
         }
         IteratorASTVisitor astVisitor = (IteratorASTVisitor) iterVal.getData();
-        if(stmtVal.getData() instanceof ArrayList){
+        if (stmtVal.getData() instanceof ArrayList) {
             ArrayList statementList = (ArrayList) stmtVal.getData();
-            if(!(statementList.get(0) instanceof Statement)){
+            if (!(statementList.get(0) instanceof Statement)) {
                 StaticVal retVal = new StaticVal(Value_t.ERROR, "addItem requires an iterator object and a statement list AST");
                 ((FunctionEnv) env).setReturnVal(retVal);
                 return;
             }
             astVisitor.addStatementBefore(statementList);
-        }else{
+        } else {
             Statement newStmt = (Statement) stmtVal.getData();
             astVisitor.addStatementBefore(newStmt);
         }
-        
-        
+
         Value retVal = NULL;
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void addItemAfter(Environment env){
+    public static void addItemAfter(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.ADDITEMAFTER, env)) {
             return;
         }
@@ -592,25 +589,24 @@ public class LibraryFunctions {
             return;
         }
         IteratorASTVisitor astVisitor = (IteratorASTVisitor) iterVal.getData();
-        if(stmtVal.getData() instanceof ArrayList){
+        if (stmtVal.getData() instanceof ArrayList) {
             ArrayList statementList = (ArrayList) stmtVal.getData();
-            if(!(statementList.get(0) instanceof Statement)){
+            if (!(statementList.get(0) instanceof Statement)) {
                 StaticVal retVal = new StaticVal(Value_t.ERROR, "addItem requires an iterator object and a statement list AST");
                 ((FunctionEnv) env).setReturnVal(retVal);
                 return;
             }
             astVisitor.addStatementAfter(statementList);
-        }else{
+        } else {
             Statement newStmt = (Statement) stmtVal.getData();
             astVisitor.addStatementAfter(newStmt);
         }
-        
-        
+
         Value retVal = NULL;
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void removeItem(Environment env){
+    public static void removeItem(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.REMOVEITEM, env)) {
             return;
         }
@@ -622,12 +618,12 @@ public class LibraryFunctions {
         }
         IteratorASTVisitor astVisitor = (IteratorASTVisitor) iterVal.getData();
         astVisitor.removeCurrentStatement();
-        
+
         Value retVal = NULL;
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void replaceItem(Environment env){
+    public static void replaceItem(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.REPLACEITEM, env)) {
             return;
         }
@@ -639,19 +635,19 @@ public class LibraryFunctions {
             return;
         }
         IteratorASTVisitor astVisitor = (IteratorASTVisitor) iterVal.getData();
-        if(stmtVal.getData() instanceof ArrayList){
+        if (stmtVal.getData() instanceof ArrayList) {
             ArrayList statementList = (ArrayList) stmtVal.getData();
-            if(!(statementList.get(0) instanceof Statement)){
+            if (!(statementList.get(0) instanceof Statement)) {
                 StaticVal retVal = new StaticVal(Value_t.ERROR, "replaceItem requires an iterator object and a statement list AST");
                 ((FunctionEnv) env).setReturnVal(retVal);
                 return;
             }
             astVisitor.setCurrentStatement(statementList);
-        }else{
+        } else {
             Statement newStmt = (Statement) stmtVal.getData();
             astVisitor.setCurrentStatement(newStmt);
         }
-        
+
         Value retVal = NULL;
         ((FunctionEnv) env).setReturnVal(retVal);
     }
@@ -1096,59 +1092,58 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void getElseStatement(Environment env){
+    public static void getElseStatement(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.GETELSESTATEMENT, env)) {
             return;
         }
         Value retVal = NULL;
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
-        if(!(val.getData() instanceof IfStatement)){
+        if (!(val.getData() instanceof IfStatement)) {
             retVal = new StaticVal(Value_t.ERROR, "getElseStatement requires an IfStatement AST");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
         Statement elseStmt = ((IfStatement) val.getData()).getElseStatement();
-        if(elseStmt != null)
+        if (elseStmt != null) {
             retVal = new StaticVal(Value_t.AST, elseStmt);
+        }
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void getOperator(Environment env){
+    public static void getOperator(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.GETOPERATOR, env)) {
             return;
-        }    
+        }
         Value retVal;
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
-        if (!(val.getData() instanceof BinaryExpression) 
+        if (!(val.getData() instanceof BinaryExpression)
                 && !(val.getData() instanceof UnaryExpression)) {
             String msg = "getOperator requires a BinaryExpression or UnaryExpression.";
             retVal = new StaticVal(Value_t.ERROR, msg);
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
-        }    
-        
-        
-        String operator;
-        if(val.getData() instanceof BinaryExpression){
-            operator = ((BinaryExpression) val.getData()).getOperator().toString();
-        }else{
-            operator = ((UnaryExpression) val.getData()).getOperator().toString();        
         }
-        
+
+        String operator;
+        if (val.getData() instanceof BinaryExpression) {
+            operator = ((BinaryExpression) val.getData()).getOperator().toString();
+        } else {
+            operator = ((UnaryExpression) val.getData()).getOperator().toString();
+        }
+
         retVal = new StaticVal(Value_t.STRING, operator);
         ((FunctionEnv) env).setReturnVal(retVal);
     }
-    
-    
-    public static void setOperator(Environment env){
+
+    public static void setOperator(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.SETOPERATOR, env)) {
             return;
-        }    
+        }
         Value retVal = NULL;
         Value expr = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
         Value op = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
-        
-        if ((!(expr.getData() instanceof BinaryExpression) 
+
+        if ((!(expr.getData() instanceof BinaryExpression)
                 && !(expr.getData() instanceof UnaryExpression))
                 || !(op.getData() instanceof String)) {
             String msg = "Requires a BinaryExpression or "
@@ -1157,25 +1152,25 @@ public class LibraryFunctions {
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
-        
-        Operator operator = Operator.toOperator((String)op.getData());
-        if(operator == null){
-            String msg = "The given string '" +op.getData()+ 
-                    "' could not parsed to a valid Operator.";
+
+        Operator operator = Operator.toOperator((String) op.getData());
+        if (operator == null) {
+            String msg = "The given string '" + op.getData()
+                    + "' could not parsed to a valid Operator.";
             retVal = new StaticVal(Value_t.ERROR, msg);
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
-        
-        if(expr.getData() instanceof BinaryExpression){
+
+        if (expr.getData() instanceof BinaryExpression) {
             ((BinaryExpression) expr.getData()).setOperator(operator);
-        }else{
+        } else {
             ((UnaryExpression) expr.getData()).setOperator(operator);
         }
-        
+
         ((FunctionEnv) env).setReturnVal(retVal);
     }
-    
+
     public static void getLine(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.GETLINE, env)) {
             return;
