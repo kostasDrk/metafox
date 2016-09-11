@@ -545,20 +545,44 @@ public class ExecutionASTVisitor implements ASTVisitor {
             int count = 0;
             ArrayList<IdentifierExpression> arguments = ((FunctionDef) lvalue.getData()).getArguments();
 
-            if (arguments.size() != actualArguments.size()) {
+            if (actualArguments.size() < arguments.size()) {
                 String msg = "Call to '" + ((DynamicVal) lvalue).getErrorInfo() + "' requires " + arguments.size() + " arguments"
                         + ": " + actualArguments.size() + " found.";
                 ASTUtils.error(node, msg);
             }
+
+            //Add Arguments field 
+            String name = "arguments";
+            String errorInfo = "arguments";
+            FoxArray argumentsArray = new FoxArray();
+            DynamicVal argumentInfo = new DynamicVal(Value_t.TABLE, argumentsArray, errorInfo);
+            _envStack.insertSymbol(name, argumentInfo);
+
+            //Map user function arguments with actual arguments(given args).
             for (IdentifierExpression argument : arguments) {
-                String name = argument.getIdentifier();
+                name = argument.getIdentifier();
                 //System.out.println(name);
 
-                String errorInfo = name;
-                DynamicVal argumentInfo = new DynamicVal(actualArguments.get(count), errorInfo);
+                errorInfo = name;
+                argumentInfo = new DynamicVal(actualArguments.get(count), errorInfo);
                 _envStack.insertSymbol(name, argumentInfo);
 
+                Value key = new StaticVal(Value_t.INTEGER, count);
+                argumentsArray.put(key, argumentInfo);
+
                 count++;
+
+            }
+
+            //Add the extra given arguments.
+            for (int i = count; i < actualArguments.size(); i++) {
+                name = "arg#" + count;
+                errorInfo = "arg#" + count;
+                argumentInfo = new DynamicVal(actualArguments.get(count), errorInfo);
+                _envStack.insertSymbol(name, argumentInfo);
+
+                Value key = new StaticVal(Value_t.INTEGER, count);
+                argumentsArray.put(key, argumentInfo);
 
             }
 
@@ -569,11 +593,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
             HashMap<Integer, Value> actualArguments = (HashMap<Integer, Value>) parameters.getData();
 
             enterFunctionSpace();
-            /*if (actualArguments.size() < 1) {
-             String msg = "Call to '" + ((DynamicVal) lvalue).getErrorInfo() + "' requires at least ONE argument"
-             + ": " + actualArguments.size() + " found.";
-             ASTUtils.error(node, msg);
-             }*/
 
             for (int i = 0; i < actualArguments.size(); i++) {
                 String errorInfo = LIBRARY_FUNC_ARG + i;
@@ -1015,16 +1034,17 @@ public class ExecutionASTVisitor implements ASTVisitor {
             } else {
                 return new StaticVal<>(Value_t.AST, node.getExpression());
             }
-        }else {
+        } else {
             if (_inMeta) {
                 for (Statement stmt : node.getStatementList()) {
                     stmt.accept(this);
                 }
             } else {
-                if(node.getStatementList().size() == 1)
+                if (node.getStatementList().size() == 1) {
                     return new StaticVal<>(Value_t.AST, node.getStatementList().get(0));
-                else
+                } else {
                     return new StaticVal<>(Value_t.AST, node.getStatementList());
+                }
             }
         }
         return new StaticVal();
