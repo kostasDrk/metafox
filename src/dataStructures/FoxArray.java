@@ -125,11 +125,11 @@ public class FoxArray extends AFoxDataStructure {
         return _numberIndexedDataMaxIndex;
     }
 
-    private HashMap<Value, Value> getNumberIndexedData() {
+    public HashMap<Value, Value> getNumberIndexedData() {
         return _numberIndexedData;
     }
 
-    private HashMap<Value, Value> getOtherTypeIndexedData() {
+    public HashMap<Value, Value> getOtherTypeIndexedData() {
         return _otherTypeIndexedData;
     }
 

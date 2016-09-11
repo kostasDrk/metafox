@@ -22,7 +22,6 @@ public enum LibraryFunction_t {
     ISLIBFUNC("isLibFunc", 1),
     ISOBJECT("isObject", 1),
     ISAST("isAST", 1),
-    //FACTORY("factory", -2),
     COPY("copy", 1),
     DIAGNOSE("diagnose", 3),
     ADDFIRST("addFirst", 2),
@@ -80,7 +79,8 @@ public enum LibraryFunction_t {
     SETOPERATOR("setOperator", 2),
     GETFUNCTIONNAME("getFunctionName", 1),
     GETFUNCTIONARGS("getFunctionArgs", 1),
-    CONTAINS("contains", 2);
+    CONTAINS("contains", 2),
+    ADDFIELDS("addFields", 2);
 
     private final String _name;
     private final int _totalArgs;
@@ -163,9 +163,6 @@ public enum LibraryFunction_t {
             case "isAST":
                 totalArgs = 1;
                 break;
-//            case "factory":
-//                totalArgs = -2;
-//                break;
             case "copy":
                 totalArgs = 1;
                 break;
@@ -340,6 +337,9 @@ public enum LibraryFunction_t {
             case "contains":
                 totalArgs = 2;
                 break;
+            case "addFields":
+                totalArgs = 2;
+                break;
             default:
                 //fatal error
                 break;
@@ -425,7 +425,8 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.SETOPERATOR.toString())
                 || name.equals(LibraryFunction_t.GETFUNCTIONNAME.toString())
                 || name.equals(LibraryFunction_t.GETFUNCTIONARGS.toString())
-                || name.equals(LibraryFunction_t.CONTAINS.toString());
+                || name.equals(LibraryFunction_t.CONTAINS.toString())
+                || name.equals(LibraryFunction_t.ADDFIELDS.toString());
     }
 
 }

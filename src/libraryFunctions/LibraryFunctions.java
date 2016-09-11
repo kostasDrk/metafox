@@ -8,6 +8,7 @@ import dataStructures.*;
 
 import environment.Environment;
 import environment.FunctionEnv;
+import java.util.Collection;
 
 import symbols.value.*;
 
@@ -16,7 +17,8 @@ import static utils.Constants.NULL;
 
 import java.util.HashMap;
 import java.util.ArrayList;
-
+import java.util.TreeMap;
+import java.util.Map;
 public class LibraryFunctions {
 
     public static void print(Environment env) throws ASTVisitorException {
@@ -1074,6 +1076,59 @@ public class LibraryFunctions {
                     + "has an expression");
         }
         ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+
+   public static void addFields(Environment env) {
+
+        if (!checkArgumentsNum(LibraryFunction_t.ADDFIELDS, env)) {
+            return;
+        }
+        Value retVal = utils.Constants.NULL;
+        Value objectVal = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value pairs = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
+
+         if (!objectVal.getType().equals(Value_t.AST)
+                || !(objectVal.getData() instanceof ObjectDefinition)) {
+            retVal = new StaticVal(Value_t.ERROR, "addField first argument must be an ObjectDefinition AST");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+
+        if (!(pairs.getData() instanceof FoxArray)) {
+            retVal = new StaticVal(Value_t.ERROR, "addField second argument must be a FoxArray");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+      
+         ArrayList<IndexedElement> indexElements = new ArrayList<>();
+       
+        ((FoxArray)pairs.getData()).getOtherTypeIndexedData().entrySet().stream().forEach((pair) -> {
+            Value key = new StaticVal(pair.getKey());
+            Value value = new DynamicVal((DynamicVal) pair.getValue());
+            
+            indexElements.add(new IndexedElement((Expression) key.getData(), (Expression) value.getData()));
+
+        });
+
+        HashMap<Value, Value> _numberIndexedData = ((FoxArray)pairs.getData()).getNumberIndexedData();
+        int count = ((FoxArray)pairs.getData()).getNumberIndexedData().size();
+    
+     Map<Integer, Value> map = new TreeMap<Integer, Value>();
+     for (HashMap.Entry<Value, Value> entry : _numberIndexedData.entrySet())
+       {
+            //System.out.println(entry.getKey().getData() + "/" + entry.getValue());
+            map.put((Integer)(entry.getKey().getData()), entry.getValue());
+
+       }
+        for (int i = 0; i < count; i = i + 2) {
+           int num2 = i + 1;
+           Value key = map.get(i);
+            Value value = map.get(num2);
+            indexElements.add(new IndexedElement((Expression) key.getData(), (Expression) value.getData()));
+        }       
+       
+        ((ObjectDefinition)objectVal.getData()).setIndexedElementList(indexElements);
     }
 
     public static void getLeftExpression(Environment env) {
