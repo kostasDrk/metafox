@@ -1,5 +1,6 @@
 
 function foo(a){
+   print(a, b, c);
    if(s = 2){
         b = 999;
 	return;
@@ -25,8 +26,11 @@ function traverse(stmt){
     lastItem = null;
     while(it..hasNext()){
 	curItem = it..next();
+	if(isLvalueCall(curItem)){
+	    setLvalue(curItem, .<print>.);
+	}
 	if(isIfStatement(curItem)){
-	    it..replace(.<println("Replaced!"); println("Yes, indeed!");>.);
+	    //it..replace(.<println("Replaced!"); println("Yes, indeed!");>.);
 	    it..addBefore(.<println("Entering if...");>.);
 	}
 	if(isIfStatement(curItem) or isForStatement(curItem) or isWhileStatement(curItem)){
@@ -71,6 +75,6 @@ traverse(foo);
 
 println("=====");
 //traverse(foo);
-//println(foo);
-l = foo(true);
+println(foo);
+//l = foo(true);
 //println(l);
