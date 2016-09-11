@@ -2,23 +2,23 @@ package symbols.value;
 
 public enum Value_t {
 
-    INTEGER("INTEGER"),
-    REAL("REAL"),
-    STRING("STRING"),
-    BOOLEAN("BOOLEAN"),
-    TABLE("TABLE"),
-    USER_FUNCTION("USER_FUNCTION"),
-    LIBRARY_FUNCTION("LIBRARY_FUNCTION"),
-    NULL("NULL"),
-    OBJECT("OBJECT"),
-    AST("AST"),
-    ERROR("ERROR"),     
-    UNDEFINED("UNDEFINED");
+    INTEGER("Integer"),
+    REAL("Real"),
+    STRING("String"),
+    BOOLEAN("Boolean"),
+    TABLE("Table"),
+    USER_FUNCTION("UserFunction"),
+    LIBRARY_FUNCTION("LibraryFunction"),
+    NULL("Null"),
+    OBJECT("Object"),
+    AST("Ast"),
+    ERROR("Error"),
+    UNDEFINED("Undefined");
 
     private final String _type;
 
     private Value_t(String type) {
-        _type = type;
+        _type = "Fox." + type;
     }
 
     @Override
