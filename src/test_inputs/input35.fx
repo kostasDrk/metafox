@@ -45,6 +45,8 @@ function traverse(a){
     while( it..hasNext()){
         curItem = it..next();
 
+        println(getAstType(curItem));
+
         if(isBinaryExpression(curItem)){
 
             //changeExp(curItem);
@@ -69,3 +71,15 @@ function traverse(a){
 traverse(foo);
 
 //println(foo);
+
+x = 5;
+y = "kala";
+z = 4.5;
+w = false;
+
+println(getFoxType(getFoxType));
+println(getFoxType(traverse));
+println(getFoxType(x));
+println(getFoxType(y));
+println(getFoxType(z));
+println(getFoxType(w));
