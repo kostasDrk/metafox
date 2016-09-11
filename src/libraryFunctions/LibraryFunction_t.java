@@ -77,7 +77,9 @@ public enum LibraryFunction_t {
     GETLINE("getLine", 1),
     GETCOLUMN("getColumn", 1),
     GETOPERATOR("getOperator", 1),
-    SETOPERATOR("setOperator", 2);
+    SETOPERATOR("setOperator", 2),
+    GETFUNCTIONNAME("getFunctionName", 1),
+    GETFUNCTIONARGS("getFunctionArgs", 1);
 
     private final String _name;
     private final int _totalArgs;
@@ -328,6 +330,12 @@ public enum LibraryFunction_t {
             case "setOperator":
                 totalArgs = 2;
                 break;
+            case "getFunctionName":
+                totalArgs = 1;
+                break;
+            case "getFunctionArgs":
+                totalArgs = 1;
+                break;
             default:
                 //fatal error
                 break;
@@ -410,7 +418,9 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.REMOVEITEM.toString())
                 || name.equals(LibraryFunction_t.REPLACEITEM.toString())
                 || name.equals(LibraryFunction_t.GETOPERATOR.toString())
-                || name.equals(LibraryFunction_t.SETOPERATOR.toString());
+                || name.equals(LibraryFunction_t.SETOPERATOR.toString())
+                || name.equals(LibraryFunction_t.GETFUNCTIONNAME.toString())
+                || name.equals(LibraryFunction_t.GETFUNCTIONARGS.toString());
     }
 
 }

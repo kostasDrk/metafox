@@ -1115,7 +1115,6 @@ public class LibraryFunctions {
         retVal = new StaticVal(Value_t.AST, rightExpression);
         ((FunctionEnv) env).setReturnVal(retVal);
     }
-    
 
     public static void setRightExpression(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.SETRIGHTEXPRESSION, env)) {
@@ -1217,6 +1216,68 @@ public class LibraryFunctions {
             ((UnaryExpression) expr.getData()).setOperator(operator);
         }
 
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void getFunctionName(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.GETFUNCTIONNAME, env)) {
+            return;
+        }
+
+        Value retVal;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        if (!(val.getData() instanceof FunctionDef)
+                && !(val.getData() instanceof FunctionDefExpression)) {
+
+            String msg = "Requires a FunctionDef or FunctionDefExpression.";
+            retVal = new StaticVal(Value_t.ERROR, msg);
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+
+        ASTNode function;
+
+        if (val.getData() instanceof FunctionDefExpression) {
+            function = ((FunctionDefExpression) val.getData()).getFunctionDef();
+        } else {
+            function = (FunctionDef) val.getData();
+        }
+
+        retVal = new StaticVal(Value_t.STRING, ((FunctionDef) function).getFuncName());
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void getFunctionArgs(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.GETFUNCTIONARGS, env)) {
+            return;
+        }
+
+        Value retVal;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        if (!(val.getData() instanceof FunctionDef)
+                && !(val.getData() instanceof FunctionDefExpression)) {
+
+            String msg = "Requires a FunctionDef or FunctionDefExpression.";
+            retVal = new StaticVal(Value_t.ERROR, msg);
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+
+        ASTNode function;
+
+        if (val.getData() instanceof FunctionDefExpression) {
+            function = ((FunctionDefExpression) val.getData()).getFunctionDef();
+        } else {
+            function = (FunctionDef) val.getData();
+        }
+
+        ArrayList<IdentifierExpression> args = ((FunctionDef) function).getArguments();
+        FoxArray foxArray = new FoxArray();
+        args.stream().forEach((arg) -> {
+            foxArray.add(new StaticVal(Value_t.STRING, arg.getIdentifier()));
+        });
+
+        retVal = new StaticVal(Value_t.TABLE, foxArray);
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 

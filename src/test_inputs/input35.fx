@@ -1,7 +1,26 @@
 function foo(){
+
+    function bar(x , y){
+        return x - 9 + y;
+    }
+
+    bar(1, 2);
+
+
     x = 5 + 3;
     b + c - d;
     x++;
+
+
+
+
+    function test(a,b,c){
+        return a + b + c;
+    }
+
+    test(1, 2, 3);
+
+
 }
 
 
@@ -28,8 +47,17 @@ function traverse(a){
 
         if(isBinaryExpression(curItem)){
 
-            changeExp(curItem);
+            //changeExp(curItem);
+            ;
+        }
 
+        if(isFunctionDefinition(curItem)){
+            println(getFunctionName(curItem));
+             x = getFunctionArgs(curItem);
+
+            for(i = 0; i< len(x); i++){
+                println("Arg#",i," ",x[i]);
+            }
         }
     }
 
@@ -38,4 +66,4 @@ function traverse(a){
 
 traverse(foo);
 
-println(foo);
+//println(foo);
