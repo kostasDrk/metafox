@@ -48,6 +48,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     private int _inFunction;
     private int _inLoop;
     private boolean _inMeta;
+    private Value _program;
 
     private void enterScopeSpace() {
         //System.out.println("EnterScopeSpace");
@@ -110,12 +111,15 @@ public class ExecutionASTVisitor implements ASTVisitor {
         }
     }
 
-    public ExecutionASTVisitor() {
+    public ExecutionASTVisitor(Program program) {
         _envStack = new EnvironmentStack();
         _scope = 0;
         _inFunction = 0;
         _inLoop = 0;
         _inMeta = false;
+        _program = new StaticVal(Value_t.AST, program);
+        _program = new DynamicVal(_program, "PROGRAM");
+        _envStack.insertSymbol("PROGRAM", (DynamicVal)_program);
     }
 
     @Override

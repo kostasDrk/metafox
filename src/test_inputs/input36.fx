@@ -1,35 +1,17 @@
 
-
-function foo(a, b, c){
-    args = getFunctionArgs(foo);
-
-    println(args);
-    
-    size = len(arguments);
-
-    println("ARGS SIZE: ",size);
-
-
-    for(i = 0; i < size; i++){
-        println("arg#",i, " ",arguments[i]);
-    }
-
-
-    a = "ok";
-    b = "45";
-    c = "5.6";
-    println();
-
-    for(i = 0; i < size; i++){
-        println("arg#",i, " ",arguments[i]);
-    }
-
-    arguments[0] = 5;
-
-    println("arg#",0, " ", a);
-
-    return;
+function foo(){
+    println("Just a foo function");
 }
 
-foo(1,2,3,4);
+function traverse(stmt){
+    it = iterator(stmt);
+    while(it..hasNext()){
+	curItem = it..next();
+	if(isFunctionDefinition(curItem)) println(getFunctionName(curItem));
+	if(isLvalueCall(curItem)){
+	    println(curItem);
+	}
+    }
+}
 
+traverse(PROGRAM);

@@ -78,11 +78,16 @@ public enum LibraryFunction_t {
     GETOPERATOR("getOperator", 1),
     SETOPERATOR("setOperator", 2),
     GETFUNCTIONNAME("getFunctionName", 1),
+    SETFUNCTIONNAME("setFunctionName", 2),
     GETFUNCTIONARGS("getFunctionArgs", 1),
     CONTAINS("contains", 2),
     ADDFIELDS("addFields", 2),
     GETFOXTYPE("getFoxType", 1),
-    GETASTTYPE("getAstType", 1);
+    GETASTTYPE("getAstType", 1),
+    GETIDENTIFIER("getIdentifier", 1),
+    SETIDENTIFIER("setIdentifier", 2),
+    GETLVALUE("getLvalue", 1),
+    SETLVALUE("setLvalue", 2),;
 
     private final String _name;
     private final int _totalArgs;
@@ -333,8 +338,23 @@ public enum LibraryFunction_t {
             case "getFunctionName":
                 totalArgs = 1;
                 break;
+            case "setFunctionName":
+                totalArgs = 1;
+                break;
             case "getFunctionArgs":
                 totalArgs = 1;
+                break;
+            case "getIdentifier":
+                totalArgs = 1;
+                break;
+            case "setIdentifier":
+                totalArgs = 2;
+                break;
+            case "getLvalue":
+                totalArgs = 1;
+                break;
+            case "setLvalue":
+                totalArgs = 2;
                 break;
             case "contains":
                 totalArgs = 2;
@@ -432,11 +452,16 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.GETOPERATOR.toString())
                 || name.equals(LibraryFunction_t.SETOPERATOR.toString())
                 || name.equals(LibraryFunction_t.GETFUNCTIONNAME.toString())
+                || name.equals(LibraryFunction_t.SETFUNCTIONNAME.toString())
                 || name.equals(LibraryFunction_t.GETFUNCTIONARGS.toString())
                 || name.equals(LibraryFunction_t.CONTAINS.toString())
                 || name.equals(LibraryFunction_t.ADDFIELDS.toString())
                 || name.equals(LibraryFunction_t.GETFOXTYPE.toString())
-                || name.equals(LibraryFunction_t.GETASTTYPE.toString());
+                || name.equals(LibraryFunction_t.GETASTTYPE.toString())
+                || name.equals(LibraryFunction_t.GETIDENTIFIER.toString())
+                || name.equals(LibraryFunction_t.SETIDENTIFIER.toString())
+                || name.equals(LibraryFunction_t.GETLVALUE.toString())
+                || name.equals(LibraryFunction_t.SETLVALUE.toString());
     }
 
 }

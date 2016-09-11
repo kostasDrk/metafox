@@ -307,6 +307,10 @@ public class LibraryFunctions {
             astNode = new Block((ArrayList<Statement>) value.getData());
         } else if (value.getData() instanceof Statement) {
             astNode = (Statement) value.getData();
+        } else if(value.getData() instanceof Program){
+            astNode = (Program) value.getData();
+            ArrayList<Statement> stmtlist = (ArrayList)((Program) astNode).getStatements();
+            astNode = new Block(stmtlist);
         } else {
             StaticVal retVal = new StaticVal(Value_t.ERROR, "iterator requires a statement AST.");
             ((FunctionEnv) env).setReturnVal(retVal);
@@ -1023,19 +1027,13 @@ public class LibraryFunctions {
         Value retVal = utils.Constants.NULL;
         Value stmtVal = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
         Value exprVal = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
-        if (!stmtVal.getType().equals(Value_t.AST)
-                || !exprVal.getType().equals(Value_t.AST)
-                || !(stmtVal.getData() instanceof Statement)) {
+        if(!(stmtVal.getData() instanceof Statement) && !(stmtVal.getData() instanceof Expression)
+            || !(exprVal.getData() instanceof Expression)){
             retVal = new StaticVal(Value_t.ERROR, "setExpression requires a statement AST and an expression AST");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
         ASTNode stmtast = (ASTNode) stmtVal.getData();
-        if (!(exprVal.getData() instanceof Expression)) {
-            retVal = new StaticVal(Value_t.ERROR, "setExpression's second argument should be an expression AST");
-            ((FunctionEnv) env).setReturnVal(retVal);
-            return;
-        }
         Expression expr = (Expression) exprVal.getData();
 
         if (stmtast instanceof IfStatement) {
@@ -1072,8 +1070,7 @@ public class LibraryFunctions {
             ((MetaToText) stmtast).setExpression(expr);
 
         } else {
-            retVal = new StaticVal(Value_t.ERROR, "setExpression's first argument should be a statement AST that "
-                    + "has an expression");
+            retVal = new StaticVal(Value_t.ERROR, "setExpression's first argument should be an expression AST");
         }
         ((FunctionEnv) env).setReturnVal(retVal);
     }
@@ -1215,6 +1212,99 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
+    public static void getIdentifier(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.GETIDENTIFIER, env)) {
+            return;
+        }
+        Value retVal;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        if(!(val.getData() instanceof IdentifierExpression)){
+            retVal = new StaticVal(Value_t.ERROR, "getIdentifier requires an IdentifierExpression AST");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+
+        IdentifierExpression idExpr = (IdentifierExpression) val.getData();
+        retVal = new StaticVal(Value_t.STRING, idExpr.getIdentifier());
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void setIdentifier(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.SETIDENTIFIER, env)) {
+            return;
+        }
+        Value retVal;
+        Value idVal = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value newidVal = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
+        if (!(idVal.getData() instanceof IdentifierExpression)
+                || !(newidVal.getType().equals(Value_t.STRING))) {
+            retVal = new StaticVal(Value_t.ERROR, "setIdentifier requires an IdentifierExpression AST and a string");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        IdentifierExpression ast = (IdentifierExpression) idVal.getData();
+        String newid = (String) newidVal.getData();
+        ast.setIdentifier(newid);
+    }
+
+    public static void getLvalue(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.GETLVALUE, env)) {
+            return;
+        }
+        Value retVal;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        if (!val.getType().equals(Value_t.AST)) {
+            retVal = new StaticVal(Value_t.ERROR, "getLvalue requires an AST");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        ASTNode ast = (ASTNode) val.getData();
+        Lvalue retLvalue = null;
+
+        if(ast instanceof AssignmentExpression){
+            retLvalue = ((AssignmentExpression) ast).getLvalue();
+        }else if(ast instanceof LvalueCall){
+            retLvalue = ((LvalueCall) ast).getLvalue();
+        }else if(ast instanceof Member){
+            retLvalue = ((Member) ast).getLvalue();
+        }else if(ast instanceof UnaryExpression){
+            retLvalue = ((UnaryExpression) ast).getLvalue();
+        }
+
+        if (retLvalue == null) {
+            retVal = utils.Constants.NULL;
+        } else {
+            retVal = new StaticVal(Value_t.AST, retLvalue);
+        }
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void setLvalue(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.SETLVALUE, env)) {
+            return;
+        }
+        Value retVal;
+        Value exprVal = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value lvalueVal = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
+        if (!(exprVal.getData() instanceof Expression)
+                || !(lvalueVal.getData() instanceof Lvalue)) {
+            retVal = new StaticVal(Value_t.ERROR, "setLvalue requires an expression AST and an Lvalue AST");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        Expression ast = (Expression) exprVal.getData();
+        Lvalue lvalue = (Lvalue) lvalueVal.getData();
+        if(ast instanceof AssignmentExpression){
+            ((AssignmentExpression) ast).setLvalue(lvalue);
+        }else if(ast instanceof LvalueCall){
+            ((LvalueCall) ast).setLvalue(lvalue);
+        }else if(ast instanceof Member){
+            ((Member) ast).setLvalue(lvalue);
+        }else if(ast instanceof UnaryExpression){
+            ((UnaryExpression) ast).setLvalue(lvalue);
+        }
+    }
+
     public static void getElseStatement(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.GETELSESTATEMENT, env)) {
             return;
@@ -1351,6 +1441,33 @@ public class LibraryFunctions {
 
         retVal = new StaticVal(Value_t.STRING, ((FunctionDef) function).getFuncName());
         ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void setFunctionName(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.SETFUNCTIONNAME, env)) {
+            return;
+        }
+        Value retVal;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value newVal = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
+        if (!(val.getData() instanceof FunctionDef)
+                && !(val.getData() instanceof FunctionDefExpression)
+                || !(newVal.getType().equals(Value_t.STRING))) {
+
+            String msg = "Requires a FunctionDef or FunctionDefExpression and a string.";
+            retVal = new StaticVal(Value_t.ERROR, msg);
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+
+        FunctionDef function;
+        if (val.getData() instanceof FunctionDefExpression) {
+            function = ((FunctionDefExpression) val.getData()).getFunctionDef();
+        } else {
+            function = (FunctionDef) val.getData();
+        }
+        String newName = (String) newVal.getData();
+        function.setFuncName(newName);
     }
 
     public static void getFunctionArgs(Environment env) {
