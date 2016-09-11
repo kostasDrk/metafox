@@ -46,58 +46,78 @@ public enum Operator {
     }
 
     public static Operator toOperator(String operator) {
+        Operator op;
+
         switch (operator) {
             case "+":
-                return Operator.PLUS;
+                op = Operator.PLUS;
+                break;
 
             case "-":
-                return Operator.MINUS;
+                op = Operator.MINUS;
+                break;
 
             case "*":
-                return Operator.MUL;
+                op = Operator.MUL;
+                break;
 
             case "/":
-                return Operator.DIV;
+                op = Operator.DIV;
+                break;
 
             case "++":
-                return Operator.PLUS_PLUS;
+                op = Operator.PLUS_PLUS;
+                break;
 
             case "--":
-                return Operator.MINUS_MINUS;
+                op = Operator.MINUS_MINUS;
+                break;
 
             case "%":
-                return Operator.MOD;
+                op = Operator.MOD;
+                break;
 
             case "and":
-                return Operator.LOGIC_AND;
+                op = Operator.LOGIC_AND;
+                break;
 
             case "or":
-                return Operator.LOGIC_OR;
+                op = Operator.LOGIC_OR;
+                break;
 
             case "not":
-                return Operator.LOGIC_NOT;
+                op = Operator.LOGIC_NOT;
+                break;
 
             case "==":
-                return Operator.CMP_EQUAL;
+                op = Operator.CMP_EQUAL;
+                break;
 
             case "!=":
-                return Operator.NOT_EQUAL;
+                op = Operator.NOT_EQUAL;
+                break;
 
             case ">=":
-                return Operator.GREATER_OR_EQUAL;
+                op = Operator.GREATER_OR_EQUAL;
+                break;
 
             case ">":
-                return Operator.GREATER;
+                op = Operator.GREATER;
+                break;
 
             case "<=":
-                return Operator.LESS_OR_EQUAL;
+                op = Operator.LESS_OR_EQUAL;
+                break;
 
             case "<":
-                return Operator.LESS;
+                op = Operator.LESS;
+                break;
 
             default:
-                return null;
+                op = null;
+                break;
         }
 
+        return op;
     }
 }

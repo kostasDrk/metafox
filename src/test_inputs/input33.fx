@@ -7,7 +7,7 @@ function foo(){
 function takeOp(prev){
 
     if(prev == "+"){
-        return "x";
+        return "-";
     
     }else if(prev == "-"){
         return "+";
@@ -31,7 +31,7 @@ function takeOp(prev){
 
 
 function changeOp(expr){
-    if(isBinaryExpression(expr)){
+     if(isBinaryExpression(expr)){
         local leftExpr = getLeftExpression(expr);
         local units = changeOp(leftExpr);
         op = getOperator(expr);
@@ -44,7 +44,7 @@ function changeOp(expr){
         local rightExpr = getRightExpression(expr);
 
         changeOp(rightExpr);
-    }else if(isUnaryExpression(epxr)){
+    }else if(isUnaryExpression(expr)){
         op = getOperator(expr);
 
         newOp = takeOp(op);
