@@ -79,7 +79,8 @@ public enum LibraryFunction_t {
     GETOPERATOR("getOperator", 1),
     SETOPERATOR("setOperator", 2),
     GETFUNCTIONNAME("getFunctionName", 1),
-    GETFUNCTIONARGS("getFunctionArgs", 1);
+    GETFUNCTIONARGS("getFunctionArgs", 1),
+    CONTAINS("contains", 2);
 
     private final String _name;
     private final int _totalArgs;
@@ -336,6 +337,9 @@ public enum LibraryFunction_t {
             case "getFunctionArgs":
                 totalArgs = 1;
                 break;
+            case "contains":
+                totalArgs = 2;
+                break;
             default:
                 //fatal error
                 break;
@@ -420,7 +424,8 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.GETOPERATOR.toString())
                 || name.equals(LibraryFunction_t.SETOPERATOR.toString())
                 || name.equals(LibraryFunction_t.GETFUNCTIONNAME.toString())
-                || name.equals(LibraryFunction_t.GETFUNCTIONARGS.toString());
+                || name.equals(LibraryFunction_t.GETFUNCTIONARGS.toString())
+                || name.equals(LibraryFunction_t.CONTAINS.toString());
     }
 
 }

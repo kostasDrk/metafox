@@ -53,10 +53,12 @@ function traverse(a){
 
         if(isFunctionDefinition(curItem)){
             println(getFunctionName(curItem));
-             x = getFunctionArgs(curItem);
+            x = getFunctionArgs(curItem);
 
-            for(i = 0; i< len(x); i++){
-                println("Arg#",i," ",x[i]);
+            if(contains(getFunctionName(curItem), "st")){
+                for(i = 0; i< len(x); i++){
+                    println("Arg#",i," ",x[i]);
+                }
             }
         }
     }

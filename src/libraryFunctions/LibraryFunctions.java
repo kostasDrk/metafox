@@ -159,6 +159,28 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
+    public static void contains(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.CONTAINS, env)) {
+            return;
+        }
+
+        Value retVal;
+        Value stringVal = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value subStringVal = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
+        if (!(stringVal.getData() instanceof String)
+                || !(subStringVal.getData() instanceof String)) {
+
+            String msg = "Requires two Strings.";
+            retVal = new StaticVal(Value_t.ERROR, msg);
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+
+        boolean contained = ((String) stringVal.getData()).contains((String) subStringVal.getData());
+        retVal = new StaticVal(Value_t.BOOLEAN, contained);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
     public static void diagnose(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.DIAGNOSE, env)) {
             return;
