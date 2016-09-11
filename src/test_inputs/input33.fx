@@ -49,8 +49,7 @@ function changeOp(expr){
 
         newOp = takeOp(op);
         if(newOp != null){
-            //setOperator(expr, newOp);
-;
+            setOperator(expr, newOp);
         }
     }else
         return;

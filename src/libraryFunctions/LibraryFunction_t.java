@@ -67,6 +67,8 @@ public enum LibraryFunction_t {
     SETEXPRESSION("setExpression", 2),
     GETLEFTEXPRESSION("getLeftExpression", 1),
     GETRIGHTEXPRESSION("getRightExpression", 1),
+    SETLEFTEXPRESSION("setLeftExpression", 2),
+    SETRIGHTEXPRESSION("setRightExpression", 2),
     ADDITEMBEFORE("addItemBefore", 2),
     ADDITEMAFTER("addItemAfter", 2),
     GETELSESTATEMENT("getElseStatement", 1),
@@ -293,6 +295,12 @@ public enum LibraryFunction_t {
             case "getRightExpression":
                 totalArgs = 1;
                 break;
+            case "setLeftExpression":
+                totalArgs = 2;
+                break;
+            case "setRightExpression":
+                totalArgs = 2;
+                break;
             case "addItemBefore":
                 totalArgs = 2;
                 break;
@@ -318,7 +326,7 @@ public enum LibraryFunction_t {
                 totalArgs = 1;
                 break;
             case "setOperator":
-                totalArgs = 1;
+                totalArgs = 2;
                 break;
             default:
                 //fatal error
@@ -392,6 +400,8 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.SETEXPRESSION.toString())
                 || name.equals(LibraryFunction_t.GETLEFTEXPRESSION.toString())
                 || name.equals(LibraryFunction_t.GETRIGHTEXPRESSION.toString())
+                || name.equals(LibraryFunction_t.SETLEFTEXPRESSION.toString())
+                || name.equals(LibraryFunction_t.SETRIGHTEXPRESSION.toString())
                 || name.equals(LibraryFunction_t.GETLINE.toString())
                 || name.equals(LibraryFunction_t.GETCOLUMN.toString())
                 || name.equals(LibraryFunction_t.ADDITEMBEFORE.toString())

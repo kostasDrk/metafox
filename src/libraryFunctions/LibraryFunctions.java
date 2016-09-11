@@ -1073,6 +1073,30 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
+    public static void setLeftExpression(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.SETLEFTEXPRESSION, env)) {
+            return;
+        }
+
+        Value retVal = NULL;
+        Value binaryExpr = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value newExpr = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
+
+        if (!(binaryExpr.getData() instanceof BinaryExpression)
+                || (!newExpr.getType().equals(Value_t.AST)
+                && !(newExpr.getData() instanceof Expression))) {
+
+            String msg = "Requires a BinaryExpression and an Expression AST.";
+            retVal = new StaticVal(Value_t.ERROR, msg);
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+
+        ((BinaryExpression) binaryExpr.getData()).setExpression1((Expression) newExpr.getData());
+
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
     public static void getRightExpression(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.GETRIGHTEXPRESSION, env)) {
             return;
@@ -1089,6 +1113,31 @@ public class LibraryFunctions {
             rightExpression = ((ParenthesisExpression) rightExpression).getExpression();
         }
         retVal = new StaticVal(Value_t.AST, rightExpression);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+    
+
+    public static void setRightExpression(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.SETRIGHTEXPRESSION, env)) {
+            return;
+        }
+
+        Value retVal = NULL;
+        Value binaryExpr = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value newExpr = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
+
+        if (!(binaryExpr.getData() instanceof BinaryExpression)
+                || (!newExpr.getType().equals(Value_t.AST)
+                && !(newExpr.getData() instanceof Expression))) {
+
+            String msg = "Requires a BinaryExpression and an Expression AST.";
+            retVal = new StaticVal(Value_t.ERROR, msg);
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+
+        ((BinaryExpression) binaryExpr.getData()).setExpression2((Expression) newExpr.getData());
+
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
