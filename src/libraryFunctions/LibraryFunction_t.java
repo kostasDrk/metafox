@@ -81,7 +81,7 @@ public enum LibraryFunction_t {
     SETFUNCTIONNAME("setFunctionName", 2),
     GETFUNCTIONARGS("getFunctionArgs", 1),
     CONTAINS("contains", 2),
-    ADDFIELDS("addFields", 2),
+    ADDFIELD("addField", 3),
     GETFOXTYPE("getFoxType", 1),
     GETASTTYPE("getAstType", 1),
     GETIDENTIFIER("getIdentifier", 1),
@@ -359,8 +359,8 @@ public enum LibraryFunction_t {
             case "contains":
                 totalArgs = 2;
                 break;
-            case "addFields":
-                totalArgs = 2;
+            case "addField":
+                totalArgs = 3;
                 break;
             case "getFoxType":
                 totalArgs = 1;
@@ -455,7 +455,7 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.SETFUNCTIONNAME.toString())
                 || name.equals(LibraryFunction_t.GETFUNCTIONARGS.toString())
                 || name.equals(LibraryFunction_t.CONTAINS.toString())
-                || name.equals(LibraryFunction_t.ADDFIELDS.toString())
+                || name.equals(LibraryFunction_t.ADDFIELD.toString())
                 || name.equals(LibraryFunction_t.GETFOXTYPE.toString())
                 || name.equals(LibraryFunction_t.GETASTTYPE.toString())
                 || name.equals(LibraryFunction_t.GETIDENTIFIER.toString())

@@ -580,12 +580,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
             //Add the extra given arguments.
             for (int i = count; i < actualArguments.size(); i++) {
-                name = "arg#" + count;
-                errorInfo = "arg#" + count;
-                argumentInfo = new DynamicVal(actualArguments.get(count), errorInfo);
+                name = "arg#" + i;
+                errorInfo = "arg#" + i;
+                argumentInfo = new DynamicVal(actualArguments.get(i), errorInfo);
                 _envStack.insertSymbol(name, argumentInfo);
 
-                Value key = new StaticVal(Value_t.INTEGER, count);
+                Value key = new StaticVal(Value_t.INTEGER, i);
                 argumentsArray.put(key, argumentInfo);
 
             }
