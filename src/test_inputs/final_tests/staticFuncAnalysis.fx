@@ -13,6 +13,7 @@ function complex_func(a, b){
 			if(false){
 				println("You'll never reach me!");
 			}
+			return;
 			temp--;
 		}
 	}
@@ -51,6 +52,8 @@ function traverse(stmt){
 				if(::returnFlag) println("[!] Missing return value @line "+getLine(curItem));
 				else push(::returns, curItem);
 			}
+			if(it..hasNext())
+				println("[!] Dead code found @line "+getLine(curItem));
 		}
 	}
 }
