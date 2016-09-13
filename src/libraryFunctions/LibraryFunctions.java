@@ -136,6 +136,43 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
+    public static void isEmpty(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.ISEMPTY, env)) {
+            return;
+        }
+
+        AFoxDataStructure fobject = getObjectArgument(env);
+        if (!(fobject instanceof FoxArray)) {
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "First argument must be of type Array.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+
+        Value retVal;
+        FoxArray farray = (FoxArray) fobject;
+        if(fobject.size() > 0)
+            retVal = new StaticVal(Value_t.BOOLEAN, Boolean.FALSE);
+        else
+            retVal = new StaticVal(Value_t.BOOLEAN, Boolean.TRUE);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void push(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.PUSH, env)) {
+            return;
+        }
+        AFoxDataStructure fobject = getObjectArgument(env);
+        if (!(fobject instanceof FoxArray)) {
+            StaticVal retVal = new StaticVal(Value_t.ERROR, "First argument must be of type Array.");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+
+        Value newVal = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
+        FoxArray farray = (FoxArray) fobject;
+        farray.add(newVal);
+    }
+
     public static void copy(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.COPY, env)) {
             return;
@@ -181,112 +218,6 @@ public class LibraryFunctions {
         boolean contained = ((String) stringVal.getData()).contains((String) subStringVal.getData());
         retVal = new StaticVal(Value_t.BOOLEAN, contained);
         ((FunctionEnv) env).setReturnVal(retVal);
-    }
-
-    public static void diagnose(Environment env) {
-        if (!checkArgumentsNum(LibraryFunction_t.DIAGNOSE, env)) {
-            return;
-        }
-
-        //Prepare environment for Library function call: addFirst
-        FunctionEnv tmpEnv = new FunctionEnv();
-        tmpEnv.insert(LIBRARY_FUNC_ARG + 0, env.getActualArgument(LIBRARY_FUNC_ARG + 0));
-        tmpEnv.insert(LIBRARY_FUNC_ARG + 1, env.getActualArgument(LIBRARY_FUNC_ARG + 1));
-        addFirst(tmpEnv);
-        ((FunctionEnv) env).setReturnVal(tmpEnv.getReturnVal());
-        if (tmpEnv.getReturnVal().getType().equals(Value_t.ERROR)) {
-            return;
-        }
-
-        //Prepare environment for Library function call: addOnExitPoints
-        tmpEnv = new FunctionEnv();
-        tmpEnv.insert(LIBRARY_FUNC_ARG + 0, env.getActualArgument(LIBRARY_FUNC_ARG + 0));
-        tmpEnv.insert(LIBRARY_FUNC_ARG + 1, env.getActualArgument(LIBRARY_FUNC_ARG + 2));
-        addOnExitPoints(tmpEnv);
-
-        ((FunctionEnv) env).setReturnVal(tmpEnv.getReturnVal());
-    }
-
-    public static void addFirst(Environment env) {
-        if (!checkArgumentsNum(LibraryFunction_t.ADDFIRST, env)) {
-            return;
-        }
-
-        FunctionDef funcdef = getFunctionArgument(env);
-        if (funcdef == null) {
-            return;
-        }
-        Value onEnterValue = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
-        Block funcBody = funcdef.getBody();
-
-        if (onEnterValue.getData() instanceof Expression) {
-            ExpressionStatement exstmtEnter = new ExpressionStatement((Expression) onEnterValue.getData());
-            funcBody.prependStatement(exstmtEnter);
-        } else if (onEnterValue.getData() instanceof ArrayList<?>) {
-            funcBody.prependStatements((ArrayList<Statement>) onEnterValue.getData());
-        } else {
-            StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument must be either an expression or a statement list.");
-            ((FunctionEnv) env).setReturnVal(retVal);
-        }
-    }
-
-    public static void addOnExitPoints(Environment env) {
-        if (!checkArgumentsNum(LibraryFunction_t.ADDONEXITPOINTS, env)) {
-            return;
-        }
-
-        FunctionDef funcdef = getFunctionArgument(env);
-        if (funcdef == null) {
-            return;
-        }
-        Value onExitValue = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
-        Block funcBody = funcdef.getBody();
-
-        if (onExitValue.getData() instanceof Expression) {
-            ExpressionStatement exstmtExit = new ExpressionStatement((Expression) onExitValue.getData());
-            funcBody.addStatementOnExit(exstmtExit);
-            funcBody.appendStatement(exstmtExit);
-        } else if (onExitValue.getData() instanceof ArrayList<?>) {
-            funcBody.addStatementsOnExit((ArrayList<Statement>) onExitValue.getData());
-            funcBody.appendStatements((ArrayList<Statement>) onExitValue.getData());
-        } else {
-            StaticVal retVal = new StaticVal(Value_t.ERROR, "Argument must be either an expression or a statement list.");
-            ((FunctionEnv) env).setReturnVal(retVal);
-        }
-    }
-
-    public static void factory(Environment env) {
-
-        if (env.totalActuals() % 2 != 0) {
-            StaticVal retVal = new StaticVal(Value_t.ERROR, "Call to factory lib function requires even number of arguments: " + env.totalActuals() + " found");
-            ((FunctionEnv) env).setReturnVal(retVal);
-            return;
-        }
-
-        int count = env.totalActuals();
-        ArrayList<IndexedElement> indexElements = new ArrayList<>();
-        ArrayList<IndexedElement> indexElements1 = new ArrayList<>();
-        ObjectDefinition binAST;
-        Value result;
-        for (int i = 0; i < count; i = i + 2) {
-            int num2 = i + 1;
-            Value tempArg1 = env.getActualArgument(LIBRARY_FUNC_ARG + i);
-            Value tempArg = env.getActualArgument(LIBRARY_FUNC_ARG + num2);
-            indexElements.add(new IndexedElement((Expression) tempArg1.getData(), (Expression) tempArg.getData()));
-            indexElements1.add(new IndexedElement((Expression) tempArg1.getData(), (Expression) tempArg.getData()));
-        }
-
-        ObjectDefinition ex = new ObjectDefinition(indexElements1);
-        ReturnStatement returnStmt = new ReturnStatement(ex);
-        ArrayList<Statement> stlist = new ArrayList<>();
-        stlist.add(returnStmt);
-        Block bl = new Block(stlist);
-        ArrayList<IdentifierExpression> idl = new ArrayList<>();
-        indexElements.add(new IndexedElement(new StringLiteral("new"), new FunctionDef("#ANONYMOUS#_", idl, bl)));
-
-        binAST = new ObjectDefinition(indexElements);
-        result = new StaticVal<>(Value_t.AST, binAST);
-        ((FunctionEnv) env).setReturnVal(result);
     }
 
     public static void iterator(Environment env) throws ASTVisitorException {
@@ -1076,7 +1007,6 @@ public class LibraryFunctions {
     }
 
     public static void addField(Environment env) {
-
         if (!checkArgumentsNum(LibraryFunction_t.ADDFIELD, env)) {
             return;
         }
@@ -1093,14 +1023,17 @@ public class LibraryFunctions {
         }
  
 
-if (!(fieldKey.getData() instanceof Expression) || !((fieldValue.getData() instanceof FunctionDef) || (fieldValue.getData() instanceof Expression))) {
+        if (!(fieldKey.getData() instanceof Expression) || !((fieldValue.getData() instanceof FunctionDef) 
+            || (fieldValue.getData() instanceof Expression))) {
             retVal = new StaticVal(Value_t.ERROR, "addField second and third argument must be an Expression AST");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
 
-    ((ObjectDefinition) objectVal.getData()).getIndexedElementList().add(new IndexedElement((Expression) fieldKey.getData(), (Expression) fieldValue.getData()));
-
+        if(fieldValue.getData() instanceof FunctionDef)
+            ((ObjectDefinition) objectVal.getData()).getIndexedElementList().add(new IndexedElement((Expression) fieldKey.getData(), (FunctionDef) fieldValue.getData()));
+        else
+            ((ObjectDefinition) objectVal.getData()).getIndexedElementList().add(new IndexedElement((Expression) fieldKey.getData(), (Expression) fieldValue.getData()));
     }
 
     public static void getLeftExpression(Environment env) {

@@ -1087,7 +1087,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
             while (ret.isAST()) {
                 ret = ((Expression) ret.getData()).accept(this);
             }
-        } else {
+        } else if(exprVal.getData() instanceof Statement){
+            ((Statement) exprVal.getData()).accept(this);
+        } else{
             for (Statement stmt : (ArrayList<Statement>) exprVal.getData()) {
                 stmt.accept(this);
             }

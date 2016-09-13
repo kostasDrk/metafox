@@ -10,6 +10,8 @@ public enum LibraryFunction_t {
     LEN("len", 1),
     KEYS("keys", 1),
     VALUES("values", 1),
+    ISEMPTY("isEmpty", 1),
+    PUSH("push", 2),
     STR("str", 1),
     ISNULL("isNull", 1),
     ISUNDEFINED("isUndefined", 1),
@@ -23,9 +25,6 @@ public enum LibraryFunction_t {
     ISOBJECT("isObject", 1),
     ISAST("isAST", 1),
     COPY("copy", 1),
-    DIAGNOSE("diagnose", 3),
-    ADDFIRST("addFirst", 2),
-    ADDONEXITPOINTS("addOnExitPoints", 2),
     ITERATOR("iterator", 1),
     GETNEXTITEM("getNextItem", 1),
     GETPREVITEM("getPrevItem", 1),
@@ -87,7 +86,7 @@ public enum LibraryFunction_t {
     GETIDENTIFIER("getIdentifier", 1),
     SETIDENTIFIER("setIdentifier", 2),
     GETLVALUE("getLvalue", 1),
-    SETLVALUE("setLvalue", 2),;
+    SETLVALUE("setLvalue", 2);
 
     private final String _name;
     private final int _totalArgs;
@@ -134,6 +133,12 @@ public enum LibraryFunction_t {
             case "values":
                 totalArgs = 1;
                 break;
+            case "isEmpty":
+                totalArgs = 1;
+                break;
+            case "push":
+                totalArgs = 2;
+                break;
             case "str":
                 totalArgs = 1;
                 break;
@@ -172,15 +177,6 @@ public enum LibraryFunction_t {
                 break;
             case "copy":
                 totalArgs = 1;
-                break;
-            case "diagnose":
-                totalArgs = 3;
-                break;
-            case "addFirst":
-                totalArgs = 2;
-                break;
-            case "addOnExitPoints":
-                totalArgs = 2;
                 break;
             case "iterator":
                 totalArgs = 1;
@@ -384,7 +380,8 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.LEN.toString())
                 || name.equals(LibraryFunction_t.KEYS.toString())
                 || name.equals(LibraryFunction_t.VALUES.toString())
-                || name.equals(LibraryFunction_t.DIAGNOSE.toString())
+                || name.equals(LibraryFunction_t.ISEMPTY.toString())
+                || name.equals(LibraryFunction_t.PUSH.toString())
                 || name.equals(LibraryFunction_t.STR.toString())
                 || name.equals(LibraryFunction_t.ISNULL.toString())
                 || name.equals(LibraryFunction_t.ISUNDEFINED.toString())
@@ -398,8 +395,6 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.ISOBJECT.toString())
                 || name.equals(LibraryFunction_t.ISAST.toString())
                 || name.equals(LibraryFunction_t.COPY.toString())
-                || name.equals(LibraryFunction_t.ADDFIRST.toString())
-                || name.equals(LibraryFunction_t.ADDONEXITPOINTS.toString())
                 || name.equals(LibraryFunction_t.ITERATOR.toString())
                 || name.equals(LibraryFunction_t.GETNEXTITEM.toString())
                 || name.equals(LibraryFunction_t.GETPREVITEM.toString())
