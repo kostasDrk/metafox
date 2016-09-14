@@ -10,6 +10,7 @@ import environment.Environment;
 import environment.FunctionEnv;
 
 import symbols.value.*;
+import symbols.utils.Symbol;
 
 import static utils.Constants.LIBRARY_FUNC_ARG;
 import static utils.Constants.NULL;
@@ -183,6 +184,10 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
+    private static Symbol toSymbol(String id) {
+        return new Symbol(new IdentifierExpression(id));
+    }
+
     public static void diagnose(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.DIAGNOSE, env)) {
             return;
@@ -190,8 +195,9 @@ public class LibraryFunctions {
 
         //Prepare environment for Library function call: addFirst
         FunctionEnv tmpEnv = new FunctionEnv();
-        tmpEnv.insert(LIBRARY_FUNC_ARG + 0, env.getActualArgument(LIBRARY_FUNC_ARG + 0));
-        tmpEnv.insert(LIBRARY_FUNC_ARG + 1, env.getActualArgument(LIBRARY_FUNC_ARG + 1));
+
+        tmpEnv.insert(toSymbol(LIBRARY_FUNC_ARG + 0), env.getActualArgument(LIBRARY_FUNC_ARG + 0));
+        tmpEnv.insert(toSymbol(LIBRARY_FUNC_ARG + 1), env.getActualArgument(LIBRARY_FUNC_ARG + 1));
         addFirst(tmpEnv);
         ((FunctionEnv) env).setReturnVal(tmpEnv.getReturnVal());
         if (tmpEnv.getReturnVal().getType().equals(Value_t.ERROR)) {
@@ -200,8 +206,8 @@ public class LibraryFunctions {
 
         //Prepare environment for Library function call: addOnExitPoints
         tmpEnv = new FunctionEnv();
-        tmpEnv.insert(LIBRARY_FUNC_ARG + 0, env.getActualArgument(LIBRARY_FUNC_ARG + 0));
-        tmpEnv.insert(LIBRARY_FUNC_ARG + 1, env.getActualArgument(LIBRARY_FUNC_ARG + 2));
+        tmpEnv.insert(toSymbol(LIBRARY_FUNC_ARG + 0), env.getActualArgument(LIBRARY_FUNC_ARG + 0));
+        tmpEnv.insert(toSymbol(LIBRARY_FUNC_ARG + 1), env.getActualArgument(LIBRARY_FUNC_ARG + 2));
         addOnExitPoints(tmpEnv);
 
         ((FunctionEnv) env).setReturnVal(tmpEnv.getReturnVal());
@@ -307,9 +313,9 @@ public class LibraryFunctions {
             astNode = new Block((ArrayList<Statement>) value.getData());
         } else if (value.getData() instanceof Statement) {
             astNode = (Statement) value.getData();
-        } else if(value.getData() instanceof Program){
+        } else if (value.getData() instanceof Program) {
             astNode = (Program) value.getData();
-            ArrayList<Statement> stmtlist = (ArrayList)((Program) astNode).getStatements();
+            ArrayList<Statement> stmtlist = (ArrayList) ((Program) astNode).getStatements();
             astNode = new Block(stmtlist);
         } else {
             StaticVal retVal = new StaticVal(Value_t.ERROR, "iterator requires a statement AST.");
@@ -336,7 +342,7 @@ public class LibraryFunctions {
         Lvalue lvalue = new IdentifierExpression("getNextItem");
         // Argument to `getNext` LvalueCall is the "iter" field of the given iterator
         Lvalue memberLvalue = new IdentifierExpression("iterator");
-        String memberIdentifier = "iter";
+        IdentifierExpression memberIdentifier = new IdentifierExpression("iter");
         Member member = new Member(memberLvalue, memberIdentifier, null, null);
         // Set LvalueCall's call suffix
         ArrayList<Expression> actualArguments = new ArrayList<>();
@@ -1027,8 +1033,8 @@ public class LibraryFunctions {
         Value retVal = utils.Constants.NULL;
         Value stmtVal = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
         Value exprVal = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
-        if(!(stmtVal.getData() instanceof Statement) && !(stmtVal.getData() instanceof Expression)
-            || !(exprVal.getData() instanceof Expression)){
+        if (!(stmtVal.getData() instanceof Statement) && !(stmtVal.getData() instanceof Expression)
+                || !(exprVal.getData() instanceof Expression)) {
             retVal = new StaticVal(Value_t.ERROR, "setExpression requires a statement AST and an expression AST");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
@@ -1212,13 +1218,13 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void getIdentifier(Environment env){
+    public static void getIdentifier(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.GETIDENTIFIER, env)) {
             return;
         }
         Value retVal;
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
-        if(!(val.getData() instanceof IdentifierExpression)){
+        if (!(val.getData() instanceof IdentifierExpression)) {
             retVal = new StaticVal(Value_t.ERROR, "getIdentifier requires an IdentifierExpression AST");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
@@ -1229,7 +1235,7 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void setIdentifier(Environment env){
+    public static void setIdentifier(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.SETIDENTIFIER, env)) {
             return;
         }
@@ -1247,7 +1253,7 @@ public class LibraryFunctions {
         ast.setIdentifier(newid);
     }
 
-    public static void getLvalue(Environment env){
+    public static void getLvalue(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.GETLVALUE, env)) {
             return;
         }
@@ -1261,13 +1267,13 @@ public class LibraryFunctions {
         ASTNode ast = (ASTNode) val.getData();
         Lvalue retLvalue = null;
 
-        if(ast instanceof AssignmentExpression){
+        if (ast instanceof AssignmentExpression) {
             retLvalue = ((AssignmentExpression) ast).getLvalue();
-        }else if(ast instanceof LvalueCall){
+        } else if (ast instanceof LvalueCall) {
             retLvalue = ((LvalueCall) ast).getLvalue();
-        }else if(ast instanceof Member){
+        } else if (ast instanceof Member) {
             retLvalue = ((Member) ast).getLvalue();
-        }else if(ast instanceof UnaryExpression){
+        } else if (ast instanceof UnaryExpression) {
             retLvalue = ((UnaryExpression) ast).getLvalue();
         }
 
@@ -1279,7 +1285,7 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void setLvalue(Environment env){
+    public static void setLvalue(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.SETLVALUE, env)) {
             return;
         }
@@ -1294,13 +1300,13 @@ public class LibraryFunctions {
         }
         Expression ast = (Expression) exprVal.getData();
         Lvalue lvalue = (Lvalue) lvalueVal.getData();
-        if(ast instanceof AssignmentExpression){
+        if (ast instanceof AssignmentExpression) {
             ((AssignmentExpression) ast).setLvalue(lvalue);
-        }else if(ast instanceof LvalueCall){
+        } else if (ast instanceof LvalueCall) {
             ((LvalueCall) ast).setLvalue(lvalue);
-        }else if(ast instanceof Member){
+        } else if (ast instanceof Member) {
             ((Member) ast).setLvalue(lvalue);
-        }else if(ast instanceof UnaryExpression){
+        } else if (ast instanceof UnaryExpression) {
             ((UnaryExpression) ast).setLvalue(lvalue);
         }
     }
