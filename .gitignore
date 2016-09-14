@@ -1,0 +1,8 @@
+/nbproject/private/
+/build/
+*.class
+lexer.java
+parser.java
+sym.java
+
+/dist/
