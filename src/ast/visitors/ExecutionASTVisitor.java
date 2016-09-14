@@ -162,7 +162,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(BinaryExpression node) throws ASTVisitorException {
         //System.out.println("-BinaryExpression");
-        Value result = null;
+        Value result = NULL;
         Value left = node.getExpression1().accept(this);
         Value right = node.getExpression2().accept(this);
         Operator op = node.getOperator();
@@ -190,8 +190,10 @@ public class ExecutionASTVisitor implements ASTVisitor {
             result = new StaticVal<>(Value_t.BOOLEAN, Boolean.FALSE);
             if (op.equals(Operator.NOT_EQUAL)) {
                 result = new StaticVal<>(Value_t.BOOLEAN, Boolean.TRUE);
+            }else if(op.equals(Operator.CMP_EQUAL)){
+                result = new StaticVal<>(Value_t.BOOLEAN, Boolean.FALSE);
             }
-            if (!left.isNumeric() && !right.isNumeric()) {
+            if (!left.isNumeric() || !right.isNumeric()) {
                 return result;
             }
         }
@@ -366,6 +368,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
             }
 
             _envStack.setValue((DynamicVal) value, assignVal);
+            returnVal = assignVal;
 
         }
 
@@ -429,7 +432,10 @@ public class ExecutionASTVisitor implements ASTVisitor {
         if ((node.getLvalue() != null) && (id != null)) { // lvalue.id 
             lvalue = node.getLvalue().accept(this);
             if (!lvalue.isObject()) {
-                String msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' is not Object type to get member '" + id + "'.";
+                String msg;
+                if(lvalue instanceof DynamicVal)
+                    msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' is not Object type to get member '" + id + "'.";
+                else msg = lvalue.getData()+ " is not an object type to get member '" + id + "'.";
                 ASTUtils.error(node, msg);
             }
 
@@ -438,7 +444,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
         } else if ((node.getLvalue() != null) && (node.getExpression() != null)) { // lvalue [exp]
             lvalue = node.getLvalue().accept(this);
             if (!lvalue.isObject() && !lvalue.isTable()) {
-                String msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' is not Object or Array type to get member '" + id + "'.";
+                String msg;
+                if(lvalue instanceof DynamicVal)
+                    msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' is not Object or Array type to get member '" + id + "'.";
+                else
+                    msg = "'" + lvalue.getData() + "' is not Object or Array type to get member '" + id + "'.";
                 ASTUtils.error(node, msg);
             }
 
@@ -1088,7 +1098,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
             while (ret.isAST()) {
                 ret = ((Expression) ret.getData()).accept(this);
             }
-        } else {
+        } else if(exprVal.getData() instanceof Statement){
+            ((Statement) exprVal.getData()).accept(this);
+        } else{
             for (Statement stmt : (ArrayList<Statement>) exprVal.getData()) {
                 stmt.accept(this);
             }
