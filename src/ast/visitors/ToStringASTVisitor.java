@@ -1,58 +1,8 @@
 package ast.visitors;
 
-import ast.ASTVisitor;
-import ast.ASTVisitorException;
-import symbols.value.Value;
-import ast.Program;
-import ast.Statement;
-import ast.IfStatement;
-import ast.WhileStatement;
-import ast.ForStatement;
-import ast.BreakStatement;
-import ast.ContinueStatement;
-import ast.ReturnStatement;
-import ast.Expression;
-import ast.ExpressionStatement;
-import ast.AssignmentExpression;
-import ast.BinaryExpression;
-import ast.UnaryExpression;
-import ast.TermExpression;
-import ast.ParenthesisExpression;
-import ast.IdentifierExpression;
-import ast.IdentifierExpressionLocal;
-import ast.IdentifierExpressionGlobal;
-import ast.Operator;
-import ast.Primary;
-import ast.Lvalue;
-import ast.Member;
-import ast.Constant;
-import ast.IntegerLiteral;
-import ast.DoubleLiteral;
-import ast.StringLiteral;
-import ast.TrueLiteral;
-import ast.FalseLiteral;
-import ast.NullLiteral;
-import ast.Call;
-import ast.ExtendedCall;
-import ast.LvalueCall;
-import ast.AnonymousFunctionCall;
-import ast.CallSuffix;
-import ast.NormCall;
-import ast.MethodCall;
-import ast.Block;
-import ast.ArrayDef;
-import ast.FunctionDef;
-import ast.FunctionDefExpression;
-import ast.ObjectDefinition;
-import ast.IndexedElement;
-import ast.MetaSyntax;
-import ast.MetaEscape;
-import ast.MetaEval;
-import ast.MetaExecute;
-import ast.MetaRun;
-import ast.MetaToText;
-import symbols.value.StaticVal;
-import symbols.value.Value_t;
+import ast.*;
+
+import symbols.value.*;
 
 public class ToStringASTVisitor implements ASTVisitor {
 
@@ -145,7 +95,7 @@ public class ToStringASTVisitor implements ASTVisitor {
     public Value visit(IdentifierExpressionGlobal node) throws ASTVisitorException {
         _programm.append("::");
         _programm.append(node.getIdentifier());
-        
+
         return null;
     }
 
@@ -274,8 +224,12 @@ public class ToStringASTVisitor implements ASTVisitor {
         node.getArguments().stream().forEach((id) -> {
             _programm.append(id.getIdentifier()).append(", ");
         });
-        _programm.setCharAt(_programm.length() - 1, ')');
-        _programm.setCharAt(_programm.length() - 2, ' ');
+
+        int len = _programm.length();
+        _programm.setCharAt(len - 1, ')');
+        if (_programm.charAt(len - 2) == ',') {
+            _programm.setCharAt(len - 2, ' ');
+        }
 
         node.getBody().accept(this);
         return null;
