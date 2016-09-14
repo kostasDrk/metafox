@@ -1,11 +1,10 @@
 package environment;
 
-import java.util.ArrayDeque;
-
+import symbols.utils.Symbol;
 import symbols.value.Value;
 import symbols.value.DynamicVal;
 
-import static utils.Constants.FUNCTION_ENV_INIT_SCOPE;
+import java.util.ArrayDeque;
 
 public class EnvironmentStack {
 
@@ -56,51 +55,51 @@ public class EnvironmentStack {
         topEnv().pop();
     }
 
-    public DynamicVal lookupGlobalScope(String name) {
-        return _globalEnv.lookupBottom(name);
+    public DynamicVal lookupGlobalScope(Symbol symbol) {
+        return _globalEnv.lookupBottom(symbol);
     }
 
     /**
      * Use it to search for functions and functions arguments in the current
      * scope.
      *
-     * @param name
+     * @param symbol
      * @return
      */
-    public DynamicVal lookupCurrentScope(String name) {
-        return topEnv().lookupTop(name);
+    public DynamicVal lookupCurrentScope(Symbol symbol) {
+        return topEnv().lookupTop(symbol);
     }
 
     /**
      * Use it to search for symbols with local in front of them in the current
      * environment.
      *
-     * @param name
+     * @param symbol
      * @return
      */
-    public DynamicVal lookupCurrentEnv(String name) {
-        return topEnv().lookupAll(name);
+    public DynamicVal lookupCurrentEnv(Symbol symbol) {
+        return topEnv().lookupAll(symbol);
     }
 
-    public DynamicVal lookupAll(String name) {
-        DynamicVal varInfo = lookupCurrentEnv(name);
+    public DynamicVal lookupAll(Symbol symbol) {
+        DynamicVal varInfo = lookupCurrentEnv(symbol);
 
         //If we don't find the variable in the top environment then check in 
         //in the global.
         if (varInfo == null) {
-            varInfo = lookupGlobalScope(name);
+            varInfo = lookupGlobalScope(symbol);
         }
 
         return varInfo;
     }
 
-    public void insertSymbol(String name, DynamicVal value) {
-        topEnv().insert(name, value);
+    public void insertSymbol(Symbol symbol, DynamicVal value) {
+        topEnv().insert(symbol, value);
         //System.out.println(toString());
     }
 
-    public void insertSymbol(String name) {
-        topEnv().insert(name);
+    public void insertSymbol(Symbol symbol) {
+        topEnv().insert(symbol);
         //System.out.println(toString());
     }
 

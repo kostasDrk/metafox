@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import libraryFunctions.LibraryFunction_t;
 import libraryFunctions.LibraryFunctions;
 
+import symbols.utils.Symbol;
 import symbols.value.Value_t;
 import symbols.value.DynamicVal;
 
@@ -24,7 +25,8 @@ public class GlobalEnv extends Environment {
                 // System.out.println(name);
                 Method method = LibraryFunctions.class.getMethod(name, Environment.class);
                 DynamicVal<String> varInfo = new DynamicVal(Value_t.LIBRARY_FUNCTION, method, libraryFunction.toString());
-                super.insert(name, varInfo);
+                Symbol symbol = new Symbol(name);
+                super.insert(symbol, varInfo);
 
             } catch (NoSuchMethodException | SecurityException ex) {
                 Logger.getLogger(GlobalEnv.class.getName()).log(Level.SEVERE, null, ex);
