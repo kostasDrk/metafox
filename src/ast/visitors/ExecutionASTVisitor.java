@@ -5,13 +5,10 @@ import ast.utils.ASTUtils;
 
 import environment.EnvironmentStack;
 
-import symbols.value.Value;
-import symbols.value.Value_t;
-import symbols.value.StaticVal;
-import symbols.value.DynamicVal;
+import symbols.value.*;
+import symbols.utils.Symbol;
 
-import dataStructures.FoxObject;
-import dataStructures.FoxArray;
+import dataStructures.*;
 
 import interpreter.parser.parser;
 import interpreter.lexer.lexer;
@@ -28,18 +25,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileReader;
 import java.io.InputStream;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
-import static utils.Constants.BREAK;
-import static utils.Constants.CONTINUE;
-import static utils.Constants.RETURN;
-import static utils.Constants.FUNCTION_ENV_INIT_SCOPE;
-import static utils.Constants.LIBRARY_FUNC_ARG;
-import static utils.Constants.NULL;
+import static utils.Constants.*;
 
 public class ExecutionASTVisitor implements ASTVisitor {
 
@@ -111,6 +101,14 @@ public class ExecutionASTVisitor implements ASTVisitor {
         }
     }
 
+    private Symbol toSymbol(IdentifierExpression idExpr) {
+        return new Symbol(idExpr);
+    }
+
+    private Symbol toSymbol(String id) {
+        return new Symbol(new IdentifierExpression(id));
+    }
+
     public ExecutionASTVisitor(Program program) {
         _envStack = new EnvironmentStack();
         _scope = 0;
@@ -119,7 +117,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         _inMeta = false;
         _program = new StaticVal(Value_t.AST, program);
         _program = new DynamicVal(_program, "PROGRAM");
-        _envStack.insertSymbol("PROGRAM", (DynamicVal)_program);
+        _envStack.insertSymbol(toSymbol("PROGRAM"), (DynamicVal) _program);
     }
 
     @Override
@@ -380,13 +378,13 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(IdentifierExpression node) throws ASTVisitorException {
         //System.out.println("-IdentifierExpression");
-        String name = node.getIdentifier();
+        Symbol symbol = toSymbol(node);
         Value symbolInfo;
 
-        symbolInfo = _envStack.lookupAll(name);
+        symbolInfo = _envStack.lookupAll(symbol);
         if (symbolInfo == null) {
-            _envStack.insertSymbol(name);
-            symbolInfo = _envStack.lookupCurrentScope(name); // Retrieve newly added symbol
+            _envStack.insertSymbol(symbol);
+            symbolInfo = _envStack.lookupCurrentScope(symbol); // Retrieve newly added symbol
         }
 
         return symbolInfo;
@@ -395,13 +393,13 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(IdentifierExpressionLocal node) throws ASTVisitorException {
         //System.out.println("-IdentifierExpressionLocal");
-        String name = node.getIdentifier();
+        Symbol symbol = toSymbol(node);
         Value symbolInfo;
 
-        symbolInfo = _envStack.lookupCurrentScope(name);
+        symbolInfo = _envStack.lookupCurrentScope(symbol);
         if (symbolInfo == null) {
-            _envStack.insertSymbol(name);
-            symbolInfo = _envStack.lookupCurrentScope(name); // Retrieve newly added symbol
+            _envStack.insertSymbol(symbol);
+            symbolInfo = _envStack.lookupCurrentScope(symbol); // Retrieve newly added symbol
         }
 
         return symbolInfo;
@@ -410,12 +408,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(IdentifierExpressionGlobal node) throws ASTVisitorException {
         //System.out.println("-IdentifierExpressionGlobal");
-        String name = node.getIdentifier();
+        Symbol symbol = toSymbol(node);
         Value symbolInfo;
 
-        symbolInfo = _envStack.lookupGlobalScope(name);
+        symbolInfo = _envStack.lookupGlobalScope(symbol);
         if (symbolInfo == null) {
-            String msg = "Global variable: " + name + " doesn't exist";
+            String msg = "Global variable: " + symbol.getName() + " doesn't exist";
             ASTUtils.error(node, msg);
         }
 
@@ -469,7 +467,8 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 ASTUtils.error(node, msg);
             }
 
-            key = _envStack.lookupAll(node.getIdentifier());
+            Symbol symbol = toSymbol(node.getIdentifierExpr());
+            key = _envStack.lookupAll(symbol);
 
         } else if ((node.getCall() != null) && (node.getExpression() != null)) { // call (expr)
             lvalue = node.getCall().accept(this);
@@ -566,20 +565,20 @@ public class ExecutionASTVisitor implements ASTVisitor {
             }
 
             //Add Arguments field 
-            String name = "arguments";
+            Symbol symbol = toSymbol("arguments");
             String errorInfo = "arguments";
             FoxArray argumentsArray = new FoxArray();
             DynamicVal argumentInfo = new DynamicVal(Value_t.TABLE, argumentsArray, errorInfo);
-            _envStack.insertSymbol(name, argumentInfo);
+            _envStack.insertSymbol(symbol, argumentInfo);
 
             //Map user function arguments with actual arguments(given args).
             for (IdentifierExpression argument : arguments) {
-                name = argument.getIdentifier();
+                symbol = toSymbol(argument);
                 //System.out.println(name);
 
-                errorInfo = name;
+                errorInfo = symbol.getName();
                 argumentInfo = new DynamicVal(actualArguments.get(count), errorInfo);
-                _envStack.insertSymbol(name, argumentInfo);
+                _envStack.insertSymbol(symbol, argumentInfo);
 
                 Value key = new StaticVal(Value_t.INTEGER, count);
                 argumentsArray.put(key, argumentInfo);
@@ -590,10 +589,10 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
             //Add the extra given arguments.
             for (int i = count; i < actualArguments.size(); i++) {
-                name = "arg#" + i;
+                symbol = toSymbol("arg#" + i);
                 errorInfo = "arg#" + i;
                 argumentInfo = new DynamicVal(actualArguments.get(i), errorInfo);
-                _envStack.insertSymbol(name, argumentInfo);
+                _envStack.insertSymbol(symbol, argumentInfo);
 
                 Value key = new StaticVal(Value_t.INTEGER, i);
                 argumentsArray.put(key, argumentInfo);
@@ -609,9 +608,10 @@ public class ExecutionASTVisitor implements ASTVisitor {
             enterFunctionSpace();
 
             for (int i = 0; i < actualArguments.size(); i++) {
+                Symbol symbol = toSymbol(LIBRARY_FUNC_ARG + i);
                 String errorInfo = LIBRARY_FUNC_ARG + i;
                 DynamicVal argumentInfo = new DynamicVal(actualArguments.get(i), errorInfo);
-                _envStack.insertSymbol(LIBRARY_FUNC_ARG + i, argumentInfo);
+                _envStack.insertSymbol(symbol, argumentInfo);
             }
 
             try {
@@ -649,18 +649,18 @@ public class ExecutionASTVisitor implements ASTVisitor {
             }
 
             int count = 0;
-            String name = arguments.get(count).getIdentifier();
-            String errorInfo = name;
+            Symbol symbol = toSymbol(arguments.get(count));
+            String errorInfo = symbol.getName();
             DynamicVal argumentInfo = new DynamicVal(lvalue, errorInfo);
-            _envStack.insertSymbol(name, argumentInfo);
+            _envStack.insertSymbol(symbol, argumentInfo);
 
             for (count = 1; count < arguments.size(); count++) {
-                name = arguments.get(count).getIdentifier();
+                symbol = toSymbol(arguments.get(count));
                 //System.out.println(name);
 
-                errorInfo = name;
+                errorInfo = symbol.getName();
                 argumentInfo = new DynamicVal(actualArguments.get(count - 1), errorInfo);
-                _envStack.insertSymbol(name, argumentInfo);
+                _envStack.insertSymbol(symbol, argumentInfo);
 
                 count++;
 
@@ -814,9 +814,10 @@ public class ExecutionASTVisitor implements ASTVisitor {
     public Value visit(FunctionDef node) throws ASTVisitorException {
         //System.out.println("-FunctionDef");
 
-        String name = node.getFuncName();
         /*Function Name*/
-        DynamicVal funcInfo = _envStack.lookupCurrentScope(name);
+        Symbol symbol = toSymbol(node.getFuncNameIdentifierExpr());
+        String name = symbol.getName();
+        DynamicVal funcInfo = _envStack.lookupCurrentScope(symbol);
         boolean isLibraryFunction = LibraryFunction_t.isLibraryFunction(name);
 
         if (funcInfo != null) {
@@ -840,13 +841,13 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
         String errorInfo = name;
         funcInfo = new DynamicVal(Value_t.USER_FUNCTION, node, errorInfo);
-        _envStack.insertSymbol(name, funcInfo);
+        _envStack.insertSymbol(symbol, funcInfo);
 
         /*Function ONLY Check Arguments*/
         enterScopeSpace();
         for (IdentifierExpression argument : node.getArguments()) {
-            name = argument.getIdentifier();
-            Value argInfo = _envStack.lookupCurrentScope(name);
+            symbol = toSymbol(argument);
+            Value argInfo = _envStack.lookupCurrentScope(symbol);
 
             if (argInfo != null) {
                 String msg = "Redeclaration of Formal-Argument: " + name + ".";
@@ -857,7 +858,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 String msg = "Formal-Argument shadows Library-Function: " + name + ".";
                 ASTUtils.error(node, msg);
             }
-            _envStack.insertSymbol(name);
+            _envStack.insertSymbol(symbol);
 
         }
         exitScopeSpace();
@@ -1143,12 +1144,24 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(MetaToText node) throws ASTVisitorException {
-        if (node.getExpression() == null) {
+        Value exprVal = node.getExpression().accept(this);
+        if(!exprVal.isAST()){
+            String msg = "'.#' requires an AST: " + exprVal.getType() + " found";
+            ASTUtils.error(node, msg);
+        }
+        if (exprVal == null) {
             return new StaticVal<>(Value_t.STRING, "");
         }
         Expression expr = (Expression) node.getExpression();
         ASTVisitor astVisitor = new ToStringASTVisitor();
-        expr.accept(astVisitor);
+        // expr.accept(astVisitor);
+        if(exprVal.getData() instanceof ArrayList){
+            ArrayList<Statement> stmtlist = (ArrayList) exprVal.getData();
+            for(Statement stmt : stmtlist)
+                stmt.accept(astVisitor);
+        }else{
+            ((ASTNode) exprVal.getData()).accept(astVisitor);
+        }
 
         String data = astVisitor.toString();
 

@@ -1,8 +1,9 @@
 package environment;
 
-import java.util.ArrayDeque;
-
+import symbols.utils.Symbol;
 import symbols.value.DynamicVal;
+
+import java.util.ArrayDeque;
 
 public class Environment {
 
@@ -13,13 +14,13 @@ public class Environment {
         push(new EnvironmentScope(scope));
     }
 
-    DynamicVal lookupTop(String name) {
-        return _environment.peek().lookup(name);
+    DynamicVal lookupTop(Symbol symbol) {
+        return _environment.peek().lookup(symbol);
     }
 
-    DynamicVal lookupAll(String name) {
+    DynamicVal lookupAll(Symbol symbol) {
         for (EnvironmentScope envScope : _environment) {
-            DynamicVal value = envScope.lookup(name);
+            DynamicVal value = envScope.lookup(symbol);
             if (value != null) {
                 return value;
             }
@@ -27,16 +28,16 @@ public class Environment {
         return null;
     }
 
-    DynamicVal lookupBottom(String name) {
-        return _environment.peekLast().lookup(name);
+    DynamicVal lookupBottom(Symbol symbol) {
+        return _environment.peekLast().lookup(symbol);
     }
 
-    public void insert(String name) {
-        _environment.peek().insert(name);
+    public void insert(Symbol symbol) {
+        _environment.peek().insert(symbol);
     }
 
-    public void insert(String name, DynamicVal value) {
-        _environment.peek().insert(name, value);
+    public void insert(Symbol symbol, DynamicVal value) {
+        _environment.peek().insert(symbol, value);
     }
 
     final void push(EnvironmentScope envScope) {
@@ -44,7 +45,10 @@ public class Environment {
     }
 
     EnvironmentScope pop() {
-        return _environment.pop();
+        EnvironmentScope envScope = _environment.pop();
+        envScope.cleanEnvReferences();
+
+        return envScope;
     }
 
     public int topScope() {

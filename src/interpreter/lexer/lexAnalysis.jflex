@@ -53,7 +53,7 @@ import interpreter.parser.sym;
 
 letter         = [A-Za-z]
 intConst       = [0-9]+
-identifier     = {letter}+({letter}|{intConst}|"_")*
+identifier     = ({letter}|"_")+({letter}|{intConst}|"_")*
 realConst      = [0-9]+\.[0-9]+
 LineTerminator = \r|\n|\r\n
 whiteSpace     = {LineTerminator} | [ \t\f] | " "
