@@ -63,6 +63,8 @@ public enum LibraryFunction_t {
     ISFALSELITERAL("isFalseLiteral", 1),
     GETEXPRESSION("getExpression", 1),
     SETEXPRESSION("setExpression", 2),
+    GETLEFTEXPRESSIONLIST("getLeftExpressionList", 1),
+    GETRIGHTEXPRESSIONLIST("getRightExpressionList", 1),
     GETLEFTEXPRESSION("getLeftExpression", 1),
     GETRIGHTEXPRESSION("getRightExpression", 1),
     SETLEFTEXPRESSION("setLeftExpression", 2),
@@ -294,6 +296,12 @@ public enum LibraryFunction_t {
             case "setExpression":
                 totalArgs = 1;
                 break;
+            case "getLeftExpressionList":
+                totalArgs = 1;
+                break;
+            case "getRightExpressionList":
+                totalArgs = 1;
+                break;
             case "getLeftExpression":
                 totalArgs = 1;
                 break;
@@ -441,6 +449,8 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.ISFALSELITERAL.toString())
                 || name.equals(LibraryFunction_t.GETEXPRESSION.toString())
                 || name.equals(LibraryFunction_t.SETEXPRESSION.toString())
+                || name.equals(LibraryFunction_t.GETLEFTEXPRESSIONLIST.toString())
+                || name.equals(LibraryFunction_t.GETRIGHTEXPRESSIONLIST.toString())
                 || name.equals(LibraryFunction_t.GETLEFTEXPRESSION.toString())
                 || name.equals(LibraryFunction_t.GETRIGHTEXPRESSION.toString())
                 || name.equals(LibraryFunction_t.SETLEFTEXPRESSION.toString())

@@ -1144,12 +1144,24 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(MetaToText node) throws ASTVisitorException {
-        if (node.getExpression() == null) {
+        Value exprVal = node.getExpression().accept(this);
+        if(!exprVal.isAST()){
+            String msg = "'.#' requires an AST: " + exprVal.getType() + " found";
+            ASTUtils.error(node, msg);
+        }
+        if (exprVal == null) {
             return new StaticVal<>(Value_t.STRING, "");
         }
         Expression expr = (Expression) node.getExpression();
         ASTVisitor astVisitor = new ToStringASTVisitor();
-        expr.accept(astVisitor);
+        // expr.accept(astVisitor);
+        if(exprVal.getData() instanceof ArrayList){
+            ArrayList<Statement> stmtlist = (ArrayList) exprVal.getData();
+            for(Statement stmt : stmtlist)
+                stmt.accept(astVisitor);
+        }else{
+            ((ASTNode) exprVal.getData()).accept(astVisitor);
+        }
 
         String data = astVisitor.toString();
 

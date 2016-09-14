@@ -1011,6 +1011,51 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
+        public static void getLeftExpressionList(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.GETLEFTEXPRESSION, env)) {
+            return;
+        }
+        Value retVal;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        if (!(val.getData() instanceof ForStatement)) {
+            retVal = new StaticVal(Value_t.ERROR, "Requires a ForStatement AST");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        ArrayList<Expression> expressions = ((ForStatement) val.getData()).getExpressionList1();
+        FoxArray exprList = new FoxArray();
+        
+        expressions.stream().forEach((ex) -> {
+            exprList.add(new StaticVal(Value_t.AST, ex));
+        });
+        
+        retVal = new StaticVal(Value_t.TABLE, exprList);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void getRightExpressionList(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.GETLEFTEXPRESSION, env)) {
+            return;
+        }
+        Value retVal;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        if (!(val.getData() instanceof ForStatement)) {
+            retVal = new StaticVal(Value_t.ERROR, "Requires a ForStatement AST");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        ArrayList<Expression> expressions = ((ForStatement) val.getData()).getExpressionList2();
+        FoxArray exprList = new FoxArray();
+        
+        expressions.stream().forEach((ex) -> {
+            exprList.add(new StaticVal(Value_t.AST, ex));
+        });
+        
+        retVal = new StaticVal(Value_t.TABLE, exprList);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+    
+
     public static void addField(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.ADDFIELD, env)) {
             return;
