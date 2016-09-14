@@ -21,7 +21,16 @@ public class IdentifierExpression extends Lvalue {
         IdentifierExpression oldIdentifier = new IdentifierExpression(_identifier);
         _identifier = identifier;
 
-        _symbolEnv.setIdentifier(oldIdentifier, this);
+        if(_symbolEnv != null)
+            _symbolEnv.setIdentifier(oldIdentifier, this);
+    }
+
+    public void setIdentifierNew(String identifier) {
+        String oldName = _identifier;
+        _identifier = identifier;
+
+        if(_symbolEnv != null)
+            _symbolEnv.setIdentifierNew(oldName, this);
     }
 
     public SymbolEnv getSymbolEnv() {

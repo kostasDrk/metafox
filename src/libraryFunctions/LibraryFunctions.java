@@ -1162,6 +1162,24 @@ public class LibraryFunctions {
         ast.setIdentifier(newid);
     }
 
+    public static void setIdentifierNew(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.SETIDENTIFIERNEW, env)) {
+            return;
+        }
+        Value retVal;
+        Value idVal = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value newidVal = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
+        if (!(idVal.getData() instanceof IdentifierExpression)
+                || !(newidVal.getType().equals(Value_t.STRING))) {
+            retVal = new StaticVal(Value_t.ERROR, "setIdentifier requires an IdentifierExpression AST and a string");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        IdentifierExpression ast = (IdentifierExpression) idVal.getData();
+        String newid = (String) newidVal.getData();
+        ast.setIdentifierNew(newid);
+    }
+
     public static void getLvalue(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.GETLVALUE, env)) {
             return;
@@ -1355,6 +1373,34 @@ public class LibraryFunctions {
         }
 
         retVal = new StaticVal(Value_t.STRING, ((FunctionDef) function).getFuncName());
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void getFunctionIdentifier(Environment env) {
+        if (!checkArgumentsNum(LibraryFunction_t.GETFUNCTIONIDENTIFIER, env)) {
+            return;
+        }
+
+        Value retVal;
+        Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        if (!(val.getData() instanceof FunctionDef)
+                && !(val.getData() instanceof FunctionDefExpression)) {
+
+            String msg = "Requires a FunctionDef or FunctionDefExpression.";
+            retVal = new StaticVal(Value_t.ERROR, msg);
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+
+        ASTNode function;
+
+        if (val.getData() instanceof FunctionDefExpression) {
+            function = ((FunctionDefExpression) val.getData()).getFunctionDef();
+        } else {
+            function = (FunctionDef) val.getData();
+        }
+
+        retVal = new StaticVal(Value_t.AST, ((FunctionDef) function).getFuncNameIdentifierExpr());
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 

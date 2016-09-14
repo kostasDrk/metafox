@@ -15,4 +15,8 @@ public class SymbolEnv {
         _env.renameSymbol(new Symbol(oldIdentifier), new Symbol(newIdentifier));
     }
 
+    public void setIdentifierNew(String oldName, IdentifierExpression newIdentifier) {
+        _env.newSymbol(oldName, new Symbol(newIdentifier));
+    }
+
 }

@@ -84,6 +84,15 @@ public class EnvironmentScope {
         insert(newSymbol, value);
     }
 
+    public void newSymbol(String oldName, Symbol symbol) {
+        DynamicVal value = _env.get(oldName);
+        DynamicVal newValue = new DynamicVal(value);
+
+        _references.get(oldName).remove(symbol.getIdExpression());
+
+        insert(symbol, newValue);
+    }    
+
     private void cleanSymbolReferences(Symbol symbol) {
         HashSet<IdentifierExpression> references;
         references = _references.remove(symbol.getName());
@@ -91,7 +100,6 @@ public class EnvironmentScope {
         references.stream().forEach((reference) -> {
             reference.removeSymbolEnv();
         });
-
     }
 
     void cleanEnvReferences() {
