@@ -482,7 +482,8 @@ lvalue ::=   ID:id
 
 member ::= lvalue:lval DOT ID:id
 			{:
-				RESULT = new Member(lval, id, null, null);
+                                IdentifierExpression tmpID = new IdentifierExpression(id);
+				RESULT = new Member(lval, tmpID, null, null);
 				RESULT.setLine(lvalleft);
 				RESULT.setColumn(lvalright);
 			:}
@@ -494,7 +495,8 @@ member ::= lvalue:lval DOT ID:id
 			:}
 			|call:cl DOT ID:id
 			{:
-				RESULT = new Member(null, id, cl, null);
+                                IdentifierExpression tmpID = new IdentifierExpression(id);
+				RESULT = new Member(null, tmpID, cl, null);
 				RESULT.setLine(clleft);
 				RESULT.setColumn(clright);
 			:}
@@ -556,7 +558,7 @@ normcall ::= LEFT_PARENTHESIS elist:el RIGHT_PARENTHESIS
 
 methodcall ::=  DOUBLE_DOT ID:id normcall:normcl
 			{:
-                RESULT = new MethodCall(id, normcl);
+                                RESULT = new MethodCall(id, normcl);
 				RESULT.setLine(idleft);
 				RESULT.setColumn(idright);
 			:}
