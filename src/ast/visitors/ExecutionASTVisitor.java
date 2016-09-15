@@ -681,7 +681,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
                 //Add method arguments in arguments table.
                 key = new StaticVal(Value_t.INTEGER, count);
-                System.out.println(key + " :1: " + argumentInfo);
                 argumentsArray.put(key, argumentInfo);
 
             }
@@ -694,7 +693,6 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 _envStack.insertSymbol(symbol, argumentInfo);
 
                 key = new StaticVal(Value_t.INTEGER, i);
-                System.out.println(key + " :2: " + argumentInfo);
                 argumentsArray.put(key, argumentInfo);
 
             }
