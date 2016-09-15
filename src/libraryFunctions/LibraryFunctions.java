@@ -903,11 +903,12 @@ public class LibraryFunctions {
         }
         Value retVal;
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
-        if (!val.getType().equals(Value_t.AST)) {
+        if (!val.getType().equals(Value_t.AST) || !(val.getData() instanceof ASTNode)) {
             retVal = new StaticVal(Value_t.ERROR, "getExpression requires an AST");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
+        
         ASTNode ast = (ASTNode) val.getData();
         Expression retExpression = null;
         if (ast instanceof IfStatement) {
@@ -918,6 +919,9 @@ public class LibraryFunctions {
 
         } else if (ast instanceof WhileStatement) {
             retExpression = ((WhileStatement) ast).getExpression();
+
+        } else if (ast instanceof ExpressionStatement) {
+            retExpression = ((ExpressionStatement) ast).getExpression();
 
         } else if (ast instanceof ReturnStatement) {
             retExpression = ((ReturnStatement) ast).getExpression();
@@ -1334,6 +1338,8 @@ public class LibraryFunctions {
             StaticVal key = new StaticVal(Value_t.INTEGER, i);
             Value arg = actualArgs.get(key);
             if(!(arg.getData() instanceof Expression)){
+                System.out.println("HERE: ");
+                System.out.println(arg.getData());
                 retVal = new StaticVal(Value_t.ERROR, "setCallArguments, FoxArray requires contained items type of AST.");
                 ((FunctionEnv) env).setReturnVal(retVal);
                 return;

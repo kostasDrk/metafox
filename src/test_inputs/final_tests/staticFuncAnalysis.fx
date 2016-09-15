@@ -61,7 +61,7 @@ function traverse(stmt){
 returns = [];
 returnFlag = false;
 traverse(complex_func);
-if(!isEmpty(returns)){
+if(!isEmpty(returns) and returnFlag){
 	for(i = 0; i<len(returns); i++)
 		println("[!] Missing return value @line "+getLine(returns[i]));
 }

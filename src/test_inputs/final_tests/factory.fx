@@ -5,7 +5,7 @@ function factory(){
     }
     // Create new ObjectDefinition AST
   	objectAST = .<{}>.;
-	for(i=0; i < len(arguments); i = i+2){
+	 for(i=0; i < len(arguments); i = i+2){
       key = arguments[i];
       value = arguments[i+1];
       addField(objectAST, key, value); // Add given key-value pair to object AST

@@ -1170,7 +1170,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
             ASTUtils.error(node, msg);
         }
 
-        retVal = new StaticVal<>(Value_t.AST, ((Program) program).getStatements());
+        ArrayList stmtlist = (ArrayList) ((Program) program).getStatements();
+        if(stmtlist.size() == 1)
+            retVal = new StaticVal<>(Value_t.AST, stmtlist.get(0));
+        else
+            retVal = new StaticVal<>(Value_t.AST, stmtlist);
         return retVal;
     }
 
