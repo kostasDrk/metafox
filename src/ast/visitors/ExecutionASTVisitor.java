@@ -190,7 +190,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
             result = new StaticVal<>(Value_t.BOOLEAN, Boolean.FALSE);
             if (op.equals(Operator.NOT_EQUAL)) {
                 result = new StaticVal<>(Value_t.BOOLEAN, Boolean.TRUE);
-            }else if(op.equals(Operator.CMP_EQUAL)){
+            } else if (op.equals(Operator.CMP_EQUAL)) {
                 result = new StaticVal<>(Value_t.BOOLEAN, Boolean.FALSE);
             }
             if (!left.isNumeric() || !right.isNumeric()) {
@@ -433,9 +433,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
             lvalue = node.getLvalue().accept(this);
             if (!lvalue.isObject()) {
                 String msg;
-                if(lvalue instanceof DynamicVal)
+                if (lvalue instanceof DynamicVal) {
                     msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' is not Object type to get member '" + id + "'.";
-                else msg = lvalue.getData()+ " is not an object type to get member '" + id + "'.";
+                } else {
+                    msg = lvalue.getData() + " is not an object type to get member '" + id + "'.";
+                }
                 ASTUtils.error(node, msg);
             }
 
@@ -445,10 +447,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
             lvalue = node.getLvalue().accept(this);
             if (!lvalue.isObject() && !lvalue.isTable()) {
                 String msg;
-                if(lvalue instanceof DynamicVal)
+                if (lvalue instanceof DynamicVal) {
                     msg = "'" + ((DynamicVal) lvalue).getErrorInfo() + "' is not Object or Array type to get member '" + id + "'.";
-                else
+                } else {
                     msg = "'" + lvalue.getData() + "' is not Object or Array type to get member '" + id + "'.";
+                }
                 ASTUtils.error(node, msg);
             }
 
@@ -486,7 +489,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         }
 
         Value value = (lvalue.isObject()) ? ((FoxObject) lvalue.getData()).get(key) : ((FoxArray) lvalue.getData()).get(key);
-
+        
         if (value == NULL) {
             if (node.isLValue()) {
                 String errorInfo = "Object." + "id.";
@@ -642,18 +645,32 @@ public class ExecutionASTVisitor implements ASTVisitor {
             ArrayList<IdentifierExpression> arguments = ((FunctionDef) function.getData()).getArguments();
 
             enterFunctionSpace();
-            if (arguments.size() != (actualArguments.size() + 1)) {
+            if ((actualArguments.size() + 1) < arguments.size()) {
                 String msg = "Call to '" + ((DynamicVal) lvalue).getErrorInfo() + "' requires " + arguments.size() + " arguments"
                         + ": " + actualArguments.size() + " found.";
                 ASTUtils.error(node, msg);
             }
 
             int count = 0;
+
+            //Add Object for first argument
             Symbol symbol = toSymbol(arguments.get(count));
             String errorInfo = symbol.getName();
             DynamicVal argumentInfo = new DynamicVal(lvalue, errorInfo);
             _envStack.insertSymbol(symbol, argumentInfo);
 
+            //Add Arguments field 
+            symbol = toSymbol("arguments");
+            errorInfo = "arguments";
+            FoxArray argumentsArray = new FoxArray();
+            argumentInfo = new DynamicVal(Value_t.TABLE, argumentsArray, errorInfo);
+            _envStack.insertSymbol(symbol, argumentInfo);
+
+            //Add object in arguments table
+            key = new StaticVal(Value_t.INTEGER, count);
+            argumentsArray.put(key, argumentInfo);
+
+            //Map user function arguments with actual arguments(given args).
             for (count = 1; count < arguments.size(); count++) {
                 symbol = toSymbol(arguments.get(count));
                 //System.out.println(name);
@@ -662,7 +679,23 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 argumentInfo = new DynamicVal(actualArguments.get(count - 1), errorInfo);
                 _envStack.insertSymbol(symbol, argumentInfo);
 
-                count++;
+                //Add method arguments in arguments table.
+                key = new StaticVal(Value_t.INTEGER, count);
+                System.out.println(key + " :1: " + argumentInfo);
+                argumentsArray.put(key, argumentInfo);
+
+            }
+
+            //Add the extra given arguments.
+            for (int i = count; i < (actualArguments.size() + 1); i++) {
+                symbol = toSymbol("arg#" + i);
+                errorInfo = "arg#" + i;
+                argumentInfo = new DynamicVal(actualArguments.get(i - 1), errorInfo);
+                _envStack.insertSymbol(symbol, argumentInfo);
+
+                key = new StaticVal(Value_t.INTEGER, i);
+                System.out.println(key + " :2: " + argumentInfo);
+                argumentsArray.put(key, argumentInfo);
 
             }
 
@@ -1098,9 +1131,9 @@ public class ExecutionASTVisitor implements ASTVisitor {
             while (ret.isAST()) {
                 ret = ((Expression) ret.getData()).accept(this);
             }
-        } else if(exprVal.getData() instanceof Statement){
+        } else if (exprVal.getData() instanceof Statement) {
             ((Statement) exprVal.getData()).accept(this);
-        } else{
+        } else {
             for (Statement stmt : (ArrayList<Statement>) exprVal.getData()) {
                 stmt.accept(this);
             }
@@ -1145,7 +1178,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(MetaToText node) throws ASTVisitorException {
         Value exprVal = node.getExpression().accept(this);
-        if(!exprVal.isAST()){
+        if (!exprVal.isAST()) {
             String msg = "'.#' requires an AST: " + exprVal.getType() + " found";
             ASTUtils.error(node, msg);
         }
@@ -1155,11 +1188,12 @@ public class ExecutionASTVisitor implements ASTVisitor {
         Expression expr = (Expression) node.getExpression();
         ASTVisitor astVisitor = new ToStringASTVisitor();
         // expr.accept(astVisitor);
-        if(exprVal.getData() instanceof ArrayList){
+        if (exprVal.getData() instanceof ArrayList) {
             ArrayList<Statement> stmtlist = (ArrayList) exprVal.getData();
-            for(Statement stmt : stmtlist)
+            for (Statement stmt : stmtlist) {
                 stmt.accept(astVisitor);
-        }else{
+            }
+        } else {
             ((ASTNode) exprVal.getData()).accept(astVisitor);
         }
 
