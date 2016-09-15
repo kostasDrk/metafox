@@ -1,56 +1,45 @@
+/**
+ * Metafox - A DYNAMIC, INTERPRETED, META-PROGRAMMING LANGUAGE, RUN AND
+ * SUPPORTED BY ITS OWN INDEPENDENT INTERPRETER.
+ *
+ * UNIVERSITY OF CRETE (UOC)
+ *
+ * COMPUTER SCIENCE DEPARTMENT (UOC)
+ *
+ * https://www.csd.uoc.gr/
+ *
+ * CS-540 ADVANCED TOPICS IN PROGRAMMING LANGUAGES DEVELOPMENT
+ *
+ * LICENCE: This file is part of Metafox. Metafox is free: you can redistribute
+ * it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation (version 3 of the License).
+ *
+ * Metafox is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * Metafox. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2016
+ *
+ */
+
+import ast.*;
+
 import java_cup.runtime.Symbol;
 import java.util.ArrayList;
 import java.util.List;
-import ast.Program;
-import ast.Statement;
-import ast.IfStatement;
-import ast.WhileStatement;
-import ast.ForStatement;
-import ast.BreakStatement;
-import ast.ContinueStatement;
-import ast.ReturnStatement;
-import ast.Expression;
-import ast.ExpressionStatement;
-import ast.AssignmentExpression;
-import ast.BinaryExpression;
-import ast.UnaryExpression;
-import ast.TermExpression;
-import ast.ParenthesisExpression;
-import ast.IdentifierExpression;
-import ast.IdentifierExpressionLocal;
-import ast.IdentifierExpressionGlobal;
-import ast.Operator;
-import ast.Primary;
-import ast.Lvalue;
-import ast.Member;
-import ast.Constant;
-import ast.IntegerLiteral;
-import ast.DoubleLiteral;
-import ast.StringLiteral;
-import ast.TrueLiteral;
-import ast.FalseLiteral;
-import ast.NullLiteral;
-import ast.Call;
-import ast.ExtendedCall;
-import ast.LvalueCall;
-import ast.AnonymousFunctionCall;
-import ast.CallSuffix;
-import ast.NormCall;
-import ast.MethodCall;
-import ast.Block;
-import ast.ArrayDef;
-import ast.FunctionDef;
-import ast.FunctionDefExpression;
-import ast.ObjectDefinition;
-import ast.IndexedElement;
-import ast.MetaSyntax;
-import ast.MetaExecute;
-import ast.MetaEscape;
-import ast.MetaRun;
-import ast.MetaEval;
-import ast.MetaToText;
 
-
+/**
+ * PARSER
+ *
+ * @author Drakonakis Kostas  < kostasDrk  at csd.uoc.gr >
+ * @author Kokolaki Anna      < kokolaki   at csd.uoc.gr >
+ * @author Nikitakis Giorgos  < nikitak    at csd.uoc.gr >
+ *
+ * @version 1.0.0
+ */
 parser code
 {:
     /** Report a non fatal error (or warning).
