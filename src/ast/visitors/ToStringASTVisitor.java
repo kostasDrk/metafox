@@ -67,11 +67,18 @@ public class ToStringASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(UnaryExpression node) throws ASTVisitorException {
-        _programm.append(node.getOperator());
+        if (!node.isIsLvaluePositionedLeft()) {
+            _programm.append(node.getOperator());
+        }
+
         if (node.getExpression() != null) {
             node.getExpression().accept(this);
         } else {
             node.getLvalue().accept(this);
+        }
+
+        if (node.isIsLvaluePositionedLeft()) {
+            _programm.append(node.getOperator());
         }
         return null;
     }

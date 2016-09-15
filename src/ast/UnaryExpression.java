@@ -7,11 +7,13 @@ public class UnaryExpression extends TermExpression {
 	private Operator _operator;
 	private Expression _expression;
 	private Lvalue _lvalue;
-	
-	public UnaryExpression(Operator operator, Expression expression, Lvalue lvalue) { 
+	private final boolean _isLvaluePositionedLeft; 
+        
+	public UnaryExpression(Operator operator, Expression expression, Lvalue lvalue, boolean isLvaluePositionedLeft) { 
 		this._operator = operator;
 		this._expression = expression;
 		this._lvalue = lvalue;
+                this._isLvaluePositionedLeft = isLvaluePositionedLeft;
 	}
 	
 	public Operator getOperator() {
@@ -38,6 +40,10 @@ public class UnaryExpression extends TermExpression {
 		this._lvalue = lval;
 	}
 
+        public boolean isIsLvaluePositionedLeft() {
+            return _isLvaluePositionedLeft;
+        }
+        
 	@Override
 	public Value accept(ASTVisitor visitor) throws ASTVisitorException {
 		return visitor.visit(this);

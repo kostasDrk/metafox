@@ -337,38 +337,38 @@ term ::=	 LEFT_PARENTHESIS expr:ex RIGHT_PARENTHESIS
 			:}
 			|MINUS expr:ex
 			{:
-				RESULT = new UnaryExpression(Operator.MINUS, ex, null);
+				RESULT = new UnaryExpression(Operator.MINUS, ex, null, false);
 				RESULT.setLine(exleft);
 				RESULT.setColumn(exright);
 			:}
 			 %prec UMINUS
 			|NOT expr:ex
 			{:
-				RESULT = new UnaryExpression(Operator.LOGIC_NOT, ex, null);
+				RESULT = new UnaryExpression(Operator.LOGIC_NOT, ex, null, false);
 				RESULT.setLine(exleft);
 				RESULT.setColumn(exright);
 			:}
 			|PLUS_PLUS lvalue:lval
 			{:
-				RESULT = new UnaryExpression(Operator.PLUS_PLUS, null, lval);
+				RESULT = new UnaryExpression(Operator.PLUS_PLUS, null, lval, false);
 				RESULT.setLine(lvalleft);
 				RESULT.setColumn(lvalright);
 			:}
 			|lvalue:lval PLUS_PLUS
 			{:
-				RESULT = new UnaryExpression(Operator.PLUS_PLUS, null, lval);
+				RESULT = new UnaryExpression(Operator.PLUS_PLUS, null, lval, true);
 				RESULT.setLine(lvalleft);
 				RESULT.setColumn(lvalright);
 			:}
 			|MINUS_MINUS lvalue:lval
 			{:
-				RESULT = new UnaryExpression(Operator.MINUS_MINUS, null, lval);
+				RESULT = new UnaryExpression(Operator.MINUS_MINUS, null, lval, false);
 				RESULT.setLine(lvalleft);
 				RESULT.setColumn(lvalright);
 			:}
 			|lvalue:lval MINUS_MINUS
 			{:
-				RESULT = new UnaryExpression(Operator.MINUS_MINUS, null, lval);
+				RESULT = new UnaryExpression(Operator.MINUS_MINUS, null, lval, true);
 				RESULT.setLine(lvalleft);
 				RESULT.setColumn(lvalright);
 			:}
