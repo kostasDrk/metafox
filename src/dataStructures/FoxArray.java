@@ -60,11 +60,10 @@ public class FoxArray extends AFoxDataStructure {
 
     @Override
     public final void put(Value key, Value value) {
-
-        if (key.isInteger() || key.isConvertedToInteger()) {
+        if (key.isInteger() && (int) key.getData() >= 0) {
             _numberIndexedData.put(key, value);
 
-            int newIndex = key.isInteger() ? (int) key.getData() : Integer.parseInt((String) key.getData());
+            int newIndex = (int) key.getData();
 
             if (_numberIndexedDataMaxIndex == newIndex) {
                 _numberIndexedDataMaxIndex++;
