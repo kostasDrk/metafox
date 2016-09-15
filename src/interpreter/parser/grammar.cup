@@ -66,9 +66,9 @@ parser code
         if( info instanceof Symbol ) {
             int line = ((Symbol)info).left;
             int column = ((Symbol)info).right;
-            error = line  + ":" + column;
+            error = "[SyntaxError] @line:"+line  + ", @column:" + column+".";
         }
-        error = error + ": error: " + message;
+        //error = error + ": error: " + message;
         System.err.println(error);
         System.err.flush();
     }
@@ -84,10 +84,10 @@ parser code
         done_parsing();
 
         /* use the normal error message reporting to put out the message */
-        report_error(message, info);
+        //report_error(message, info);
 
         /* throw an exception */
-        throw new Exception("Can't recover from previous error(s)");
+        throw new Exception("[Metafox-Parser]: Can't recover from previous error(s)");
     }
 
     public int getLine() {
