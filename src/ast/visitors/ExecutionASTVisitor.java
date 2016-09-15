@@ -496,11 +496,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
 
                 retVal = new DynamicVal(errorInfo);
                 if (lvalue.isObject()) {
-                    ((FoxObject) lvalue.getData()).put(key, retVal);
+                    ((FoxObject) lvalue.getData()).put(new StaticVal(key), retVal);
                 } else {
-                    ((FoxArray) lvalue.getData()).put(key, retVal);
+                    ((FoxArray) lvalue.getData()).put(new StaticVal(key), retVal);
                 }
-                // lvalue.put(key, retVal);
+        
             } else {
                 retVal = NULL;
             }
