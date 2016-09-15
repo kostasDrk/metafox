@@ -9,7 +9,8 @@ public class ASTUtils {
             throws ASTVisitorException {
         throw new ASTVisitorException("[SemanticError] @line:" + node.getLine()
                 + ", @column:" + node.getColumn()
-                + " #" + message);
+                + " #" + message
+                + "\n[Metafox-Interpreter]: Can't recover from previous error(s)");
     }
 
     public static void fatalError(ASTNode node, String errorCode)

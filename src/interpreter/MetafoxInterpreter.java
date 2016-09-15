@@ -32,7 +32,7 @@ public class MetafoxInterpreter {
                 // System.out.println("\n\n**Execution ok**\n\n");
             } catch (Exception e) {
                 System.out.println(e.getMessage());
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
     }
