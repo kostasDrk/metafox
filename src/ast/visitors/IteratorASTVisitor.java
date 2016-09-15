@@ -1,3 +1,29 @@
+/**
+ * Metafox - A DYNAMIC, INTERPRETED, META-PROGRAMMING LANGUAGE, RUN AND
+ * SUPPORTED BY ITS OWN INDEPENDENT INTERPRETER.
+ *
+ * UNIVERSITY OF CRETE (UOC)
+ *
+ * COMPUTER SCIENCE DEPARTMENT (UOC)
+ *
+ * https://www.csd.uoc.gr/
+ *
+ * CS-540 ADVANCED TOPICS IN PROGRAMMING LANGUAGES DEVELOPMENT
+ *
+ * LICENCE: This file is part of Metafox. Metafox is free: you can redistribute
+ * it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation (version 3 of the License).
+ *
+ * Metafox is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * Metafox. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2016
+ *
+ */
 package ast.visitors;
 
 import ast.*;
@@ -6,6 +32,15 @@ import symbols.value.Value;
 
 import java.util.ArrayList;
 
+/**
+ * CLASS IteratorASTVisitor
+ *
+ * @author Drakonakis Kostas  < kostasDrk  at csd.uoc.gr >
+ * @author Kokolaki Anna      < kokolaki   at csd.uoc.gr >
+ * @author Nikitakis Giorgos  < nikitak    at csd.uoc.gr >
+ *
+ * @version 1.0.0
+ */
 public class IteratorASTVisitor implements ASTVisitor {
 
     private ArrayList<Statement> _statementList;
@@ -28,40 +63,40 @@ public class IteratorASTVisitor implements ASTVisitor {
         return _statementList.get(pos);
     }
 
-    public void addStatementBefore(Statement stmt){
+    public void addStatementBefore(Statement stmt) {
         _statementList.add(_curItem, stmt);
         incCurItem();
     }
 
-    public void addStatementBefore(ArrayList<Statement> statementList){
-        for(Statement stmt : statementList){
+    public void addStatementBefore(ArrayList<Statement> statementList) {
+        for (Statement stmt : statementList) {
             _statementList.add(_curItem, stmt);
             incCurItem();
         }
     }
 
-    public void addStatementAfter(Statement stmt){
-        _statementList.add(_curItem+1, stmt);
+    public void addStatementAfter(Statement stmt) {
+        _statementList.add(_curItem + 1, stmt);
         incCurItem();
     }
 
-    public void addStatementAfter(ArrayList<Statement> statementList){
-        for(Statement stmt : statementList){
-            _statementList.add(_curItem+1, stmt);
+    public void addStatementAfter(ArrayList<Statement> statementList) {
+        for (Statement stmt : statementList) {
+            _statementList.add(_curItem + 1, stmt);
             incCurItem();
         }
     }
 
-    public void removeCurrentStatement(){
+    public void removeCurrentStatement() {
         _statementList.remove(_curItem);
         decCurItem();
     }
 
-    public void setCurrentStatement(Statement statement){
+    public void setCurrentStatement(Statement statement) {
         _statementList.set(_curItem, statement);
     }
 
-    public void setCurrentStatement(ArrayList<Statement> statementList){
+    public void setCurrentStatement(ArrayList<Statement> statementList) {
         _statementList.set(_curItem, statementList.get(0));
         statementList.remove(0); // First element already inserted
         addStatementAfter(statementList);
@@ -242,9 +277,9 @@ public class IteratorASTVisitor implements ASTVisitor {
     @Override
     public Value visit(Block node) throws ASTVisitorException {
         /*node.getStatementList().stream().forEach((stmt) -> {
-            _statementList.add(stmt);
-            // stmt.accept(this);
-        });*/
+         _statementList.add(stmt);
+         // stmt.accept(this);
+         });*/
         _statementList = node.getStatementList();
         return null;
     }

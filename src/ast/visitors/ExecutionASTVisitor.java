@@ -1,3 +1,29 @@
+/**
+ * Metafox - A DYNAMIC, INTERPRETED, META-PROGRAMMING LANGUAGE, RUN AND
+ * SUPPORTED BY ITS OWN INDEPENDENT INTERPRETER.
+ *
+ * UNIVERSITY OF CRETE (UOC)
+ *
+ * COMPUTER SCIENCE DEPARTMENT (UOC)
+ *
+ * https://www.csd.uoc.gr/
+ *
+ * CS-540 ADVANCED TOPICS IN PROGRAMMING LANGUAGES DEVELOPMENT
+ *
+ * LICENCE: This file is part of Metafox. Metafox is free: you can redistribute
+ * it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation (version 3 of the License).
+ *
+ * Metafox is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * Metafox. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2016
+ *
+ */
 package ast.visitors;
 
 import ast.*;
@@ -31,6 +57,15 @@ import java.nio.charset.StandardCharsets;
 
 import static utils.Constants.*;
 
+/**
+ * CLASS ExecutionASTVisitor
+ *
+ * @author Drakonakis Kostas  < kostasDrk  at csd.uoc.gr >
+ * @author Kokolaki Anna      < kokolaki   at csd.uoc.gr >
+ * @author Nikitakis Giorgos  < nikitak    at csd.uoc.gr >
+ *
+ * @version 1.0.0
+ */
 public class ExecutionASTVisitor implements ASTVisitor {
 
     private final EnvironmentStack _envStack;
@@ -125,9 +160,10 @@ public class ExecutionASTVisitor implements ASTVisitor {
         //System.out.println("-Program");
         ArrayList<Statement> stmtlist = (ArrayList) node.getStatements();
         int size = stmtlist.size();
-        for(int i = 0; i < size; i++){
-            if(stmtlist.get(i) != null)
+        for (int i = 0; i < size; i++) {
+            if (stmtlist.get(i) != null) {
                 stmtlist.get(i).accept(this);
+            }
             stmtlist = (ArrayList) node.getStatements();
             size = stmtlist.size();
         }
@@ -497,7 +533,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
         }
 
         Value value = (lvalue.isObject()) ? ((FoxObject) lvalue.getData()).get(key) : ((FoxArray) lvalue.getData()).get(key);
-        
+
         if (value == NULL) {
             if (node.isLValue()) {
                 String errorInfo = "Object." + "id.";
@@ -508,7 +544,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
                 } else {
                     ((FoxArray) lvalue.getData()).put(new StaticVal(key), retVal);
                 }
-        
+
             } else {
                 retVal = NULL;
             }
@@ -1171,10 +1207,11 @@ public class ExecutionASTVisitor implements ASTVisitor {
         }
 
         ArrayList stmtlist = (ArrayList) ((Program) program).getStatements();
-        if(stmtlist.size() == 1)
+        if (stmtlist.size() == 1) {
             retVal = new StaticVal<>(Value_t.AST, stmtlist.get(0));
-        else
+        } else {
             retVal = new StaticVal<>(Value_t.AST, stmtlist);
+        }
         return retVal;
     }
 
