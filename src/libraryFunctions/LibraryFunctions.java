@@ -1,3 +1,29 @@
+/**
+ * Metafox - A DYNAMIC, INTERPRETED, META-PROGRAMMING LANGUAGE, RUN AND
+ * SUPPORTED BY ITS OWN INDEPENDENT INTERPRETER.
+ *
+ * UNIVERSITY OF CRETE (UOC)
+ *
+ * COMPUTER SCIENCE DEPARTMENT (UOC)
+ *
+ * https://www.csd.uoc.gr/
+ *
+ * CS-540 ADVANCED TOPICS IN PROGRAMMING LANGUAGES DEVELOPMENT
+ *
+ * LICENCE: This file is part of Metafox. Metafox is free: you can redistribute
+ * it and/or modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation (version 3 of the License).
+ *
+ * Metafox is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * Metafox. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2016
+ *
+ */
 package libraryFunctions;
 
 import ast.*;
@@ -17,9 +43,16 @@ import static utils.Constants.NULL;
 
 import java.util.HashMap;
 import java.util.ArrayList;
-import java.util.TreeMap;
-import java.util.Map;
 
+/**
+ * CLASS LibraryFunctions
+ *
+ * @author Drakonakis Kostas  < kostasDrk  at csd.uoc.gr >
+ * @author Kokolaki Anna      < kokolaki   at csd.uoc.gr >
+ * @author Nikitakis Giorgos  < nikitak    at csd.uoc.gr >
+ *
+ * @version 1.0.0
+ */
 public class LibraryFunctions {
 
     public static void print(Environment env) throws ASTVisitorException {
@@ -137,7 +170,7 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void isEmpty(Environment env){
+    public static void isEmpty(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.ISEMPTY, env)) {
             return;
         }
@@ -151,14 +184,15 @@ public class LibraryFunctions {
 
         Value retVal;
         FoxArray farray = (FoxArray) fobject;
-        if(fobject.size() > 0)
+        if (fobject.size() > 0) {
             retVal = new StaticVal(Value_t.BOOLEAN, Boolean.FALSE);
-        else
+        } else {
             retVal = new StaticVal(Value_t.BOOLEAN, Boolean.TRUE);
+        }
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void push(Environment env){
+    public static void push(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.PUSH, env)) {
             return;
         }
@@ -908,7 +942,7 @@ public class LibraryFunctions {
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
-        
+
         ASTNode ast = (ASTNode) val.getData();
         Expression retExpression = null;
         if (ast instanceof IfStatement) {
@@ -1015,7 +1049,7 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-        public static void getLeftExpressionList(Environment env) {
+    public static void getLeftExpressionList(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.GETLEFTEXPRESSION, env)) {
             return;
         }
@@ -1028,11 +1062,11 @@ public class LibraryFunctions {
         }
         ArrayList<Expression> expressions = ((ForStatement) val.getData()).getExpressionList1();
         FoxArray exprList = new FoxArray();
-        
+
         expressions.stream().forEach((ex) -> {
             exprList.add(new StaticVal(Value_t.AST, ex));
         });
-        
+
         retVal = new StaticVal(Value_t.TABLE, exprList);
         ((FunctionEnv) env).setReturnVal(retVal);
     }
@@ -1050,15 +1084,14 @@ public class LibraryFunctions {
         }
         ArrayList<Expression> expressions = ((ForStatement) val.getData()).getExpressionList2();
         FoxArray exprList = new FoxArray();
-        
+
         expressions.stream().forEach((ex) -> {
             exprList.add(new StaticVal(Value_t.AST, ex));
         });
-        
+
         retVal = new StaticVal(Value_t.TABLE, exprList);
         ((FunctionEnv) env).setReturnVal(retVal);
     }
-    
 
     public static void addField(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.ADDFIELD, env)) {
@@ -1075,19 +1108,19 @@ public class LibraryFunctions {
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
- 
 
-        if (!(fieldKey.getData() instanceof Expression) || !((fieldValue.getData() instanceof FunctionDef) 
-            || (fieldValue.getData() instanceof Expression))) {
+        if (!(fieldKey.getData() instanceof Expression) || !((fieldValue.getData() instanceof FunctionDef)
+                || (fieldValue.getData() instanceof Expression))) {
             retVal = new StaticVal(Value_t.ERROR, "addField second and third argument must be an Expression AST");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
 
-        if(fieldValue.getData() instanceof FunctionDef)
+        if (fieldValue.getData() instanceof FunctionDef) {
             ((ObjectDefinition) objectVal.getData()).getIndexedElementList().add(new IndexedElement((Expression) fieldKey.getData(), (FunctionDef) fieldValue.getData()));
-        else
+        } else {
             ((ObjectDefinition) objectVal.getData()).getIndexedElementList().add(new IndexedElement((Expression) fieldKey.getData(), (Expression) fieldValue.getData()));
+        }
     }
 
     public static void getLeftExpression(Environment env) {
@@ -1287,22 +1320,23 @@ public class LibraryFunctions {
         }
     }
 
-    public static void getCallArguments(Environment env){
+    public static void getCallArguments(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.GETCALLARGUMENTS, env)) {
             return;
         }
 
         Value retVal;
         Value callValue = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
-        if(!(callValue.getData() instanceof LvalueCall)){
+        if (!(callValue.getData() instanceof LvalueCall)) {
             retVal = new StaticVal(Value_t.ERROR, "getCallArguments requires a Call AST");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
         LvalueCall call = (LvalueCall) callValue.getData();
         CallSuffix suffix = call.getCallSuffix();
-        if(suffix instanceof MethodCall)
+        if (suffix instanceof MethodCall) {
             suffix = ((MethodCall) suffix).getNormCall();
+        }
         ArrayList<Expression> args = ((NormCall) suffix).getExpressionList();
 
         FoxArray foxArray = new FoxArray();
@@ -1314,7 +1348,7 @@ public class LibraryFunctions {
         ((FunctionEnv) env).setReturnVal(retVal);
     }
 
-    public static void setCallArguments(Environment env){
+    public static void setCallArguments(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.SETCALLARGUMENTS, env)) {
             return;
         }
@@ -1322,22 +1356,21 @@ public class LibraryFunctions {
         Value retVal = NULL;
         Value callValue = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
         Value argsValue = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
-        if(!(callValue.getData() instanceof LvalueCall) || !argsValue.isTable()){
+        if (!(callValue.getData() instanceof LvalueCall) || !argsValue.isTable()) {
             retVal = new StaticVal(Value_t.ERROR, "setCallArguments requires a Call AST and a FoxArray");
             ((FunctionEnv) env).setReturnVal(retVal);
             return;
         }
 
- 
         FoxArray argsFoxArray = (FoxArray) argsValue.getData();
 
-        HashMap<Value, Value> actualArgs  =  argsFoxArray.getNumberIndexedData();
+        HashMap<Value, Value> actualArgs = argsFoxArray.getNumberIndexedData();
         ArrayList<Expression> newActualArgs = new ArrayList<>();
 
         for (int i = 0; i < actualArgs.size(); i++) {
             StaticVal key = new StaticVal(Value_t.INTEGER, i);
             Value arg = actualArgs.get(key);
-            if(!(arg.getData() instanceof Expression)){
+            if (!(arg.getData() instanceof Expression)) {
                 System.out.println("HERE: ");
                 System.out.println(arg.getData());
                 retVal = new StaticVal(Value_t.ERROR, "setCallArguments, FoxArray requires contained items type of AST.");
@@ -1345,14 +1378,14 @@ public class LibraryFunctions {
                 return;
             }
 
-            newActualArgs.add((Expression)arg.getData());
+            newActualArgs.add((Expression) arg.getData());
         }
-
 
         LvalueCall call = (LvalueCall) callValue.getData();
         CallSuffix suffix = call.getCallSuffix();
-        if(suffix instanceof MethodCall)
+        if (suffix instanceof MethodCall) {
             suffix = ((MethodCall) suffix).getNormCall();
+        }
         ((NormCall) suffix).setExpressionList(newActualArgs);
 
         ((FunctionEnv) env).setReturnVal(retVal);
@@ -1706,10 +1739,11 @@ public class LibraryFunctions {
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
         Value ret;
-        if(val.isString())
+        if (val.isString()) {
             ret = new StaticVal(Value_t.BOOLEAN, LibraryFunction_t.isLibraryFunction((String) val.getData()));
-        else
+        } else {
             ret = isType(val, Value_t.LIBRARY_FUNCTION);
+        }
         ((FunctionEnv) env).setReturnVal(ret);
     }
 
