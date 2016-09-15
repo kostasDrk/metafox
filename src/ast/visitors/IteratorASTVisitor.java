@@ -103,9 +103,10 @@ public class IteratorASTVisitor implements ASTVisitor {
 
     @Override
     public Value visit(Program node) throws ASTVisitorException {
-        node.getStatements().stream().filter((stmt) -> (stmt != null)).forEach((stmt) -> {
-            _statementList.add(stmt);
-        });
+        // node.getStatements().stream().filter((stmt) -> (stmt != null)).forEach((stmt) -> {
+        //     _statementList.add(stmt);
+        // });
+        _statementList = (ArrayList<Statement>) node.getStatements();
         return null;
     }
 

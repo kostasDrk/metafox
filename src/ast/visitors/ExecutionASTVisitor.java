@@ -123,11 +123,19 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(Program node) throws ASTVisitorException {
         //System.out.println("-Program");
-        for (Statement stmt : node.getStatements()) {
-            if (stmt != null) {
-                stmt.accept(this);
-            }
+        ArrayList<Statement> stmtlist = (ArrayList) node.getStatements();
+        int size = stmtlist.size();
+        for(int i = 0; i < size; i++){
+            if(stmtlist.get(i) != null)
+                stmtlist.get(i).accept(this);
+            stmtlist = (ArrayList) node.getStatements();
+            size = stmtlist.size();
         }
+        // for (Statement stmt : node.getStatements()) {
+        //     if (stmt != null) {
+        //         stmt.accept(this);
+        //     }
+        // }
         // //System.out.println(_envStack.toString());
         return null;
     }
@@ -1176,7 +1184,7 @@ public class ExecutionASTVisitor implements ASTVisitor {
     @Override
     public Value visit(MetaToText node) throws ASTVisitorException {
         Value exprVal = node.getExpression().accept(this);
-        if (!exprVal.isAST()) {
+        if (!exprVal.isAST() && !exprVal.isUserFunction()) {
             String msg = "'.#' requires an AST: " + exprVal.getType() + " found";
             ASTUtils.error(node, msg);
         }

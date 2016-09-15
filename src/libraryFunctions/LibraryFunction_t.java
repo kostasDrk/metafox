@@ -69,6 +69,8 @@ public enum LibraryFunction_t {
     GETRIGHTEXPRESSION("getRightExpression", 1),
     SETLEFTEXPRESSION("setLeftExpression", 2),
     SETRIGHTEXPRESSION("setRightExpression", 2),
+    GETCALLARGUMENTS("getCallArguments", 1),
+    SETCALLARGUMENTS("setCallArguments", 2),
     ADDITEMBEFORE("addItemBefore", 2),
     ADDITEMAFTER("addItemAfter", 2),
     GETELSESTATEMENT("getElseStatement", 1),
@@ -329,6 +331,12 @@ public enum LibraryFunction_t {
             case "getElseStatement":
                 totalArgs = 1;
                 break;
+            case "getCallArguments":
+                totalArgs = 1;
+                break;
+            case "setCallArguments":
+                totalArgs = 2;
+                break;
             case "getLine":
                 totalArgs = 1;
                 break;
@@ -390,6 +398,7 @@ public enum LibraryFunction_t {
 
     public static boolean isLibraryFunction(String name) {
         return name.equals(LibraryFunction_t.PRINT.toString())
+                || name.equals(LibraryFunction_t.PRINT_LN.toString())
                 || name.equals(LibraryFunction_t.SQRT.toString())
                 || name.equals(LibraryFunction_t.COS.toString())
                 || name.equals(LibraryFunction_t.SIN.toString())
@@ -455,6 +464,8 @@ public enum LibraryFunction_t {
                 || name.equals(LibraryFunction_t.GETRIGHTEXPRESSION.toString())
                 || name.equals(LibraryFunction_t.SETLEFTEXPRESSION.toString())
                 || name.equals(LibraryFunction_t.SETRIGHTEXPRESSION.toString())
+                || name.equals(LibraryFunction_t.GETCALLARGUMENTS.toString())
+                || name.equals(LibraryFunction_t.SETCALLARGUMENTS.toString())
                 || name.equals(LibraryFunction_t.GETLINE.toString())
                 || name.equals(LibraryFunction_t.GETCOLUMN.toString())
                 || name.equals(LibraryFunction_t.ADDITEMBEFORE.toString())

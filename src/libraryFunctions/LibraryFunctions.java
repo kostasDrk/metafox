@@ -1283,6 +1283,75 @@ public class LibraryFunctions {
         }
     }
 
+    public static void getCallArguments(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.GETCALLARGUMENTS, env)) {
+            return;
+        }
+
+        Value retVal;
+        Value callValue = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        if(!(callValue.getData() instanceof LvalueCall)){
+            retVal = new StaticVal(Value_t.ERROR, "getCallArguments requires a Call AST");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+        LvalueCall call = (LvalueCall) callValue.getData();
+        CallSuffix suffix = call.getCallSuffix();
+        if(suffix instanceof MethodCall)
+            suffix = ((MethodCall) suffix).getNormCall();
+        ArrayList<Expression> args = ((NormCall) suffix).getExpressionList();
+
+        FoxArray foxArray = new FoxArray();
+        args.stream().forEach((arg) -> {
+            foxArray.add(new StaticVal(Value_t.AST, arg));
+        });
+
+        retVal = new StaticVal(Value_t.TABLE, foxArray);
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
+    public static void setCallArguments(Environment env){
+        if (!checkArgumentsNum(LibraryFunction_t.SETCALLARGUMENTS, env)) {
+            return;
+        }
+
+        Value retVal = NULL;
+        Value callValue = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
+        Value argsValue = env.getActualArgument(LIBRARY_FUNC_ARG + 1);
+        if(!(callValue.getData() instanceof LvalueCall) || !argsValue.isTable()){
+            retVal = new StaticVal(Value_t.ERROR, "setCallArguments requires a Call AST and a FoxArray");
+            ((FunctionEnv) env).setReturnVal(retVal);
+            return;
+        }
+
+ 
+        FoxArray argsFoxArray = (FoxArray) argsValue.getData();
+
+        HashMap<Value, Value> actualArgs  =  argsFoxArray.getNumberIndexedData();
+        ArrayList<Expression> newActualArgs = new ArrayList<>();
+
+        for (int i = 0; i < actualArgs.size(); i++) {
+            StaticVal key = new StaticVal(Value_t.INTEGER, i);
+            Value arg = actualArgs.get(key);
+            if(!(arg.getData() instanceof Expression)){
+                retVal = new StaticVal(Value_t.ERROR, "setCallArguments, FoxArray requires contained items type of AST.");
+                ((FunctionEnv) env).setReturnVal(retVal);
+                return;
+            }
+
+            newActualArgs.add((Expression)arg.getData());
+        }
+
+
+        LvalueCall call = (LvalueCall) callValue.getData();
+        CallSuffix suffix = call.getCallSuffix();
+        if(suffix instanceof MethodCall)
+            suffix = ((MethodCall) suffix).getNormCall();
+        ((NormCall) suffix).setExpressionList(newActualArgs);
+
+        ((FunctionEnv) env).setReturnVal(retVal);
+    }
+
     public static void getElseStatement(Environment env) {
         if (!checkArgumentsNum(LibraryFunction_t.GETELSESTATEMENT, env)) {
             return;
@@ -1630,7 +1699,11 @@ public class LibraryFunctions {
             return;
         }
         Value val = env.getActualArgument(LIBRARY_FUNC_ARG + 0);
-        Value ret = isType(val, Value_t.LIBRARY_FUNCTION);
+        Value ret;
+        if(val.isString())
+            ret = new StaticVal(Value_t.BOOLEAN, LibraryFunction_t.isLibraryFunction((String) val.getData()));
+        else
+            ret = isType(val, Value_t.LIBRARY_FUNCTION);
         ((FunctionEnv) env).setReturnVal(ret);
     }
 
